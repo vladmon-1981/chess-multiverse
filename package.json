@@ -1,0 +1,24 @@
+{
+  "name": "chess-multiverse",
+  "version": "1.0.0",
+  "description": "Полнофункциональное веб-приложение шахмат с тремя визуальными темами и ИИ-противником",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "dev": "open http://localhost:8000"
+  },
+  "keywords": [
+    "chess",
+    "game",
+    "ai",
+    "javascript",
+    "html5",
+    "web"
+  ],
+  "author": "Chess Multiverse Team",
+  "license": "MIT",
+  "dependencies": {
+    "chess.js": "^1.0.0-beta.8"
+  },
+  "devDependencies": {}
+}

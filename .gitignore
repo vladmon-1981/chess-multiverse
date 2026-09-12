@@ -1,0 +1,23 @@
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Dependencies (если будут добавлены)
+node_modules/
+package-lock.json
+
+# Build
+dist/
+build/
+
+# Env
+.env
+.env.local

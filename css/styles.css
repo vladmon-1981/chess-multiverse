@@ -1,0 +1,151 @@
+* {
+    box-sizing: border-box;
+    user-select: none;
+}
+
+/* Плавные переходы */
+* {
+    transition: all 0.2s ease;
+}
+
+/* Шахматная доска */
+.chess-board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 0;
+    background: linear-gradient(135deg, #8B7355 0%, #D2B48C 100%);
+    border: 4px solid #5D4E37;
+}
+
+.chess-square {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    font-size: clamp(2rem, 8vw, 3.5rem);
+    font-weight: bold;
+}
+
+.chess-square.white {
+    background-color: #F0D9B5;
+}
+
+.chess-square.black {
+    background-color: #B58863;
+}
+
+.chess-square.highlight {
+    box-shadow: inset 0 0 0 3px rgba(255, 200, 0, 0.8);
+}
+
+.chess-square.check {
+    background-color: rgba(255, 0, 0, 0.3) !important;
+}
+
+.chess-piece {
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    user-select: none;
+    transition: all 0.15s ease;
+}
+
+.chess-piece:active {
+    cursor: grabbing;
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+}
+
+.chess-piece.selected {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 15px rgba(255, 200, 0, 0.8));
+}
+
+/* Сенсорное управление: "парящая" фигура */
+.chess-piece.hovering {
+    transform: translateY(-20%) scale(1.2);
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+}
+
+/* Подсвеченные ходы для сенсора */
+.chess-square.move-highlight {
+    box-shadow: inset 0 0 0 2px rgba(100, 200, 255, 0.7);
+}
+
+.chess-square.move-highlight::after {
+    content: '';
+    position: absolute;
+    width: 40%;
+    height: 40%;
+    border-radius: 50%;
+    background: rgba(100, 200, 255, 0.4);
+}
+
+/* Экраны меню */
+.menu-screen {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Активная кнопка темы */
+.theme-btn-active {
+    ring: 3px solid rgba(168, 85, 247, 1);
+}
+
+/* Адаптивность */
+@media (max-width: 640px) {
+    .chess-board {
+        padding: 2px;
+    }
+
+    .chess-square {
+        font-size: 2rem;
+    }
+}
+
+/* История ходов */
+#moveHistory {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+}
+
+#moveHistory button {
+    padding: 0.5rem;
+    background: rgba(99, 102, 241, 0.5);
+    border-radius: 0.25rem;
+    border: none;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#moveHistory button:hover {
+    background: rgba(99, 102, 241, 0.8);
+}
+
+/* Плотная сетка для истории */
+#moveHistory {
+    gap: 0.25rem;
+}
+
+/* Темная подсветка при ожидании хода компьютера */
+.thinking {
+    opacity: 0.6;
+    pointer-events: none;
+}

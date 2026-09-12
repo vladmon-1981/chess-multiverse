@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Шахматы: Мультивселенная</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gradient-to-br from-slate-900 to-slate-800 text-white min-h-screen">
+    <div id="app" class="min-h-screen flex items-center justify-center p-4">
+        <!-- Главное меню -->
+        <div id="mainMenu" class="menu-screen w-full max-w-md">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+                    ♟ Шахматы ♟
+                </h1>
+                <p class="text-lg text-gray-300">Мультивселенная</p>
+            </div>
+
+            <div class="space-y-4 mb-6">
+                <input
+                    type="text"
+                    id="playerName"
+                    placeholder="Введите ваше имя"
+                    class="w-full px-4 py-3 bg-slate-700 text-white rounded-lg border-2 border-purple-500 focus:border-pink-500 focus:outline-none"
+                    value="">
+            </div>
+
+            <div class="space-y-3 mb-6">
+                <label class="block text-sm text-gray-300">Выберите тему:</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button data-theme="classic" class="theme-btn theme-btn-active px-3 py-2 bg-purple-600 rounded-lg hover:bg-purple-500 transition text-sm font-semibold">
+                        ♞ Классика
+                    </button>
+                    <button data-theme="animal" class="theme-btn px-3 py-2 bg-slate-600 rounded-lg hover:bg-slate-500 transition text-sm font-semibold">
+                        🐕 Animal
+                    </button>
+                    <button data-theme="cars" class="theme-btn px-3 py-2 bg-slate-600 rounded-lg hover:bg-slate-500 transition text-sm font-semibold">
+                        🚗 Тачки
+                    </button>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <button id="pvpBtn" class="w-full px-6 py-4 bg-green-600 hover:bg-green-500 rounded-lg font-bold text-lg transition">
+                    👥 Игрок vs Игрок
+                </button>
+                <button id="pveBtn" class="w-full px-6 py-4 bg-blue-600 hover:bg-blue-500 rounded-lg font-bold text-lg transition">
+                    🤖 Игрок vs Компьютер
+                </button>
+            </div>
+        </div>
+
+        <!-- Выбор сложности для ПвЕ -->
+        <div id="difficultyMenu" class="menu-screen hidden w-full max-w-md">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-purple-400">Выберите уровень сложности</h2>
+            </div>
+            <div class="space-y-3">
+                <button data-difficulty="easy" class="w-full px-6 py-4 bg-green-600 hover:bg-green-500 rounded-lg font-bold text-lg transition">
+                    🟢 Лёгкий
+                </button>
+                <button data-difficulty="medium" class="w-full px-6 py-4 bg-yellow-600 hover:bg-yellow-500 rounded-lg font-bold text-lg transition">
+                    🟡 Средний
+                </button>
+                <button data-difficulty="hard" class="w-full px-6 py-4 bg-red-600 hover:bg-red-500 rounded-lg font-bold text-lg transition">
+                    🔴 Тяжёлый
+                </button>
+            </div>
+            <button id="backBtn" class="w-full mt-4 px-6 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg font-semibold transition">
+                ← Назад
+            </button>
+        </div>
+
+        <!-- Игровое поле -->
+        <div id="gameScreen" class="hidden w-full max-w-6xl">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+                <!-- Доска -->
+                <div class="lg:col-span-3">
+                    <div id="board" class="chess-board bg-slate-700 rounded-lg shadow-2xl p-4 aspect-square max-w-2xl mx-auto lg:mx-0">
+                        <!-- 64 клетки будут созданы JS -->
+                    </div>
+                </div>
+
+                <!-- Панель информации -->
+                <div class="lg:col-span-1 flex flex-col gap-4">
+                    <div class="bg-slate-700 rounded-lg p-4">
+                        <p class="text-sm text-gray-400 mb-1">Белые</p>
+                        <p id="whitePlayer" class="font-bold text-lg">Белые</p>
+                    </div>
+                    <div class="bg-slate-700 rounded-lg p-4">
+                        <p class="text-sm text-gray-400 mb-1">Чёрные</p>
+                        <p id="blackPlayer" class="font-bold text-lg">Чёрные</p>
+                    </div>
+                    <div id="statusPanel" class="bg-slate-700 rounded-lg p-4 flex-1">
+                        <p class="text-sm text-gray-400 mb-2">Статус</p>
+                        <p id="status" class="font-semibold text-base">Ход белых</p>
+                    </div>
+                    <div class="space-y-2">
+                        <button id="undoBtn" class="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg font-semibold transition">
+                            ↶ Отменить
+                        </button>
+                        <button id="resetBtn" class="w-full px-4 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg font-semibold transition">
+                            🔄 Новая игра
+                        </button>
+                        <button id="menuBtn" class="w-full px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg font-semibold transition">
+                            ⌂ В меню
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- История ходов -->
+            <div class="bg-slate-700 rounded-lg p-4">
+                <h3 class="font-bold mb-2">История ходов</h3>
+                <div id="moveHistory" class="grid grid-cols-4 gap-2 max-h-40 overflow-y-auto text-sm">
+                    <!-- Ходы будут добавляться JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/1.0.0-beta.8/chess.js"></script>
+    <script src="js/themes.js"></script>
+    <script src="js/sounds.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/chess-app.js"></script>
+</body>
+</html>
