@@ -69,10 +69,13 @@ class ChessApp {
 
     selectTheme(themeKey) {
         this.themeManager.loadTheme(themeKey);
+        localStorage.setItem('chess-theme', themeKey);
         document.querySelectorAll('.theme-btn').forEach(btn => {
             btn.classList.toggle('theme-btn-active', btn.dataset.theme === themeKey);
         });
-        this.renderBoard();
+        if (this.game) {
+            this.renderBoard();
+        }
     }
 
     showMainMenu() {

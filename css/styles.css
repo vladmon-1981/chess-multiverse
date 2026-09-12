@@ -104,7 +104,8 @@
 
 /* Активная кнопка темы */
 .theme-btn-active {
-    ring: 3px solid rgba(168, 85, 247, 1);
+    outline: 3px solid #a855f7;
+    outline-offset: 2px;
 }
 
 /* Адаптивность */
