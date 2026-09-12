@@ -34,13 +34,13 @@ class ChessApp {
     attachEventListeners() {
         document.getElementById('pvpBtn').addEventListener('click', () => this.startGame('pvp'));
         document.getElementById('pveBtn').addEventListener('click', () => this.showDifficultyMenu());
-        
+
         document.querySelectorAll('.theme-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => this.selectTheme(e.target.dataset.theme));
+            btn.addEventListener('click', () => this.selectTheme(btn.dataset.theme));
         });
 
         document.querySelectorAll('[data-difficulty]').forEach(btn => {
-            btn.addEventListener('click', (e) => this.startGame('pve', e.target.dataset.difficulty));
+            btn.addEventListener('click', () => this.startGame('pve', btn.dataset.difficulty));
         });
         document.getElementById('backBtn').addEventListener('click', () => this.showMainMenu());
 
