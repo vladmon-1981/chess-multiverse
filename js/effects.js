@@ -8,7 +8,12 @@
     const PALETTES = {
         classic: { colors: ['#f7d774', '#fff3c4', '#d9a441', '#ffffff', '#b8860b'], shapes: ['rect', 'star', 'circle'] },
         cars: { colors: ['#e53935', '#ffd21f', '#ffffff', '#111111', '#29b6f6'], shapes: ['flag', 'rect', 'bolt'] },
-        hospital: { colors: ['#ff8fb1', '#2dd4bf', '#ffffff', '#fde68a', '#a78bfa'], shapes: ['heart', 'cross', 'circle'] }
+        hospital: { colors: ['#ff8fb1', '#2dd4bf', '#ffffff', '#fde68a', '#a78bfa'], shapes: ['heart', 'cross', 'circle'] },
+        // Хоккей: шайбы, звёзды и ленты цветов команды-победителя
+        hockey: {
+            colors: ['#1f4fa3', '#ffffff', '#d7262e', '#16161b', '#9fd8ff'], shapes: ['puck', 'star', 'rect', 'rect'],
+            sides: { w: ['#1f4fa3', '#ffffff', '#d7262e', '#9fd8ff'], b: ['#d4202c', '#ffffff', '#16161b', '#ff8a8a'] }
+        }
     };
 
     class Effects {
@@ -30,9 +35,10 @@
             this.canvas.height = Math.round(window.innerHeight * dpr);
         }
 
-        /** Праздничные конфетти из двух «пушек» внизу экрана и дождь сверху. */
+        /** Праздничные конфетти из двух «пушек» внизу экрана и дождь сверху; o.side — цвета победившей стороны. */
         confetti(theme = 'classic', o = {}) {
             const pal = PALETTES[theme] || PALETTES.classic;
+            const colors = (o.side && pal.sides && pal.sides[o.side]) || pal.colors;
             const W = window.innerWidth, H = window.innerHeight;
             const count = o.count || (W < 600 ? 110 : 190);
             for (let i = 0; i < count; i++) {
@@ -58,7 +64,7 @@
                     vr: (Math.random() - 0.5) * 0.3,
                     flip: Math.random() * Math.PI * 2,
                     vflip: 0.08 + Math.random() * 0.12,
-                    color: pal.colors[Math.floor(Math.random() * pal.colors.length)],
+                    color: colors[Math.floor(Math.random() * colors.length)],
                     shape: pal.shapes[Math.floor(Math.random() * pal.shapes.length)],
                     life: 0,
                     max: 4.5 + Math.random() * 1.5,
@@ -163,6 +169,13 @@
                     }
                     break;
                 }
+                case 'puck':
+                    // Шайба сбоку: чёрный диск с рифлёным ободком
+                    ctx.fillStyle = '#141417';
+                    ctx.beginPath(); ctx.ellipse(0, 0, s * 0.6, s * 0.3, 0, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#4a4a55';
+                    ctx.fillRect(-s * 0.58, -s * 0.04, s * 1.16, s * 0.08);
+                    break;
                 case 'bolt':
                     ctx.beginPath();
                     ctx.moveTo(-s * 0.1, -s * 0.6); ctx.lineTo(s * 0.35, -s * 0.6); ctx.lineTo(s * 0.05, -s * 0.05);

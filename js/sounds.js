@@ -2,7 +2,8 @@
  * Звук и озвучка.
  * Все эффекты и музыкальные заставки синтезируются через Web Audio API (без файлов):
  * у каждой вселенной свой набор — дерево и колокола в «Классике», моторы и клаксоны
- * в «Тачках», кардиомонитор и маримба в «Animal Hospital».
+ * в «Тачках», кардиомонитор и маримба в «Animal Hospital», коньки, свисток судьи,
+ * удары о борт, сирена гола и стадионный орган в «Хоккее».
  * Диктор говорит по-русски через Web Speech API (speechSynthesis), если он есть в браузере.
  */
 (function () {
@@ -274,6 +275,80 @@
             this.tone(t, { type: 'sine', f: 1000, dur, hold: dur * 0.7, d: 0.03, g, a: 0.004, send: 0.12 });
         }
 
+        /** Свисток судьи: высокий тон с трелью горошины и шумом дыхания. */
+        whistle(t, dur = 0.35, g = 0.12, f = 2950) {
+            const o = { dur, hold: dur * 0.85, d: 0.04, a: 0.01, vib: 90, vibRate: 34, send: 0.25 };
+            this.tone(t, Object.assign({ type: 'sine', f, g }, o));
+            this.tone(t, Object.assign({ type: 'sine', f: f * 2.01, g: g * 0.12 }, o));
+            this.noise(t, { dur, hold: dur * 0.8, d: 0.05, a: 0.01, g: g * 0.3, filter: { type: 'bandpass', f: f * 1.05, q: 4 }, send: 0.2 });
+        }
+
+        /** Стадионный орган: гармоники-«регистры» с лёгким вибрато. */
+        organ(t, f, dur = 0.3, g = 0.08, send = 0.3) {
+            for (const [r, k] of [[1, 1], [2, 0.7], [3, 0.45], [4, 0.3], [6, 0.18], [8, 0.1]]) {
+                this.tone(t, { type: 'sine', f: f * r, dur, hold: Math.max(0, dur - 0.06), d: 0.08, a: 0.008, g: g * k, vib: 7, vibRate: 6.4, send });
+            }
+        }
+
+        /** Сирена гола на арене: низкий хриплый гудок-аккорд. */
+        goalHorn(t, dur = 2.2, g = 0.1) {
+            for (const f of [138.6, 174.6, 207.7]) {
+                this.tone(t, {
+                    type: 'sawtooth', f, dur, a: 0.06, hold: dur - 0.35, d: 0.3, g, drive: true, send: 0.35,
+                    filter: { type: 'lowpass', f: 900, f2: 1500, time: 0.3, q: 1.4 }
+                });
+            }
+            this.tone(t, { type: 'sine', f: 69.3, dur, a: 0.06, hold: dur - 0.35, d: 0.3, g: g * 1.2, send: 0.2 });
+        }
+
+        /** Толчок коньком: короткий шорох лезвия по льду. */
+        skate(t, g = 0.1, len = 0.18) {
+            this.noise(t, { dur: len, a: 0.01, hold: len * 0.4, d: len * 0.6, g, filters: [{ type: 'highpass', f: 2600 }, { type: 'bandpass', f: 5200, f2: 3800, q: 1.2 }], send: 0.08 });
+        }
+
+        /** Хоккейная остановка: скрежет лезвий и шуршание ледяной крошки. */
+        skateStop(t, g = 0.16) {
+            this.noise(t, { dur: 0.32, a: 0.02, hold: 0.1, d: 0.24, g, filters: [{ type: 'bandpass', f: 7000, f2: 2800, q: 1.4, time: 0.3 }], send: 0.12 });
+            this.noise(t + 0.03, { dur: 0.35, a: 0.03, d: 0.35, g: g * 0.5, filter: { type: 'highpass', f: 6000 }, send: 0.15 });
+        }
+
+        /** Стук клюшки о лёд. */
+        stickTap(t, g = 0.2) {
+            this.noise(t, { dur: 0.02, g: g * 1.2, filter: { type: 'bandpass', f: 2200, q: 1.3 }, send: 0.1 });
+            this.tone(t, { type: 'triangle', f: 520, f2: 330, dur: 0.07, g: g * 0.8, a: 0.001, send: 0.08 });
+        }
+
+        /** Щелчок по шайбе. */
+        slap(t, g = 0.3) {
+            this.noise(t, { dur: 0.05, g, filter: { type: 'highpass', f: 1400 }, send: 0.2 });
+            this.tone(t, { type: 'square', f: 1100, f2: 300, dur: 0.06, g: g * 0.35, a: 0.001, send: 0.1, filter: { type: 'lowpass', f: 3000 } });
+            this.kick(t, g * 0.5);
+        }
+
+        /** Удар о борт: глухой бум и дребезг оргстекла. */
+        boards(t, g = 0.3) {
+            this.kick(t, g * 1.3);
+            this.noise(t, { dur: 0.5, g: g * 0.8, filter: { type: 'lowpass', f: 1800, f2: 200, q: 0.8 }, send: 0.3 });
+            this.tone(t + 0.01, { type: 'triangle', f: 190, dur: 0.6, g: g * 0.35, vib: 45, vibRate: 13, send: 0.25 });
+            for (let i = 0; i < 7; i++) {
+                this.noise(t + 0.02 + i * 0.045 * (0.75 + Math.random() * 0.5), { dur: 0.05, g: g * 0.35 * (1 - i / 9), filter: { type: 'bandpass', f: 2600 * (0.85 + Math.random() * 0.3), q: 3 }, send: 0.25 });
+            }
+        }
+
+        /** Финальная сирена-зуммер. */
+        buzzer(t, dur = 1.4, g = 0.07) {
+            for (const f of [220, 223]) {
+                this.tone(t, { type: 'square', f, dur, a: 0.01, hold: dur - 0.1, d: 0.08, g, send: 0.3, filter: { type: 'lowpass', f: 2400 } });
+            }
+        }
+
+        /** Разочарованный гул трибун «о-о-ох». */
+        groan(t, dur = 1.6, g = 0.12) {
+            for (const [f, f2] of [[520, 360], [950, 640], [2300, 1700]]) {
+                this.noise(t, { dur, a: 0.25, hold: dur * 0.3, d: dur * 0.5, g: f > 2000 ? g * 0.3 : g, filter: { type: 'bandpass', f, f2, q: 3.5, time: dur }, send: 0.35 });
+            }
+        }
+
         chord(t, notes, fn) { notes.forEach((n, i) => fn(t, hz(n), i)); }
     }
 
@@ -502,7 +577,82 @@
         }
     };
 
-    const SFX = { classic: CLASSIC, cars: CARS, hospital: HOSPITAL };
+    const HOCKEY = {
+        select(S, t) { S.stickTap(t, 0.16); },
+        // Толчки коньками и скольжение; торможение звучит отдельно — в момент остановки ('stop')
+        move(S, t) {
+            S.skate(t + 0.1, 0.17);
+            S.skate(t + 0.27, 0.18);
+            S.skate(t + 0.42, 0.08, 0.35);
+        },
+        stop(S, t) { S.skateStop(t, 0.21); },
+        // Силовой приём: глухой удар щитков и стук клюшек
+        hit(S, t) {
+            S.kick(t, 0.5);
+            S.noise(t, { dur: 0.25, g: 0.3, filter: { type: 'lowpass', f: 1500, f2: 300, q: 0.9 }, send: 0.2 });
+            S.tone(t, { type: 'sine', f: 95, f2: 50, dur: 0.3, g: 0.3, send: 0.1 });
+            S.stickTap(t + 0.05, 0.12);
+        },
+        // Со спецэффектами трибуны ахают
+        impact(S, t) {
+            S.kick(t, 0.4);
+            S.crowd(t + 0.05, 1.4, 0.1);
+        },
+        boards(S, t) { S.boards(t, 0.32); },
+        // Игрок покидает лёд — свисток судьи
+        poof(S, t) { S.whistle(t, 0.22, 0.08); },
+        castle(S, t) {
+            S.skate(t, 0.16);
+            S.skate(t + 0.18, 0.16);
+            S.stickTap(t + 0.4, 0.2);
+            S.stickTap(t + 0.55, 0.2);
+        },
+        check(S, t) { S.whistle(t, 0.14, 0.11); S.whistle(t + 0.22, 0.32, 0.11); },
+        // Орган «В атаку!» и трибуны
+        promote(S, t) {
+            [['G4', 0.12], ['C5', 0.12], ['E5', 0.12], ['G5', 0.24], ['E5', 0.12], ['G5', 0.5]]
+                .reduce((tt, [n, d]) => { S.organ(tt, hz(n), d * 0.9, 0.06); return tt + d; }, t);
+            S.crowd(t + 0.9, 1.4, 0.08);
+        },
+        illegal(S, t) { S.whistle(t, 0.09, 0.08, 2700); S.whistle(t + 0.15, 0.09, 0.08, 2700); },
+        // Свисток, вбрасывание — стук клюшек и щелчок по шайбе — и гул трибун
+        start(S, t) {
+            S.whistle(t, 0.6, 0.12);
+            S.stickTap(t + 0.9, 0.2);
+            S.stickTap(t + 0.98, 0.18);
+            S.slap(t + 1.1, 0.16);
+            S.crowd(t + 0.85, 2.4, 0.1);
+            S.skate(t + 1.2, 0.08);
+            S.skate(t + 1.38, 0.08);
+        },
+        // Гол! Сирена, рёв трибун и праздничный орган
+        win(S, t) {
+            S.goalHorn(t, 2.4, 0.09);
+            S.crowd(t + 0.05, 4.2, 0.16);
+            const st = t + 1.9;
+            [['C5', 0.15], ['E5', 0.15], ['G5', 0.15], ['C6', 0.45], ['A5', 0.15], ['C6', 0.9]]
+                .reduce((tt, [n, d]) => { S.organ(tt, hz(n), d * 0.92, 0.055); return tt + d; }, st);
+            S.chord(st + 1.05, ['C4', 'E4', 'G4'], (x, f) => S.organ(x, f, 1.2, 0.03));
+            for (let i = 0; i < 6; i++) S.clap(st + 0.1 + i * 0.3, 0.12);
+        },
+        // Шайба в наших воротах: далёкая сирена соперника, вздох трибун и грустный орган
+        lose(S, t) {
+            S.goalHorn(t, 1.2, 0.035);
+            S.groan(t + 0.2, 1.8, 0.14);
+            [['G4', 0.45], ['F#4', 0.45], ['F4', 0.45], ['E4', 1.3]]
+                .reduce((tt, [n, d]) => { S.organ(tt, hz(n), d * 0.95, 0.05, 0.4); return tt + d; }, t + 1.2);
+            S.chord(t + 2.55, ['C3', 'G3', 'E4'], (x, f) => S.organ(x, f, 1.4, 0.02, 0.4));
+        },
+        // Финальная сирена и вежливые аплодисменты
+        draw(S, t) {
+            S.buzzer(t, 1.3, 0.06);
+            for (let i = 0; i < 8; i++) S.clap(t + 1.4 + i * 0.16 + Math.random() * 0.05, 0.08);
+            S.chord(t + 1.5, ['C4', 'F4', 'A4'], (x, f) => S.organ(x, f, 0.8, 0.025));
+            S.chord(t + 2.3, ['C4', 'E4', 'G4'], (x, f) => S.organ(x, f, 1.2, 0.025));
+        }
+    };
+
+    const SFX = { classic: CLASSIC, cars: CARS, hospital: HOSPITAL, hockey: HOCKEY };
 
     // ---------- Голос диктора ----------
     class Voice {
