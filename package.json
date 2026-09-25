@@ -1,24 +1,26 @@
 {
   "name": "chess-multiverse",
-  "version": "1.0.0",
-  "description": "Полнофункциональное веб-приложение шахмат с тремя визуальными темами и ИИ-противником",
+  "version": "2.0.0",
+  "description": "Шахматы с 3D-фигурами в трёх вселенных (Классика, Тачки, Animal Hospital), компьютером-соперником, звуками и озвучкой",
   "main": "index.html",
   "scripts": {
     "start": "python3 -m http.server 8000",
-    "dev": "open http://localhost:8000"
+    "dev": "open http://localhost:8000",
+    "test": "node tests/engine.test.js"
   },
   "keywords": [
     "chess",
     "game",
     "ai",
+    "3d",
+    "threejs",
+    "webgl",
     "javascript",
     "html5",
     "web"
   ],
   "author": "Chess Multiverse Team",
   "license": "MIT",
-  "dependencies": {
-    "chess.js": "^1.0.0-beta.8"
-  },
+  "dependencies": {},
   "devDependencies": {}
 }
