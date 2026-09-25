@@ -401,16 +401,34 @@ body[data-screen="menu"] .btn-primary, body[data-screen="pve"] .btn-primary, bod
 }
 .board-column { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 0; }
 
-.board-stage {
+.stage-wrap, .board-stage {
     position: relative; width: 100%;
     max-width: min(1040px, calc((100vh - var(--topbar-h) - 172px) * 1.32));
     max-width: min(1040px, calc((100svh - var(--topbar-h) - 172px) * 1.32));
+}
+.board-stage {
     aspect-ratio: 1.32 / 1;
     border-radius: 26px;
     background: radial-gradient(closest-side, rgba(255, 255, 255, 0.07), transparent);
 }
 .board3d { position: absolute; inset: 0; border-radius: inherit; }
 .board3d canvas { display: block; width: 100%; height: 100%; touch-action: none; outline: none; }
+
+/* Кнопки камеры: на широком экране — в правом верхнем углу доски, на телефоне — строкой под ней */
+.cam-controls { position: absolute; top: 10px; right: 10px; z-index: 2; display: flex; flex-direction: column; gap: 6px; }
+.cam-controls[hidden] { display: none; }
+.cam-btn {
+    width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center;
+    font-size: 19px; line-height: 1; color: var(--text);
+    background: var(--panel); border: 1px solid var(--panel-border);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    transition: transform 0.2s var(--ease-pop), background 0.2s, box-shadow 0.2s;
+}
+.cam-btn:hover { transform: scale(1.08); background: var(--panel-strong); }
+.cam-btn:active { transform: scale(0.94); }
+.cam-cine { font-size: 17px; opacity: 0.75; }
+.cam-cine[aria-pressed="true"] { opacity: 1; background: var(--accent); color: var(--accent-ink); box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.18), 0 0 18px var(--accent); }
+body.is-cine .cam-controls .cam-btn:not(.cam-cine) { opacity: 0.4; pointer-events: none; }
 .board-stage.shake { animation: shake 0.45s ease; }
 .board-stage.shake-strong { animation: shake 0.7s ease; }
 @keyframes shake {
@@ -542,6 +560,23 @@ body[data-screen="menu"] .btn-primary, body[data-screen="pve"] .btn-primary, bod
 @keyframes cardIn { from { opacity: 0; transform: translateY(30px) scale(0.9); } to { opacity: 1; transform: none; } }
 .modal-card h3 { margin: 0 0 14px; font-family: var(--font-display); font-size: 22px; }
 
+.settings-card { max-width: 480px; text-align: left; }
+.settings-card h3 { text-align: center; }
+.settings-list { display: grid; gap: 4px; margin-bottom: 14px; }
+.toggle.setting { display: flex; align-items: center; gap: 14px; margin: 0; padding: 10px 12px; border-radius: 16px; transition: background 0.2s; }
+.toggle.setting:hover { background: rgba(255, 255, 255, 0.06); }
+.setting-text { display: flex; flex-direction: column; gap: 2px; color: var(--text); }
+.setting-text b { font-weight: 800; }
+.setting-text small { color: var(--text-faint); font-size: 13px; font-weight: 600; line-height: 1.35; }
+.toggle.setting input:disabled ~ .setting-text { opacity: 0.45; }
+.settings-card .toggle input:checked + .toggle-track { background: var(--accent); }
+.settings-help { padding: 12px 14px; margin-bottom: 16px; border-radius: 16px; background: rgba(255, 255, 255, 0.05); color: var(--text-dim); font-size: 13.5px; font-weight: 600; line-height: 1.45; }
+.settings-help h4 { margin: 0 0 6px; color: var(--text); font-family: var(--font-display); font-size: 16px; }
+.settings-help ul { margin: 0; padding-left: 18px; }
+.settings-help li + li { margin-top: 4px; }
+.settings-help b { color: var(--text); }
+.settings-card #settingsClose { display: block; margin: 0 auto; min-width: 160px; }
+
 .promo-card { max-width: 520px; }
 .promo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 12px; }
 .promo-grid button {
@@ -652,7 +687,7 @@ body.is-gloom .board-stage { filter: saturate(0.45) brightness(0.8); transition:
 @media (max-width: 980px) {
     .game-layout { grid-template-columns: 1fr; }
     .side-panel { position: static; width: 100%; max-width: 1040px; margin: 0 auto; }
-    .board-stage, .player-card {
+    .stage-wrap, .board-stage, .player-card {
         max-width: min(1040px, calc((100vh - var(--topbar-h) - 150px) * 1.32), 100%);
         max-width: min(1040px, calc((100svh - var(--topbar-h) - 150px) * 1.32), 100%);
     }
@@ -689,6 +724,8 @@ body.is-gloom .board-stage { filter: saturate(0.45) brightness(0.8); transition:
     .seg-piece, .seg-dice { width: 34px; height: 34px; font-size: 24px; }
     .mode-buttons .btn { width: 100%; }
     .board-stage { border-radius: 18px; }
+    .cam-controls { position: static; flex-direction: row; justify-content: center; gap: 8px; margin-top: 8px; }
+    .cam-btn { width: 44px; height: 40px; }
     .player-card { min-height: 50px; padding: 4px 10px 4px 4px; }
     .pc-avatar { width: 42px; height: 42px; }
     .pc-name { font-size: 17px; }
