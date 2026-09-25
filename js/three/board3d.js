@@ -411,13 +411,19 @@
             this.renderer.setSize(w, h, false);
             this.camera.aspect = w / h;
             this.camera.updateProjectionMatrix();
+            // Сцена стала другой формы (поворот телефона, новая раскладка) — наклон по пресету,
+            // если зритель не наклонял камеру сам
+            if (!this.elevUser && !this.viewGoal && this.theme) this.elevation = this.presetElevation();
             this.updateCamera();
             this.requestRender();
         }
 
         presetElevation(name = this.preset || 'normal') {
             const base = (this.theme && CM.Themes3D[this.theme].elevation) || 54;
-            return ({ normal: base, top: 80, low: base - 16 }[name] || base) * Math.PI / 180;
+            // На квадратной или вытянутой вверх сцене (телефон) смотрим круче: доска почти квадратом
+            // заполняет ширину экрана и получается крупнее
+            const steep = this.camera && this.camera.aspect < 1.12 ? 12 : 0;
+            return ({ normal: base + steep, top: 80, low: base - 16 + steep / 2 }[name] || base) * Math.PI / 180;
         }
 
         /** Азимут своей стороны: белые внизу — 0, чёрные — π. */
@@ -439,7 +445,7 @@
             // В кадр должны попасть игровое поле с краем рамки и верхушки фигур на крайних клетках
             const H = (this.theme && CM.Themes3D[this.theme].fitHeight) || 1.0;
             const pts = [];
-            for (const x of [-4.4, 4.4]) for (const z of [-4.4, 4.4]) pts.push(new T.Vector3(x, 0, z), new T.Vector3(x, -0.2, z));
+            for (const x of [-4.4, 4.4]) for (const z of [-4.4, 4.4]) pts.push(new T.Vector3(x, 0, z));
             for (const x of [-3.9, 3.9]) for (const z of [-3.9, 3.9]) pts.push(new T.Vector3(x, H, z));
             const v = new T.Vector3();
             const measure = (d, tgt) => {
@@ -456,7 +462,7 @@
                 }
                 return { minX, maxX, minY, maxY };
             };
-            const mx = 0.975, my = 0.955;
+            const mx = 0.985, my = 0.97;
             const target = new T.Vector3();
             let d = 20;
             for (let iter = 0; iter < 4; iter++) {
@@ -563,6 +569,7 @@
 
         setPreset(name, animate = true) {
             this.preset = name;
+            this.elevUser = false;
             return this.animateView({ elevation: this.presetElevation(name), zoom: 1, pan: new T.Vector3() }, animate ? 0.6 : 0);
         }
 
@@ -581,6 +588,7 @@
         /** Обычный вид: со своей стороны, наклон по пресету, без приближения. */
         resetView(animate = true) {
             if (this.cineLock) return Promise.resolve();
+            this.elevUser = false;
             const side = this.sideAzimuth();
             return this.animateView({
                 azimuth: this.azimuth + angleDiff(this.azimuth, side),
@@ -641,6 +649,7 @@
         orbitBy(dx, dy) {
             const r = this.renderer.domElement.getBoundingClientRect();
             this.azimuth -= dx * Math.PI * 2 / Math.max(360, r.width) * 0.85;
+            if (dy) this.elevUser = true;
             this.elevation = clamp(this.elevation + dy * Math.PI / Math.max(300, r.height) * 0.75, EL_MIN, EL_MAX);
             this.updateCamera();
         }
@@ -677,6 +686,7 @@
             // Новая вселенная — обычный вид (без кинокамеры и приближения)
             this.cineReset();
             this.stopViewAnim();
+            this.elevUser = false;
             this.elevation = this.presetElevation();
             this.zoom = 1;
             this.pan.set(0, 0, 0);

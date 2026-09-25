@@ -395,38 +395,46 @@ body[data-screen="menu"] .btn-primary, body[data-screen="pve"] .btn-primary, bod
 #pvpStartBtn { display: flex; margin: 0 auto; }
 
 /* ---------- Партия ---------- */
-.game-layout {
-    display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 18px;
-    max-width: 1240px; margin: 0 auto; align-items: start;
-}
-.board-column { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 0; }
+/* Доска занимает почти весь экран; игроки, кнопки и ходы — в узкой компактной колонке справа */
+body[data-screen="game"] { --topbar-h: 50px; }
+body[data-screen="game"] .screens { padding: calc(var(--topbar-h) + env(safe-area-inset-top)) 10px 10px; }
+body[data-screen="game"] .icon-btn { width: 38px; height: 38px; font-size: 17px; }
+body[data-screen="game"] .brand { padding: 6px 12px 6px 8px; font-size: 12px; }
 
-.stage-wrap, .board-stage {
-    position: relative; width: 100%;
-    max-width: min(1040px, calc((100vh - var(--topbar-h) - 172px) * 1.32));
-    max-width: min(1040px, calc((100svh - var(--topbar-h) - 172px) * 1.32));
+.game-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(220px, 21vw, 272px);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: "board players" "board side";
+    gap: 8px 10px;
+    height: calc(100vh - var(--topbar-h) - 10px);
+    height: calc(100svh - var(--topbar-h) - env(safe-area-inset-top) - 10px);
+    max-width: 1900px; margin: 0 auto;
 }
+.players { grid-area: players; display: grid; gap: 6px; min-width: 0; }
+.stage-wrap { grid-area: board; position: relative; min-width: 0; min-height: 0; }
+
 .board-stage {
-    aspect-ratio: 1.32 / 1;
-    border-radius: 26px;
+    position: relative; width: 100%; height: 100%;
+    border-radius: 22px;
     background: radial-gradient(closest-side, rgba(255, 255, 255, 0.07), transparent);
 }
 .board3d { position: absolute; inset: 0; border-radius: inherit; }
 .board3d canvas { display: block; width: 100%; height: 100%; touch-action: none; outline: none; }
 
 /* Кнопки камеры: на широком экране — в правом верхнем углу доски, на телефоне — строкой под ней */
-.cam-controls { position: absolute; top: 10px; right: 10px; z-index: 2; display: flex; flex-direction: column; gap: 6px; }
+.cam-controls { position: absolute; top: 8px; right: 8px; z-index: 2; display: flex; flex-direction: column; gap: 5px; }
 .cam-controls[hidden] { display: none; }
 .cam-btn {
-    width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center;
-    font-size: 19px; line-height: 1; color: var(--text);
+    width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+    font-size: 16px; line-height: 1; color: var(--text);
     background: var(--panel); border: 1px solid var(--panel-border);
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
     transition: transform 0.2s var(--ease-pop), background 0.2s, box-shadow 0.2s;
 }
 .cam-btn:hover { transform: scale(1.08); background: var(--panel-strong); }
 .cam-btn:active { transform: scale(0.94); }
-.cam-cine { font-size: 17px; opacity: 0.75; }
+.cam-cine { font-size: 15px; opacity: 0.75; }
 .cam-cine[aria-pressed="true"] { opacity: 1; background: var(--accent); color: var(--accent-ink); box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.18), 0 0 18px var(--accent); }
 body.is-cine .cam-controls .cam-btn:not(.cam-cine) { opacity: 0.4; pointer-events: none; }
 .board-stage.shake { animation: shake 0.45s ease; }
@@ -453,7 +461,7 @@ body.is-cine .cam-controls .cam-btn:not(.cam-cine) { opacity: 0.4; pointer-event
 .banner {
     position: absolute; left: 50%; top: 42%; z-index: 3; pointer-events: none;
     transform: translate(-50%, -50%) scale(0.4); opacity: 0;
-    font-family: var(--font-display); font-weight: 900; font-size: clamp(46px, 12vw, 104px);
+    font-family: var(--font-display); font-weight: 900; font-size: clamp(46px, 12vw, 120px);
     letter-spacing: 0.03em; white-space: nowrap; color: #fff;
     text-shadow: 0 4px 0 rgba(0, 0, 0, 0.35), 0 0 34px rgba(255, 60, 60, 0.9);
 }
@@ -468,85 +476,81 @@ body.is-cine .cam-controls .cam-btn:not(.cam-cine) { opacity: 0.4; pointer-event
     100% { opacity: 0; transform: translate(-50%, -60%) scale(0.9); }
 }
 
-/* Карточки игроков */
+/* Карточки игроков — компактные */
 .player-card {
-    width: 100%;
-    max-width: min(1040px, calc((100vh - var(--topbar-h) - 172px) * 1.32));
-    max-width: min(1040px, calc((100svh - var(--topbar-h) - 172px) * 1.32));
-    display: flex; align-items: center; gap: 12px; padding: 6px 14px 6px 6px;
-    border-radius: 18px; background: var(--panel); border: 1px solid var(--panel-border);
+    display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; min-width: 0; min-height: 46px;
+    border-radius: 14px; background: var(--panel); border: 1px solid var(--panel-border);
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     transition: box-shadow 0.3s, border-color 0.3s;
-    min-height: 58px;
 }
-.player-card.is-turn { border-color: var(--accent); box-shadow: 0 0 0 2px var(--glow), 0 0 26px var(--glow); }
-.pc-avatar { width: 50px; height: 50px; object-fit: contain; flex: none; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4)); }
+.player-card.is-turn { border-color: var(--accent); box-shadow: 0 0 0 2px var(--glow), 0 0 18px var(--glow); }
+.pc-avatar { width: 36px; height: 36px; object-fit: contain; flex: none; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.4)); }
 .pc-avatar:not([src]) { visibility: hidden; }
 .pc-info { min-width: 0; flex: 1; }
-.pc-name { font-family: var(--font-display); font-size: 19px; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pc-sub { color: var(--text-faint); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pc-captured { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; max-width: 55%; }
-.pc-captured img { width: 26px; height: 26px; object-fit: contain; margin-left: -8px; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)); animation: pop 0.35s var(--ease-pop); }
-.pc-captured .adv { margin-left: 6px; font-size: 14px; color: var(--good); font-weight: 900; }
-.pc-thinking { display: none; gap: 4px; }
+.pc-name { font-family: var(--font-display); font-size: 15px; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pc-sub { color: var(--text-faint); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pc-captured { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; max-width: 50%; }
+.pc-captured img { width: 18px; height: 18px; object-fit: contain; margin-left: -6px; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)); animation: pop 0.35s var(--ease-pop); }
+.pc-captured .adv { margin-left: 4px; font-size: 12px; color: var(--good); font-weight: 900; }
+.pc-thinking { display: none; gap: 3px; }
 .player-card.is-thinking .pc-thinking { display: flex; }
-.pc-thinking i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: bounce 1s infinite; }
+.pc-thinking i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: bounce 1s infinite; }
 .pc-thinking i:nth-child(2) { animation-delay: 0.15s; }
 .pc-thinking i:nth-child(3) { animation-delay: 0.3s; }
-@keyframes bounce { 0%, 100% { transform: translateY(0); opacity: 0.5; } 40% { transform: translateY(-7px); opacity: 1; } }
+@keyframes bounce { 0%, 100% { transform: translateY(0); opacity: 0.5; } 40% { transform: translateY(-5px); opacity: 1; } }
 
-/* Боковая панель */
-.side-panel { display: flex; flex-direction: column; gap: 12px; position: sticky; top: calc(var(--topbar-h) + 10px); }
+/* Боковая панель — мелкие кнопки, история ходов забирает оставшееся место */
+.side-panel { grid-area: side; display: flex; flex-direction: column; gap: 8px; min-width: 0; min-height: 0; }
 .status-card, .history-card, .controls, .theme-switch {
-    background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius);
+    background: var(--panel); border: 1px solid var(--panel-border); border-radius: 16px;
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     box-shadow: var(--shadow);
 }
-.status-card { padding: 14px 16px 16px; min-height: 104px; }
-.status-kicker { color: var(--text-faint); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; }
+.status-card { padding: 8px 12px 9px; }
+.status-kicker { color: var(--text-faint); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; }
 .status-text {
-    margin-top: 6px; font-family: var(--font-display); font-size: 23px; line-height: 1.2; min-height: 1.2em;
+    margin-top: 3px; font-family: var(--font-display); font-size: 17px; line-height: 1.2; min-height: 1.2em;
     color: var(--text);
 }
 .status-text.is-typing::after, .result-sub.is-typing::after { content: '▍'; margin-left: 2px; color: var(--accent); animation: blink 0.8s steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 .status-card.is-check .status-text { color: #ffb4b4; }
-.piece-hint { margin-top: 8px; color: var(--text-dim); font-size: 14px; min-height: 1.2em; }
+.piece-hint { margin-top: 3px; color: var(--text-dim); font-size: 12px; min-height: 1.2em; }
 
-.controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 8px; }
+.controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 5px; }
 .tile-btn {
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-    min-height: 64px; border-radius: 14px; font-size: 13px; color: var(--text-dim);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+    min-height: 44px; border-radius: 10px; font-size: 11px; color: var(--text-dim);
     background: rgba(255, 255, 255, 0.05); transition: background 0.2s, color 0.2s, transform 0.2s var(--ease-pop);
 }
-.tile-btn .ti { font-size: 22px; line-height: 1; color: var(--text); }
+.tile-btn .ti { font-size: 17px; line-height: 1; color: var(--text); }
 .tile-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.14); color: var(--text); transform: translateY(-2px); }
 .tile-btn:disabled { opacity: 0.35; cursor: default; }
 #resignBtn:hover:not(:disabled) { background: rgba(248, 113, 113, 0.22); }
 
-.theme-switch { display: flex; align-items: center; gap: 6px; padding: 8px 10px; }
-.ts-label { flex: 1; color: var(--text-faint); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; padding-left: 6px; }
+.theme-switch { display: flex; align-items: center; gap: 5px; padding: 5px 8px; }
+.ts-label { flex: 1; color: var(--text-faint); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; padding-left: 4px; }
 .theme-switch button {
-    width: 44px; height: 44px; border-radius: 12px; font-size: 22px;
+    width: 34px; height: 34px; border-radius: 10px; font-size: 18px;
     background: rgba(255, 255, 255, 0.06); transition: transform 0.2s var(--ease-pop), background 0.2s, box-shadow 0.2s;
 }
 .theme-switch button:hover { transform: scale(1.08); background: rgba(255, 255, 255, 0.14); }
 .theme-switch button[aria-checked="true"] { background: rgba(255, 255, 255, 0.2); box-shadow: inset 0 0 0 2px var(--accent); }
 
-.history-card { padding: 12px 12px 10px; }
-.history-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 4px 6px; }
-.history-head h3 { margin: 0; font-family: var(--font-display); font-size: 18px; }
-.move-count { color: var(--text-faint); font-size: 13px; }
+.history-card { padding: 8px 8px 6px; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.history-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 2px 4px; }
+.history-head h3 { margin: 0; font-family: var(--font-display); font-size: 15px; }
+.move-count { color: var(--text-faint); font-size: 11px; }
 .move-list {
-    list-style: none; margin: 0; padding: 0; max-height: 240px; overflow-y: auto;
-    display: grid; grid-template-columns: 34px 1fr 1fr; gap: 3px 4px; font-size: 15px;
+    list-style: none; margin: 0; padding: 0; flex: 1; min-height: 0; overflow-y: auto; align-content: start;
+    display: grid; grid-template-columns: 28px 1fr 1fr; gap: 2px 3px; font-size: 13px;
     scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
 }
 .move-list li { display: contents; }
-.move-list .mn { color: var(--text-faint); text-align: right; padding: 5px 4px 0 0; font-size: 13px; }
-.move-list .mv { padding: 4px 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); font-variant-numeric: tabular-nums; }
+.move-list .mn { color: var(--text-faint); text-align: right; padding: 3px 3px 0 0; font-size: 11px; }
+.move-list .mv { padding: 2px 6px; border-radius: 6px; background: rgba(255, 255, 255, 0.05); font-variant-numeric: tabular-nums; }
 .move-list .mv.is-last { background: var(--accent); color: var(--accent-ink); animation: pop 0.3s var(--ease-pop); }
-.move-list .empty { grid-column: 1 / -1; color: var(--text-faint); padding: 6px 4px; font-weight: 600; }
+.move-list .empty { grid-column: 1 / -1; color: var(--text-faint); padding: 4px 2px; font-weight: 600; font-size: 12px; }
 
 /* ---------- Модальные окна ---------- */
 .modal { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 16px; background: rgba(6, 4, 16, 0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: fade 0.25s ease both; }
@@ -684,16 +688,64 @@ body.is-gloom .board-stage { filter: saturate(0.45) brightness(0.8); transition:
 .board2d .coord.r { left: 4px; top: 2px; }
 
 /* ---------- Адаптивность ---------- */
-@media (max-width: 980px) {
-    .game-layout { grid-template-columns: 1fr; }
-    .side-panel { position: static; width: 100%; max-width: 1040px; margin: 0 auto; }
-    .stage-wrap, .board-stage, .player-card {
-        max-width: min(1040px, calc((100vh - var(--topbar-h) - 150px) * 1.32), 100%);
-        max-width: min(1040px, calc((100svh - var(--topbar-h) - 150px) * 1.32), 100%);
+/* Телефон и планшет в портретной ориентации: игроки строкой, под ними квадратная доска
+   на всю ширину экрана, кнопки и ходы — ниже */
+@media (orientation: portrait) and (max-width: 980px), (max-width: 599px) {
+    body[data-screen="game"] { --topbar-h: 46px; }
+    body[data-screen="game"] .screens { padding: calc(var(--topbar-h) + env(safe-area-inset-top)) 4px 12px; }
+    body[data-screen="game"] .icon-btn { width: 34px; height: 34px; font-size: 15px; }
+    .game-layout {
+        grid-template-columns: minmax(0, 1fr); grid-template-rows: none;
+        grid-template-areas: "players" "board" "side";
+        height: auto; gap: 6px;
     }
+    .players { grid-template-columns: 1fr 1fr; gap: 4px; }
+    .player-card { min-height: 38px; padding: 2px 6px 2px 2px; gap: 5px; border-radius: 12px; }
+    .pc-avatar { width: 30px; height: 30px; }
+    .pc-name { font-size: 13px; }
+    .pc-sub { font-size: 10px; }
+    .pc-captured { max-width: 42%; }
+    .pc-captured img { width: 15px; height: 15px; margin-left: -5px; }
+    .pc-captured .adv { font-size: 11px; }
+    .board-stage {
+        height: auto; aspect-ratio: 1 / 1; border-radius: 16px;
+        max-height: calc(100vh - var(--topbar-h) - 96px);
+        max-height: calc(100svh - var(--topbar-h) - 96px);
+    }
+    .cam-controls { position: static; flex-direction: row; justify-content: center; gap: 6px; margin-top: 6px; }
+    .cam-btn { width: 42px; height: 34px; }
+    .side-panel { gap: 6px; }
     .controls { grid-template-columns: repeat(6, 1fr); }
-    .tile-btn { min-height: 58px; font-size: 12px; }
-    .move-list { max-height: 180px; }
+    .tile-btn { min-height: 42px; font-size: 10px; }
+    .tile-btn .ti { font-size: 16px; }
+    .history-card { flex: none; }
+    .move-list { max-height: 150px; }
+}
+
+/* Низкий экран в альбомной ориентации (телефон боком): колонка справа ещё компактнее */
+@media (orientation: landscape) and (max-height: 560px) {
+    body[data-screen="game"] { --topbar-h: 42px; }
+    body[data-screen="game"] .icon-btn { width: 32px; height: 32px; font-size: 14px; }
+    body[data-screen="game"] .screens { padding-bottom: 6px; }
+    .game-layout { gap: 5px 8px; height: calc(100vh - var(--topbar-h) - 6px); height: calc(100svh - var(--topbar-h) - 6px); }
+    .players { gap: 4px; }
+    .player-card { min-height: 34px; padding: 2px 8px 2px 2px; gap: 6px; }
+    .pc-avatar { width: 28px; height: 28px; }
+    .pc-name { font-size: 13px; }
+    .pc-sub, .piece-hint { display: none; }
+    .side-panel { gap: 5px; }
+    .status-card { padding: 4px 10px 5px; }
+    .status-kicker { font-size: 9.5px; }
+    .status-text { font-size: 14px; margin-top: 1px; }
+    .controls { grid-template-columns: repeat(6, 1fr); padding: 3px; gap: 3px; }
+    .tile-btn { min-height: 32px; }
+    .tile-btn span:not(.ti) { display: none; }
+    .theme-switch { padding: 3px 6px; }
+    .theme-switch button { width: 28px; height: 28px; font-size: 15px; }
+    .history-card { padding: 5px 6px 4px; }
+    .history-head h3 { font-size: 13px; }
+    .cam-controls { top: 5px; right: 5px; gap: 4px; }
+    .cam-btn { width: 30px; height: 30px; font-size: 14px; }
 }
 
 @media (max-width: 720px) {
@@ -723,15 +775,6 @@ body.is-gloom .board-stage { filter: saturate(0.45) brightness(0.8); transition:
     .segmented button { flex-direction: column; justify-content: center; gap: 2px; padding: 8px 4px; font-size: 13px; line-height: 1.15; text-align: center; }
     .seg-piece, .seg-dice { width: 34px; height: 34px; font-size: 24px; }
     .mode-buttons .btn { width: 100%; }
-    .board-stage { border-radius: 18px; }
-    .cam-controls { position: static; flex-direction: row; justify-content: center; gap: 8px; margin-top: 8px; }
-    .cam-btn { width: 44px; height: 40px; }
-    .player-card { min-height: 50px; padding: 4px 10px 4px 4px; }
-    .pc-avatar { width: 42px; height: 42px; }
-    .pc-name { font-size: 17px; }
-    .pc-captured img { width: 22px; height: 22px; margin-left: -7px; }
-    .controls { grid-template-columns: repeat(3, 1fr); }
-    .status-text { font-size: 20px; }
     .promo-grid img { width: 64px; height: 64px; }
     .result-hero { height: 150px; }
     .result-hero img { width: 140px; height: 140px; }

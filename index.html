@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Nunito:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Russo+One&family=Unbounded:wght@700;900&display=swap">
-    <link rel="stylesheet" href="css/styles.css?v=2.1.0">
+    <link rel="stylesheet" href="css/styles.css?v=2.2.0">
 </head>
 <body data-theme="classic" data-screen="menu">
     <!-- Фоны вселенных -->
@@ -132,7 +132,8 @@
         <!-- Партия -->
         <section id="gameScreen" class="screen" aria-label="Партия">
             <div class="game-layout">
-                <div class="board-column">
+                <!-- Игроки: на широком экране — в колонке справа, на телефоне — строкой над доской -->
+                <div class="players">
                     <div class="player-card" id="topPlayer">
                         <img class="pc-avatar" alt="">
                         <div class="pc-info">
@@ -142,21 +143,6 @@
                         <div class="pc-captured" aria-label="Взятые фигуры"></div>
                         <div class="pc-thinking" aria-hidden="true"><i></i><i></i><i></i></div>
                     </div>
-                    <div class="stage-wrap">
-                        <div class="board-stage" id="boardStage">
-                            <div id="board3d" class="board3d"></div>
-                            <div class="banner" id="banner" aria-live="assertive"></div>
-                            <div class="board-loading" id="boardLoading"><span class="spinner"></span><span>Открываем портал во вселенную…</span></div>
-                        </div>
-                        <div class="cam-controls" id="camControls" role="toolbar" aria-label="Камера">
-                            <button type="button" class="cam-btn" data-cam="left" title="Повернуть доску против часовой стрелки (←)" aria-label="Повернуть доску против часовой стрелки">⟲</button>
-                            <button type="button" class="cam-btn" data-cam="right" title="Повернуть доску по часовой стрелке (→)" aria-label="Повернуть доску по часовой стрелке">⟳</button>
-                            <button type="button" class="cam-btn" data-cam="in" title="Приблизить (+)" aria-label="Приблизить">＋</button>
-                            <button type="button" class="cam-btn" data-cam="out" title="Отдалить (−)" aria-label="Отдалить">－</button>
-                            <button type="button" class="cam-btn" data-cam="reset" title="Обычный вид (0)" aria-label="Вернуть обычный вид">⌖</button>
-                            <button type="button" class="cam-btn cam-cine" id="cineBtn" aria-pressed="false" title="Кинематографичные ходы" aria-label="Кинематографичные ходы">🎬</button>
-                        </div>
-                    </div>
                     <div class="player-card" id="bottomPlayer">
                         <img class="pc-avatar" alt="">
                         <div class="pc-info">
@@ -165,6 +151,22 @@
                         </div>
                         <div class="pc-captured" aria-label="Взятые фигуры"></div>
                         <div class="pc-thinking" aria-hidden="true"><i></i><i></i><i></i></div>
+                    </div>
+                </div>
+
+                <div class="stage-wrap">
+                    <div class="board-stage" id="boardStage">
+                        <div id="board3d" class="board3d"></div>
+                        <div class="banner" id="banner" aria-live="assertive"></div>
+                        <div class="board-loading" id="boardLoading"><span class="spinner"></span><span>Открываем портал во вселенную…</span></div>
+                    </div>
+                    <div class="cam-controls" id="camControls" role="toolbar" aria-label="Камера">
+                        <button type="button" class="cam-btn" data-cam="left" title="Повернуть доску против часовой стрелки (←)" aria-label="Повернуть доску против часовой стрелки">⟲</button>
+                        <button type="button" class="cam-btn" data-cam="right" title="Повернуть доску по часовой стрелке (→)" aria-label="Повернуть доску по часовой стрелке">⟳</button>
+                        <button type="button" class="cam-btn" data-cam="in" title="Приблизить (+)" aria-label="Приблизить">＋</button>
+                        <button type="button" class="cam-btn" data-cam="out" title="Отдалить (−)" aria-label="Отдалить">－</button>
+                        <button type="button" class="cam-btn" data-cam="reset" title="Обычный вид (0)" aria-label="Вернуть обычный вид">⌖</button>
+                        <button type="button" class="cam-btn cam-cine" id="cineBtn" aria-pressed="false" title="Кинематографичные ходы" aria-label="Кинематографичные ходы">🎬</button>
                     </div>
                 </div>
 
@@ -278,20 +280,20 @@
 
     <noscript><div class="noscript">Для игры нужен JavaScript.</div></noscript>
 
-    <script src="js/vendor/chess.js?v=2.1.0"></script>
-    <script src="js/vendor/three.min.js?v=2.1.0"></script>
-    <script src="js/engine.js?v=2.1.0"></script>
-    <script src="js/ai.js?v=2.1.0"></script>
-    <script src="js/three/common.js?v=2.1.0"></script>
-    <script src="js/three/classic.js?v=2.1.0"></script>
-    <script src="js/three/cars.js?v=2.1.0"></script>
-    <script src="js/three/hospital.js?v=2.1.0"></script>
-    <script src="js/three/boards.js?v=2.1.0"></script>
-    <script src="js/three/board3d.js?v=2.1.0"></script>
-    <script src="js/board2d.js?v=2.1.0"></script>
-    <script src="js/themes.js?v=2.1.0"></script>
-    <script src="js/sounds.js?v=2.1.0"></script>
-    <script src="js/effects.js?v=2.1.0"></script>
-    <script src="js/chess-app.js?v=2.1.0"></script>
+    <script src="js/vendor/chess.js?v=2.2.0"></script>
+    <script src="js/vendor/three.min.js?v=2.2.0"></script>
+    <script src="js/engine.js?v=2.2.0"></script>
+    <script src="js/ai.js?v=2.2.0"></script>
+    <script src="js/three/common.js?v=2.2.0"></script>
+    <script src="js/three/classic.js?v=2.2.0"></script>
+    <script src="js/three/cars.js?v=2.2.0"></script>
+    <script src="js/three/hospital.js?v=2.2.0"></script>
+    <script src="js/three/boards.js?v=2.2.0"></script>
+    <script src="js/three/board3d.js?v=2.2.0"></script>
+    <script src="js/board2d.js?v=2.2.0"></script>
+    <script src="js/themes.js?v=2.2.0"></script>
+    <script src="js/sounds.js?v=2.2.0"></script>
+    <script src="js/effects.js?v=2.2.0"></script>
+    <script src="js/chess-app.js?v=2.2.0"></script>
 </body>
 </html>
