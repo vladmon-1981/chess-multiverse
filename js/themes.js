@@ -98,11 +98,41 @@
                 resignWin: 'Аномалии отступили. Победа!',
                 resignLose: 'Вы покинули смену.'
             }
+        },
+        hockey: {
+            key: 'hockey',
+            name: 'Хоккей',
+            tagline: '«Металлург» против «Авангарда»',
+            sides: { w: '«Металлург»', b: '«Авангард»' },
+            texts: {
+                start: 'Вбрасывание! Шайба в игре!',
+                yourMove: 'Твой ход — выходи на лёд!',
+                sideMove: (side) => `Атакует ${side}`,
+                thinking: 'Соперник разыгрывает комбинацию',
+                check: 'Шах! Вратарь под обстрелом!',
+                checkBanner: 'Шах!',
+                mateBanner: 'Гол!',
+                win: { title: 'Победа!', sub: 'Шайба в воротах — матч выигран!' },
+                lose: { title: 'Поражение', sub: 'Соперник забил решающую шайбу. Реванш в следующем матче?' },
+                pvpWin: { title: 'Победа!', sub: (name) => `${name} забивает победную шайбу!` },
+                draw: { title: 'Ничья', sub: 'Финальная сирена — счёт равный.' }
+            },
+            voice: {
+                rate: 1.08, pitch: 1.0,
+                start: 'Вбрасывание! Шайба в игре!',
+                check: 'Шах! Опасный момент у ворот!',
+                win: 'Гол! Победа!',
+                lose: 'Шайба в наших воротах. Поражение.',
+                pvpWin: (name) => `Гол! Побеждает ${name}!`,
+                draw: 'Финальная сирена! Ничья!',
+                resignWin: 'Соперник ушёл со льда. Победа!',
+                resignLose: 'Вы ушли со льда.'
+            }
         }
     };
 
     // Имена персонажей берём из 3D-модулей тем
-    for (const key of ['cars', 'hospital']) {
+    for (const key of ['cars', 'hospital', 'hockey']) {
         const spec = window.CM && window.CM.Themes3D && window.CM.Themes3D[key];
         if (spec && spec.names) THEMES[key].pieceNames = spec.names;
     }

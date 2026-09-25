@@ -83,7 +83,7 @@
         // ---------- Загрузка ----------
         loadFonts() {
             if (!document.fonts || !document.fonts.load) return Promise.resolve();
-            const faces = ['700 40px "Playfair Display"', '400 40px "Russo One"', '700 40px Comfortaa', '800 20px Nunito', '900 40px Unbounded'];
+            const faces = ['700 40px "Playfair Display"', '400 40px "Russo One"', '700 40px Comfortaa', '800 20px Nunito', '900 40px Unbounded', '700 40px Oswald'];
             return Promise.race([
                 Promise.all(faces.map((f) => document.fonts.load(f).catch(() => null))),
                 sleep(2500)
@@ -788,7 +788,8 @@
                 this.banner(T.texts.mateBanner, 'mate');
                 this.fx.shake($('#boardStage'), true);
                 this.view.showMate(k, result.winner);
-                await sleep(1300);
+                // В хоккее мат — это гол: даём шайбе влететь в ворота и фонарю помигать
+                await sleep(this.theme === 'hockey' && this.hasWebGL ? 2100 : 1300);
             } else {
                 await sleep(450);
             }
@@ -804,8 +805,8 @@
             this.sound.say(line, { rate: T.voice.rate, pitch: T.voice.pitch, delay: outcome === 'lose' ? 1500 : 1000 });
 
             if (outcome === 'win') {
-                this.fx.confetti(this.theme);
-                setTimeout(() => { if (token === this.gameToken) this.fx.confetti(this.theme, { count: 90 }); }, 1400);
+                this.fx.confetti(this.theme, { side: result.winner });
+                setTimeout(() => { if (token === this.gameToken) this.fx.confetti(this.theme, { count: 90, side: result.winner }); }, 1400);
             } else if (outcome === 'lose') {
                 document.body.classList.add('is-gloom');
                 this.fx.ash();

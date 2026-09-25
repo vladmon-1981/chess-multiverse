@@ -1,6 +1,6 @@
 /*
  * Оформление 3D-доски для каждой темы: текстура игрового поля с рамкой и координатами,
- * материал боковин и освещение сцены.
+ * материал боковин, освещение сцены и объёмный декор (у хоккея — борта и ворота).
  */
 (function () {
     'use strict';
@@ -204,6 +204,211 @@
         drawCoords(ctx, L, '700 {px}px Comfortaa, "Nunito", sans-serif', '#1f8f82', null);
     }
 
+    // ---------- Хоккей ----------
+    // Линии ворот — чуть за крайними горизонталями, в кайме доски
+    const GOAL_LINE = 4.14;
+
+    function hockeyTop(ctx, L) {
+        const rnd = CM.Tex.rng(1974);
+        const S = L.size, k = L.k;
+        // Координаты доски (единицы, центр — 0) → пиксели текстуры; +z — сторона белых, внизу
+        const X = (x) => S / 2 + x * k;
+        const Z = (z) => S / 2 + z * k;
+        const g = ctx.createRadialGradient(S / 2, S / 2, S * 0.1, S / 2, S / 2, S * 0.75);
+        g.addColorStop(0, '#f7fbfe');
+        g.addColorStop(1, '#e2edf6');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, S, S);
+        speckle(ctx, 0, 0, S, S, rnd, ['#eaf3fa', '#ffffff', '#dde9f3'], 9000, 3);
+        // Клетки: светлые — чистый лёд, тёмные — голубой
+        for (let r = 0; r < 8; r++) {
+            for (let f = 0; f < 8; f++) {
+                const light = (r + f) % 2 === 0;
+                const x = L.off + f * L.sq, y = L.off + r * L.sq;
+                ctx.fillStyle = light ? '#f2f8fc' : '#8fc0e5';
+                ctx.fillRect(x, y, L.sq, L.sq);
+                speckle(ctx, x, y, L.sq, L.sq, rnd, light ? ['#e6f1f9', '#ffffff'] : ['#82b5dc', '#a3cdee', '#7aaed6'], 420, 3);
+                const gl = ctx.createLinearGradient(x, y, x + L.sq, y + L.sq);
+                gl.addColorStop(0, 'rgba(255,255,255,0.24)');
+                gl.addColorStop(0.5, 'rgba(255,255,255,0)');
+                gl.addColorStop(1, 'rgba(255,255,255,0.1)');
+                ctx.fillStyle = gl;
+                ctx.fillRect(x, y, L.sq, L.sq);
+            }
+        }
+        // Разметка площадки «подо льдом»
+        ctx.save();
+        ctx.globalAlpha = 0.8;
+        const RED = '#d61f2a', BLUE = '#1d5fd6';
+        const line = (z, color, w) => { ctx.fillStyle = color; ctx.fillRect(0, Z(z) - (w * k) / 2, S, w * k); };
+        line(0, RED, 0.075);
+        for (const s of [-1, 1]) line(s, BLUE, 0.075);
+        for (const s of [-1, 1]) line(s * GOAL_LINE, RED, 0.03);
+        // Центральный круг вбрасывания
+        ctx.strokeStyle = BLUE;
+        ctx.lineWidth = 0.04 * k;
+        ctx.beginPath(); ctx.arc(X(0), Z(0), 0.95 * k, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = BLUE;
+        ctx.beginPath(); ctx.arc(X(0), Z(0), 0.08 * k, 0, Math.PI * 2); ctx.fill();
+        // Круги вбрасывания в зонах с «усами» и точки у синих линий
+        ctx.strokeStyle = RED;
+        ctx.fillStyle = RED;
+        for (const sx of [-1, 1]) {
+            for (const sz of [-1, 1]) {
+                const cx = X(sx * 2), cz = Z(sz * 2.55);
+                ctx.lineWidth = 0.035 * k;
+                ctx.beginPath(); ctx.arc(cx, cz, 0.8 * k, 0, Math.PI * 2); ctx.stroke();
+                for (const hx of [-1, 1]) {
+                    for (const hz of [-1, 1]) {
+                        const x0 = hx > 0 ? cx + 0.8 * k : cx - 0.96 * k;
+                        ctx.fillRect(x0, cz + hz * 0.14 * k - 0.0175 * k, 0.16 * k, 0.035 * k);
+                    }
+                }
+                ctx.beginPath(); ctx.arc(cx, cz, 0.1 * k, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(X(sx * 2), Z(sz * 0.62), 0.08 * k, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+        // Вратарские площадки перед воротами
+        for (const s of [-1, 1]) {
+            ctx.beginPath();
+            ctx.arc(X(0), Z(s * GOAL_LINE), 0.34 * k, s > 0 ? Math.PI : 0, s > 0 ? Math.PI * 2 : Math.PI);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(80, 160, 255, 0.55)';
+            ctx.fill();
+            ctx.strokeStyle = RED;
+            ctx.lineWidth = 0.025 * k;
+            ctx.stroke();
+        }
+        ctx.restore();
+        // Царапины от коньков
+        ctx.save();
+        ctx.lineCap = 'round';
+        for (let i = 0; i < 280; i++) {
+            ctx.strokeStyle = rnd() < 0.55 ? 'rgba(255,255,255,0.4)' : 'rgba(110,150,185,0.13)';
+            ctx.lineWidth = 0.6 + rnd() * 1.6;
+            const a0 = rnd() * Math.PI * 2;
+            ctx.beginPath();
+            ctx.arc(rnd() * S, rnd() * S, (0.6 + rnd() * 2.6) * k, a0, a0 + 0.2 + rnd() * 0.5);
+            ctx.stroke();
+        }
+        ctx.restore();
+        drawCoords(ctx, L, '700 {px}px Oswald, "Russo One", "Arial Narrow", sans-serif', '#12325e', null);
+    }
+
+    /** Геометрия из четырёхугольников [a, b, c, d] с развёрткой в клетках сетки размера cell. */
+    function quads(list, cell) {
+        const T = THREE;
+        const pos = [], uv = [];
+        for (const q of list) {
+            const P = q.map((p) => new T.Vector3(p[0], p[1], p[2]));
+            const w = P[0].distanceTo(P[1]) / cell, h = P[0].distanceTo(P[3]) / cell;
+            const U = [[0, 0], [w, 0], [w, h], [0, h]];
+            for (const i of [0, 1, 2, 0, 2, 3]) {
+                pos.push(P[i].x, P[i].y, P[i].z);
+                uv.push(U[i][0], U[i][1]);
+            }
+        }
+        const g = new T.BufferGeometry();
+        g.setAttribute('position', new T.Float32BufferAttribute(pos, 3));
+        g.setAttribute('uv', new T.Float32BufferAttribute(uv, 2));
+        g.computeVertexNormals();
+        return g;
+    }
+
+    /**
+     * Хоккейная коробка вокруг поля: борта со скруглёнными углами (жёлтый низ, белые щиты,
+     * тёмно-синий поручень), ворота с сеткой, фонари гола и щиты с названиями команд.
+     * Возвращает ссылки на фонари — они загораются при голе (мате).
+     */
+    function hockeyDecor(group, env) {
+        const T = THREE;
+        const add = (geo, mat, x = 0, y = 0, z = 0, o = {}) => {
+            const m = new T.Mesh(geo, mat);
+            m.position.set(x, y, z);
+            if (o.rx) m.rotation.x = o.rx;
+            if (o.ry) m.rotation.y = o.ry;
+            if (o.rz) m.rotation.z = o.rz;
+            m.castShadow = o.shadow !== false;
+            m.receiveShadow = true;
+            group.add(m);
+            return m;
+        };
+        const M = {
+            board: new T.MeshPhysicalMaterial({ color: '#f6f8fa', roughness: 0.32, clearcoat: 0.6, clearcoatRoughness: 0.2 }),
+            kick: new T.MeshStandardMaterial({ color: '#ffc61a', roughness: 0.45 }),
+            cap: new T.MeshStandardMaterial({ color: '#10284f', roughness: 0.4, metalness: 0.1 }),
+            red: new T.MeshStandardMaterial({ color: '#d8202b', roughness: 0.3, metalness: 0.25 }),
+            white: new T.MeshStandardMaterial({ color: '#f4f4f4', roughness: 0.45 })
+        };
+        const ring = (outer, inner, rOut, rIn, y0, y1) => {
+            const s = CM.G.roundedRectShape(outer, outer, rOut);
+            s.holes.push(CM.G.roundedRectShape(inner, inner, rIn));
+            const geo = new T.ExtrudeGeometry(s, { depth: y1 - y0, bevelEnabled: false, curveSegments: 12 });
+            geo.rotateX(-Math.PI / 2);
+            geo.translate(0, y0, 0);
+            return geo;
+        };
+        const O = env.size, R = env.corner, I = O - 0.26, RI = R - 0.13;
+        add(ring(O, I, R, RI, 0, 0.05), M.kick);
+        add(ring(O, I, R, RI, 0.05, 0.2), M.board);
+        add(ring(O + 0.03, I - 0.03, R + 0.015, RI - 0.015, 0.2, 0.228), M.cap);
+
+        // Ворота: красные штанги и перекладина, белая рама, сетка
+        const netTex = CM.Tex.canvas(64, 64, (ctx, w, h) => {
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = 'rgba(255,255,255,0.95)';
+            ctx.fillRect(0, 0, w, 8);
+            ctx.fillRect(0, 0, 8, h);
+        }, { repeat: true });
+        const net = new T.MeshStandardMaterial({ map: netTex, transparent: true, side: T.DoubleSide, roughness: 0.9, depthWrite: false });
+        const lamps = {};
+        for (const side of [1, -1]) {
+            const z0 = side * GOAL_LINE, w = 0.36, h = 0.3, d = 0.3;
+            const bz = (t) => z0 + side * d * t;
+            const post = new T.CylinderGeometry(0.02, 0.02, h, 12);
+            for (const s of [-1, 1]) add(post, M.red, s * w, h / 2, z0);
+            add(new T.CylinderGeometry(0.02, 0.02, 2 * w + 0.04, 12), M.red, 0, h, z0, { rz: Math.PI / 2 });
+            add(CM.G.tube([[-w, 0.012, z0], [-w * 0.92, 0.012, bz(0.7)], [0, 0.012, bz(1)], [w * 0.92, 0.012, bz(0.7)], [w, 0.012, z0]], 0.011, 40, 6), M.white);
+            for (const s of [-1, 1]) {
+                add(CM.G.tube([[s * w, h, z0], [s * w * 0.9, h * 0.72, bz(0.5)], [s * w * 0.88, 0.012, bz(0.78)]], 0.01, 16, 6), M.white);
+            }
+            const top = [[-w, h, z0], [w, h, z0], [w * 0.9, h * 0.72, bz(0.5)], [-w * 0.9, h * 0.72, bz(0.5)]];
+            const back = [[-w * 0.9, h * 0.72, bz(0.5)], [w * 0.9, h * 0.72, bz(0.5)], [w * 0.92, 0.012, bz(0.85)], [-w * 0.92, 0.012, bz(0.85)]];
+            const left = [[-w, 0, z0], [-w, h, z0], [-w * 0.9, h * 0.72, bz(0.5)], [-w * 0.92, 0, bz(0.85)]];
+            const right = [[w, 0, z0], [w, h, z0], [w * 0.9, h * 0.72, bz(0.5)], [w * 0.92, 0, bz(0.85)]];
+            add(quads([top, back, left, right], 0.045), net, 0, 0, 0, { shadow: false });
+            // Фонарь гола на поручне за воротами (свой материал — загорается отдельно)
+            const zl = side * (O / 2 - 0.065);
+            const lampMat = new T.MeshStandardMaterial({ color: '#7a0b10', emissive: '#ff1f1f', emissiveIntensity: 0.18, roughness: 0.25 });
+            add(new T.CylinderGeometry(0.074, 0.084, 0.03, 20), M.cap, 0, 0.243, zl);
+            add(new T.SphereGeometry(0.072, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), lampMat, 0, 0.258, zl);
+            lamps[side > 0 ? 'w' : 'b'] = { mat: lampMat, pos: new T.Vector3(0, 0.3, zl), goal: new T.Vector3(0, 0.12, z0 + side * 0.14) };
+        }
+
+        // Щиты с названиями команд на торцевых бортах, по обе стороны от ворот
+        const ad = (label, color, bg) => {
+            const tex = CM.Tex.canvas(1024, 43, (ctx, w, h) => {
+                ctx.fillStyle = bg;
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = color;
+                ctx.font = '700 32px Oswald, "Russo One", "Arial Narrow", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(label, w / 2, h / 2 + 2);
+            });
+            return new T.MeshStandardMaterial({ map: tex, roughness: 0.4 });
+        };
+        const avg = ad('АВАНГАРД · ОМСК', '#ffffff', '#c8202b');
+        const mmg = ad('МЕТАЛЛУРГ · МАГНИТОГОРСК', '#ffffff', '#1f4fa3');
+        const panel = new T.PlaneGeometry(3.1, 0.13);
+        const zi = I / 2 - 0.004;
+        for (const s of [-1, 1]) {
+            add(panel, avg, s * 2.25, 0.125, -zi, { shadow: false });
+            add(panel, mmg, s * 2.25, 0.125, zi, { ry: Math.PI, shadow: false });
+        }
+        return { lamps };
+    }
+
     CM.Boards = {
         classic: {
             drawTop: classicTop,
@@ -219,6 +424,14 @@
             drawTop: hospitalTop,
             side: '#dfe7e6', sideRough: 0.4, clearcoat: 0.5,
             light: { hemiSky: '#effffc', hemiGround: '#5f7f7a', hemi: 0.7, sun: '#ffffff', sunI: 2.3, env: 0.75, exposure: 1.0 }
+        },
+        hockey: {
+            drawTop: hockeyTop,
+            decor: hockeyDecor,
+            // Коробка со скруглёнными углами, как у настоящей площадки; лёд — гладкий и блестящий
+            corner: 0.6,
+            side: '#0f2240', sideRough: 0.5, sideCoat: 0.3, clearcoat: 1, topRough: 0.22, topCoatRough: 0.06,
+            light: { hemiSky: '#f3f9ff', hemiGround: '#50698c', hemi: 0.78, sun: '#ffffff', sunI: 2.35, env: 0.8, exposure: 1.0 }
         },
         layout
     };
