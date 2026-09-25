@@ -71,7 +71,13 @@
         setPreset() { return Promise.resolve(); }
         setPosition(board) { this.board = board; this.render(); }
         get isFlat() { return true; }
-        applyMove(move, o) { if (o && o.board) this.setPosition(o.board); return Promise.resolve(); }
+        applyMove(move, o = {}) {
+            if (o.board) this.setPosition(o.board);
+            if (o.onStart) o.onStart();
+            if (move.captured && o.onImpact) o.onImpact();
+            return Promise.resolve();
+        }
+        setOptions() {}
         setHighlights(h) { Object.assign(this.hl, h); this.render(); }
         showCheck(sq) { this.hl.check = sq; this.render(); }
         showMate() { return Promise.resolve(); }

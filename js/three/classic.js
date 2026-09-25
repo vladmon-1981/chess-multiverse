@@ -227,14 +227,12 @@
         key: 'classic',
         buildPiece,
         motion: 'glide',
-        // Кони (морда модели смотрит в −x) повернуты в профиль к зрителю и к сопернику
+        // Кони (морда модели смотрит в −x) стоят вполоборота к сопернику
         yaw(type, color) {
             if (type !== 'n') return 0;
             return color === 'w' ? -0.5 : Math.PI - 0.5;
         },
-        yawOffset: 0,
         elevation: 54,
-        fitHeight: 1.2,
-        faceCamera: false
+        fitHeight: 1.2
     };
 })();

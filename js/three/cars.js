@@ -1030,10 +1030,11 @@
         buildPiece,
         names: NAMES,
         motion: 'drive',
-        faceCamera: true,
+        // На доске машинки стоят носом к соперникам
+        faceOpponent: true,
         elevation: 50,
         fitHeight: 0.85,
-        // Машинки стоят вполоборота — видно и «лицо», и наклейки на боку
-        yawOffset: -0.42
+        // Снимки для интерфейса — вполоборота: видно и «лицо», и наклейки на боку
+        portraitYaw: -0.07
     };
 })();

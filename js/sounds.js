@@ -290,16 +290,32 @@
         portal(S, t) {
             S.noise(t, { dur: 0.7, g: 0.18, a: 0.25, filter: { type: 'bandpass', f: 300, f2: 3000, q: 1.5 }, send: 0.4 });
             [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => S.tone(t + 0.08 * i, { type: 'sine', f, dur: 0.6, g: 0.05, send: 0.5 }));
+        },
+        // Кинокамера подлетает к ходу
+        whoosh(S, t) {
+            S.noise(t, { dur: 0.5, g: 0.26, a: 0.24, filter: { type: 'bandpass', f: 320, f2: 2600, q: 2.4 }, send: 0.3 });
+            S.noise(t + 0.05, { dur: 0.45, g: 0.13, a: 0.2, filter: { type: 'bandpass', f: 600, f2: 4200, q: 3 }, send: 0.3, pan: 0.3 });
+        },
+        // Мощный удар при взятии со спецэффектами
+        impact(S, t) {
+            S.kick(t, 0.55);
+            S.tone(t, { type: 'sine', f: 78, f2: 30, dur: 0.7, g: 0.32, a: 0.002, send: 0.18 });
+            S.noise(t, { dur: 0.6, g: 0.24, filter: { type: 'lowpass', f: 2600, f2: 160, q: 0.7 }, send: 0.4 });
         }
     };
 
     const CLASSIC = {
         select(S, t) { S.wood(t, 1.6, 0.25); },
         move(S, t) { S.wood(t, rnd(0.08)); },
-        capture(S, t) {
+        hit(S, t) {
             S.wood(t, rnd(0.06) * 0.92, 1.1);
             S.wood(t + 0.085, rnd(0.06) * 0.8, 0.9);
             S.noise(t + 0.02, { dur: 0.12, g: 0.06, filter: { type: 'bandpass', f: 1500, q: 0.7 }, send: 0.05 });
+        },
+        // Фигура раскалывается: россыпь деревянных щелчков и хруст
+        shatter(S, t) {
+            for (let i = 0; i < 8; i++) S.wood(t + 0.02 + i * 0.035 * rnd(0.6), 1.3 * rnd(0.5), 0.35 * (1 - i / 10));
+            S.noise(t, { dur: 0.35, g: 0.12, filter: { type: 'highpass', f: 2200 }, send: 0.3 });
         },
         castle(S, t) { S.wood(t, 1.02); S.wood(t + 0.17, 0.9); },
         check(S, t) { S.bell(t, 1318.5, 1.8, 0.2); S.bell(t + 0.14, 1760, 1.4, 0.1); },
@@ -349,12 +365,20 @@
             S.engine(t, { f0: 50 * rnd(0.1), f1: 150 * rnd(0.1), f2: 85, dur: 0.55, g: 0.13 });
             S.noise(t + 0.05, { dur: 0.3, g: 0.025, filter: { type: 'bandpass', f: 1800, q: 1.5 }, send: 0.05 });
         },
-        capture(S, t) {
-            S.engine(t, { f0: 60, f1: 170, f2: 120, dur: 0.4, g: 0.12 });
-            const h = t + 0.32;
-            S.noise(h, { dur: 0.45, g: 0.32, filter: { type: 'lowpass', f: 3500, f2: 500, q: 0.8 }, send: 0.2 });
-            S.tone(h, { type: 'sine', f: 110, f2: 42, dur: 0.3, g: 0.4, send: 0.05 });
-            for (const f of [430, 1130, 2390, 3710]) S.tone(h + 0.01, { type: 'sine', f: f * rnd(0.05), dur: 0.35, g: 0.06, send: 0.2 });
+        // Таран: скрежет и звон металла (разгон звучит отдельно — это обычный звук хода)
+        hit(S, t) {
+            S.noise(t, { dur: 0.45, g: 0.32, filter: { type: 'lowpass', f: 3500, f2: 500, q: 0.8 }, send: 0.2 });
+            S.tone(t, { type: 'sine', f: 110, f2: 42, dur: 0.3, g: 0.4, send: 0.05 });
+            for (const f of [430, 1130, 2390, 3710]) S.tone(t + 0.01, { type: 'sine', f: f * rnd(0.05), dur: 0.35, g: 0.06, send: 0.2 });
+        },
+        // Машинка взрывается: глухой удар, рокот и треск разлетающихся обломков
+        boom(S, t) {
+            S.kick(t, 0.5);
+            S.noise(t, { dur: 1.2, g: 0.36, a: 0.004, filter: { type: 'lowpass', f: 2200, f2: 110, q: 0.6 }, send: 0.45 });
+            S.tone(t, { type: 'sine', f: 60, f2: 26, dur: 0.95, g: 0.38, send: 0.12 });
+            for (let i = 0; i < 6; i++) {
+                S.noise(t + 0.12 + i * 0.07 * rnd(0.6), { dur: 0.04, g: 0.07, filter: { type: 'highpass', f: 2600 * rnd(0.4) }, send: 0.25, pan: (Math.random() - 0.5) * 0.8 });
+            }
         },
         castle(S, t) {
             for (let i = 0; i < 9; i++) S.noise(t + i * 0.034, { dur: 0.018, g: 0.16, filter: { type: 'bandpass', f: 3800, q: 2 }, send: 0.05 });
@@ -420,10 +444,21 @@
             S.tone(t, { type: 'sine', f: 640 * rnd(0.1), f2: 430, dur: 0.1, g: 0.3, send: 0.1 });
             S.tone(t + 0.16, { type: 'sine', f: 700 * rnd(0.1), f2: 470, dur: 0.09, g: 0.21, send: 0.1 });
         },
-        capture(S, t) {
+        hit(S, t) {
             S.tone(t, { type: 'sine', f: 900, f2: 180, dur: 0.16, g: 0.36, send: 0.08 });
             S.noise(t + 0.08, { dur: 0.4, g: 0.32, filter: { type: 'bandpass', f: 1800, f2: 280, q: 1.3 }, send: 0.25 });
             S.bell(t + 0.12, 1568, 0.6, 0.06);
+        },
+        // Разряд дефибриллятора: гудение с дрожью и сухой электрический треск
+        zap(S, t) {
+            S.tone(t, { type: 'sawtooth', f: 95, dur: 0.42, hold: 0.3, d: 0.12, g: 0.15, a: 0.005, vib: 80, vibRate: 55, filter: { type: 'bandpass', f: 1600, q: 1.2 }, send: 0.15 });
+            for (let i = 0; i < 7; i++) S.noise(t + i * 0.055 * rnd(0.5), { dur: 0.025, g: 0.17, filter: { type: 'highpass', f: 3000 * rnd(0.4) }, send: 0.12 });
+            S.tone(t + 0.02, { type: 'square', f: 2400, f2: 1800, dur: 0.3, g: 0.025, send: 0.2 });
+        },
+        // Персонаж лопается
+        pop(S, t) {
+            S.tone(t, { type: 'sine', f: 520, f2: 1400, dur: 0.09, g: 0.25, a: 0.003, send: 0.1 });
+            S.noise(t, { dur: 0.25, g: 0.18, filter: { type: 'bandpass', f: 1200, f2: 300, q: 1.1 }, send: 0.25 });
         },
         castle(S, t) { S.noise(t, { dur: 0.36, g: 0.42, a: 0.12, filter: { type: 'bandpass', f: 500, f2: 2600, q: 1.8 }, send: 0.2 }); },
         check(S, t) { for (let i = 0; i < 3; i++) S.monitorBeep(t + i * 0.2, 0.14); },

@@ -793,9 +793,11 @@
         buildPiece,
         names: NAMES,
         motion: 'hop',
-        faceCamera: true,
+        // На доске персонажи стоят лицом к соперникам
+        faceOpponent: true,
         elevation: 46,
         fitHeight: 1.2,
-        yawOffset: -0.22
+        // Снимки для интерфейса — почти анфас
+        portraitYaw: 0.13
     };
 })();

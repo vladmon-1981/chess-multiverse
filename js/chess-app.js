@@ -57,6 +57,9 @@
             this.colorChoice = store.get('chess-color', 'w');
             this.autoFlip = store.get('chess-autoflip', '0') === '1';
             this.cameraPreset = store.get('chess-camera', 'normal');
+            // Кинематографичные ходы — по желанию, спецэффекты взятия — по умолчанию включены
+            this.cinematic = store.get('chess-cinema', '0') === '1';
+            this.captureFx = store.get('chess-fx', '1') === '1';
             this.names = { w: 'Белые', b: 'Чёрные' };
             this.orientation = 'w';
             this.selected = null;
@@ -181,13 +184,44 @@
             });
             $('#fullscreenBtn').addEventListener('click', () => this.toggleFullscreen());
 
+            // Камера
+            $$('#camControls [data-cam]').forEach((b) => b.addEventListener('click', () => this.cameraAction(b.dataset.cam)));
+            $('#cineBtn').addEventListener('click', () => this.setCinematic(!this.cinematic, true));
+            document.addEventListener('keydown', (e) => {
+                if (document.body.dataset.screen !== 'game' || !this.hasWebGL || !this.view || e.ctrlKey || e.metaKey || e.altKey) return;
+                if (e.target.closest && e.target.closest('input, textarea, select') || $$('.modal').some((m) => !m.hidden)) return;
+                const act = { ArrowLeft: 'left', ArrowRight: 'right', '+': 'in', '=': 'in', '-': 'out', '_': 'out', '0': 'reset' }[e.key];
+                if (!act) return;
+                e.preventDefault();
+                this.cameraAction(act);
+            });
+
+            // Настройки
+            $('#settingsBtn').addEventListener('click', () => this.openSettings());
+            $('#settingsClose').addEventListener('click', () => this.closeSettings());
+            $('#settingsModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) this.closeSettings(); });
+            $('#setCinema').addEventListener('change', (e) => this.setCinematic(e.target.checked));
+            $('#setFx').addEventListener('change', (e) => this.setCaptureFx(e.target.checked));
+            $('#setSound').addEventListener('change', (e) => {
+                this.sound.setEnabled(e.target.checked);
+                this.updateToggles();
+                if (this.sound.enabled) this.sound.play('uiClick');
+            });
+            $('#setVoice').addEventListener('change', (e) => {
+                if (!this.sound.voice.available) return;
+                this.sound.voice.setEnabled(e.target.checked);
+                this.updateToggles();
+                if (this.sound.voice.enabled) this.sound.say('Диктор на месте!', { rate: 1.05 });
+            });
+
             // Модальные окна
             $('#promoCancel').addEventListener('click', () => this.closePromotion(null));
             $('#confirmYes').addEventListener('click', () => this.closeConfirm(true));
             $('#confirmNo').addEventListener('click', () => this.closeConfirm(false));
             document.addEventListener('keydown', (e) => {
                 if (e.key !== 'Escape') return;
-                if (this.pendingPromotion) this.closePromotion(null);
+                if (!$('#settingsModal').hidden) this.closeSettings();
+                else if (this.pendingPromotion) this.closePromotion(null);
                 else if (this.confirmResolve) this.closeConfirm(false);
                 else if (!$('#resultModal').hidden) this.hideResult();
                 else if (this.selected) this.deselect();
@@ -229,6 +263,47 @@
                 b.classList.toggle('is-active', on);
                 b.setAttribute('aria-checked', String(on));
             });
+            $('#cineBtn').setAttribute('aria-pressed', String(this.cinematic));
+            $('#setCinema').checked = this.cinematic;
+            $('#setFx').checked = this.captureFx;
+            $('#setSound').checked = this.sound.enabled;
+            $('#setVoice').checked = this.sound.voice.available && this.sound.voice.enabled;
+            $('#setVoice').disabled = !this.sound.voice.available;
+        }
+
+        openSettings() {
+            this.updateToggles();
+            $('#settingsModal').hidden = false;
+            setTimeout(() => $('#settingsClose').focus({ preventScroll: true }), 50);
+        }
+
+        closeSettings() {
+            $('#settingsModal').hidden = true;
+        }
+
+        setCinematic(on, announce = false) {
+            this.cinematic = !!on;
+            store.set('chess-cinema', this.cinematic ? '1' : '0');
+            this.updateToggles();
+            if (announce) this.toast(this.cinematic ? '🎬 Кинематографичные ходы включены' : 'Кинематографичные ходы выключены', 1600);
+        }
+
+        setCaptureFx(on) {
+            this.captureFx = !!on;
+            store.set('chess-fx', this.captureFx ? '1' : '0');
+            if (this.view && this.view.setOptions) this.view.setOptions({ captureFx: this.captureFx });
+            this.updateToggles();
+        }
+
+        /** Кнопки и клавиши камеры: повороты на 45°, приближение, обычный вид. */
+        cameraAction(act) {
+            const v = this.view;
+            if (!v || !v.rotateBy) return;
+            if (act === 'left') v.rotateBy(-Math.PI / 4);
+            else if (act === 'right') v.rotateBy(Math.PI / 4);
+            else if (act === 'in') v.zoomBy(0.75);
+            else if (act === 'out') v.zoomBy(1 / 0.75);
+            else if (act === 'reset') v.resetView();
         }
 
         showScreen(name) {
@@ -303,6 +378,7 @@
                     const quality = new URLSearchParams(location.search).get('quality');
                     this.view = new CM.Board3D(host, handlers, { quality });
                     this.view.preset = this.cameraPreset;
+                    this.view.setOptions({ captureFx: this.captureFx });
                 } catch (e) {
                     console.warn('3D недоступно', e);
                     this.view = null;
@@ -312,6 +388,7 @@
             if (!this.view) {
                 this.view = new Board2D(host, handlers);
                 $('#viewBtn').disabled = true;
+                $('#camControls').hidden = true;
                 this.toast('3D-режим недоступен в этом браузере — включена плоская доска', 4000);
             }
             return this.view;
@@ -367,6 +444,14 @@
             if (token !== this.gameToken) return;
 
             this.updateAll();
+            if (this.hasWebGL && store.get('chess-cam-hint') !== '1') {
+                store.set('chess-cam-hint', '1');
+                const touch = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+                const hint = touch
+                    ? 'Доску можно крутить: веди пальцем мимо фигур. Два пальца — приблизить и повернуть'
+                    : 'Доску можно крутить: тяни мимо фигур или правой кнопкой. Колёсико — приблизить';
+                setTimeout(() => { if (token === this.gameToken) this.toast(hint, 4500); }, 1500);
+            }
             const T = THEMES[this.theme];
             this.sound.play('start');
             this.sound.say(T.voice.start, { rate: T.voice.rate, pitch: T.voice.pitch, delay: 350 });
@@ -492,10 +577,10 @@
             return true;
         }
 
+        /** Звук начала хода; удар при взятии звучит отдельно — в момент столкновения фигур. */
         playMoveSound(move) {
             if (move.promotion) this.sound.play('promote');
             else if (move.flags.includes('k') || move.flags.includes('q')) this.sound.play('castle');
-            else if (move.captured) this.sound.play('capture');
             else this.sound.play('move');
         }
 
@@ -513,16 +598,30 @@
             this.targets = [];
             $('#pieceHint').textContent = '';
             this.busy = true;
-            this.playMoveSound(move);
             this.view.setHighlights({ selected: null, targets: [], last: { from: move.from, to: move.to }, hover: null });
             this.view.showCheck(null);
             this.updatePlayers();
+            const live = () => token === this.gameToken;
+            const cinematic = this.cinematic && this.hasWebGL && !dragged;
+            document.body.classList.toggle('is-cine', cinematic);
             try {
-                await this.view.applyMove(move, { dragged, board: this.game.board() });
+                await this.view.applyMove(move, {
+                    dragged,
+                    board: this.game.board(),
+                    cinematic,
+                    onStart: () => { if (live()) this.playMoveSound(move); },
+                    onImpact: () => {
+                        if (!live()) return;
+                        this.sound.play('hit');
+                        if (this.captureFx && this.hasWebGL) this.sound.play('impact');
+                    },
+                    onFx: (name) => { if (live()) this.sound.play(name); }
+                });
             } catch (e) {
                 console.warn(e);
                 this.view.setPosition(this.game.board());
             }
+            document.body.classList.remove('is-cine');
             if (token !== this.gameToken) return true;
             this.busy = false;
             this.afterMove();
