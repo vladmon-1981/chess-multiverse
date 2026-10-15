@@ -7,9 +7,13 @@ cd "$(dirname "$0")/.."
 DEVICE="${DEVICE:-iPhone Vlad}"
 UDID=$(xcrun devicectl list devices 2>/dev/null | awk -v d="$DEVICE" '$0 ~ "^"d"  " {for(i=1;i<=NF;i++) if($i ~ /^[0-9A-F-]{20,}$/){print $i; exit}}')
 [ -n "$UDID" ] || { echo "Устройство '$DEVICE' не найдено"; exit 1; }
+# actool в папке Dropbox иногда получает "Operation not permitted" — собираем из копии вне Dropbox
+SRC="$PWD"; WORK=$(mktemp -d); rsync -a --exclude build --exclude xcuserdata "$SRC/" "$WORK/"; cd "$WORK"
 OUT=build
+set -o pipefail
 xcodebuild -project ChessMultiverse3D.xcodeproj -scheme ChessMultiverse3D -configuration Release \
-  -destination "platform=iOS,id=$UDID" -derivedDataPath $OUT -allowProvisioningUpdates build | tail -3
+  -destination "platform=iOS,id=$UDID" -derivedDataPath $OUT -allowProvisioningUpdates build | grep -E "error:|BUILD"
+grep -q . /dev/null || true
 APP=$OUT/Build/Products/Release-iphoneos/ChessMultiverse3D.app
 xcrun devicectl device install app --device "$UDID" "$APP"
 xcrun devicectl device process launch --device "$UDID" com.chessmultiverse.app || true
