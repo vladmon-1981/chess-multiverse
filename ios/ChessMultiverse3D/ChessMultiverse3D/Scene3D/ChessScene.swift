@@ -4,9 +4,7 @@ import UIKit
 /// Базовая SceneKit-сцена: доска 8x8, процедурные фигуры Стаунтона (тема classic),
 /// орбитальная камера, подсветка выбора и легальных ходов.
 ///
-/// Фигуры трёх других тем (cars/hospital/hockey) в фазе 1 — ЗАГЛУШКА: те же силуэты,
-/// что в classic, перекрашенные в акцентный цвет темы (см. ThemeSpec.accentColorHex).
-/// Подробная 3D-геометрия машинок/персонажей/хоккеистов — следующая фаза.
+/// Фигуры тем cars/hospital/hockey строятся своими моделями (CarsModels/HospitalModels/HockeyModels).
 final class ChessScene {
 
     let scnScene = SCNScene()
@@ -185,28 +183,90 @@ final class ChessScene {
     /// Возвращает false, если подходящую ноду не нашли — тогда вызывающая сторона должна
     /// упасть обратно на setPosition (полная перестройка).
     @discardableResult
-    func animateMove(from: Square, to: Square, promoted: Bool, duration: TimeInterval = 0.3, completion: @escaping () -> Void) -> Bool {
+    func animateMove(from: Square, to: Square, promoted: Bool, cinematic: Bool = false, captureFx: Bool = false,
+                     duration: TimeInterval = 0.3, completion: @escaping () -> Void) -> Bool {
         let fromName = "piece_\(from.row)_\(from.file)"
         guard let movingNode = piecesNode.childNode(withName: fromName, recursively: false) else {
             completion()
             return false
         }
-        // Если на целевой клетке уже есть фигура (взятие) — убрать её сразу.
+        let targetPosition = boardPosition(row: to.row, col: to.file, y: 0.06)
+        // Взятая фигура: сразу убираем, либо (спецэффекты) разлетаемся искрами.
         let toName = "piece_\(to.row)_\(to.file)"
         if let capturedNode = piecesNode.childNode(withName: toName, recursively: false), capturedNode !== movingNode {
-            capturedNode.removeFromParentNode()
+            if captureFx {
+                capturedNode.name = nil
+                let delay = cinematic ? 0.5 : duration * 0.7
+                capturedNode.runAction(.sequence([
+                    .wait(duration: delay),
+                    .group([.scale(to: 0.01, duration: 0.2), .fadeOut(duration: 0.2)]),
+                    .removeFromParentNode()
+                ]))
+                let burst = Self.makeBurst()
+                burst.position = targetPosition
+                piecesNode.addChildNode(burst)
+                burst.runAction(.sequence([.wait(duration: delay), .run { n in
+                    n.particleSystems?.first?.birthRate = 900
+                }, .wait(duration: 1.2), .removeFromParentNode()]))
+            } else {
+                capturedNode.removeFromParentNode()
+            }
         }
-        // При превращении пешки проще перестроить ноду заново после анимации (вызывающая
-        // сторона в этом случае может дёрнуть setPosition сама); здесь просто переносим визуально.
-        let targetPosition = boardPosition(row: to.row, col: to.file, y: 0.06)
-        let move = SCNAction.move(to: targetPosition, duration: duration)
+        let total = cinematic ? max(duration, 0.7) : duration
+        let move = SCNAction.move(to: targetPosition, duration: total)
         move.timingMode = .easeInEaseOut
-        movingNode.runAction(move) { [weak movingNode] in
+        var action = move
+        if cinematic || captureFx {
+            // Фигура «перелетает» дугой.
+            let hop = SCNAction.customAction(duration: total) { [from = movingNode.position] node, t in
+                let k = Float(t / CGFloat(total))
+                node.position.x = from.x + (targetPosition.x - from.x) * k
+                node.position.z = from.z + (targetPosition.z - from.z) * k
+                node.position.y = 0.06 + sinf(k * .pi) * (cinematic ? 0.9 : 0.4)
+            }
+            hop.timingMode = .easeInEaseOut
+            action = hop
+        }
+        if cinematic { runCinematicCamera(on: targetPosition, duration: total) }
+        movingNode.runAction(action) { [weak movingNode] in
+            movingNode?.position = targetPosition
             movingNode?.name = toName
             DispatchQueue.main.async { completion() }
         }
         _ = promoted
         return true
+    }
+
+    /// Лёгкий наезд камеры на клетку хода и возврат.
+    private func runCinematicCamera(on target: SCNVector3, duration: TimeInterval) {
+        guard let camera = cameraNode.camera else { return }
+        let base = camera.fieldOfView
+        let zoom = SCNAction.customAction(duration: duration + 0.5) { _, t in
+            let k = Double(t) / (duration + 0.5)
+            camera.fieldOfView = base - CGFloat(sin(k * .pi)) * base * 0.22
+        }
+        cameraNode.runAction(zoom) { camera.fieldOfView = base }
+    }
+
+    private static func makeBurst() -> SCNNode {
+        let ps = SCNParticleSystem()
+        ps.birthRate = 0
+        ps.emissionDuration = 0.15
+        ps.loops = false
+        ps.particleLifeSpan = 0.7
+        ps.particleVelocity = 2.5
+        ps.particleVelocityVariation = 1.5
+        ps.spreadingAngle = 180
+        ps.emitterShape = SCNSphere(radius: 0.1)
+        ps.particleSize = 0.06
+        ps.particleColor = UIColor(red: 1, green: 0.75, blue: 0.2, alpha: 1)
+        ps.particleColorVariation = SCNVector4(0.1, 0.3, 0.1, 0)
+        ps.blendMode = .additive
+        ps.acceleration = SCNVector3(0, -4, 0)
+        ps.isAffectedByGravity = false
+        let node = SCNNode()
+        node.addParticleSystem(ps)
+        return node
     }
 
     // ---------- Подсветка ----------

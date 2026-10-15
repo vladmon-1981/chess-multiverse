@@ -13,8 +13,9 @@ targets:
       - ChessMultiverse3D
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.chessmultiverse.ChessMultiverse3D
+        PRODUCT_BUNDLE_IDENTIFIER: kz.vladmon.chessmultiverse
         CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 4N9Z9JPM6C
         SWIFT_VERSION: 5.0
         TARGETED_DEVICE_FAMILY: "1,2"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon

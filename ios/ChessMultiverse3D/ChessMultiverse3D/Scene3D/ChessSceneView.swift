@@ -54,7 +54,9 @@ struct ChessSceneView: UIViewRepresentable {
             scene.setPosition(viewModel.board)
             coordinator.lastAnimatedMove = move
         } else if let move, moveChanged {
-            let animated = scene.animateMove(from: move.from, to: move.to, promoted: false) {}
+            let animated = scene.animateMove(from: move.from, to: move.to, promoted: false,
+                                         cinematic: viewModel.settings.cinematic,
+                                         captureFx: viewModel.settings.captureFx) {}
             if !animated { scene.setPosition(viewModel.board) }
             coordinator.lastAnimatedMove = move
         } else if coordinator.firstUpdateDone == false {
