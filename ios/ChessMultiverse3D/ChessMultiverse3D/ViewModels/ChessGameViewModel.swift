@@ -269,9 +269,12 @@ final class ChessGameViewModel: ObservableObject {
         if settings.cinematic { announcer.playEffect("whoosh") }
         if applied.capturedKind != nil || applied.isEnPassant {
             let total = MotionTiming.duration(from: from, to: to, cinematic: settings.cinematic)
-            scheduleImpactAudio(after: total * MotionTiming.impactFraction)
+            scheduleImpactAudio(after: total * 1.3)   // запасной таймер; обычно удар приходит сигналом сцены
         }
     }
+
+    /// Сигнал из сцены: фигуры соприкоснулись — играем удар точно в этот момент.
+    func sceneImpact() { scheduleImpactAudio(after: 0) }
 
     /// Удар «hit» в момент контакта; при captureFx — звук эффекта взятия темы (как в вебе).
     private func scheduleImpactAudio(after delay: Double) {

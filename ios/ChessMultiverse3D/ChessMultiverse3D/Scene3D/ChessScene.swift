@@ -110,6 +110,14 @@ final class ChessScene {
     static let minDistance: Float = 10.5
     static let maxDistance: Float = 22
 
+    /// Сигналы сцены для звука: контакт при взятии и остановка на льду (хоккей).
+    var onImpact: (() -> Void)?
+    var onSlideStop: (() -> Void)?
+
+    /// Временные смещения камеры в кинорежиме (погоня/облёт); складываются с пользовательскими.
+    private var cineAzimuth: Float = 0
+    private var cineElevation: Float = 0
+    private var cineDistance: Float = 0
     private var distance: Float = 13
     private var azimuth: Float = 0            // поворот вокруг Y, без ограничений
     private var elevation: Float = 0.9         // угол наклона камеры
@@ -136,9 +144,12 @@ final class ChessScene {
         azimuth = azimuth.truncatingRemainder(dividingBy: 2 * .pi)
         elevation = min(Self.maxElevation, max(Self.minElevation, elevation))
         distance = min(Self.maxDistance, max(Self.minDistance, distance))
-        let x = distance * sin(azimuth) * cos(elevation)
-        let y = distance * sin(elevation)
-        let z = distance * cos(azimuth) * cos(elevation)
+        let az = azimuth + cineAzimuth
+        let el = min(Self.maxElevation, max(Self.minElevation, elevation + cineElevation))
+        let dist = max(5, distance + cineDistance)
+        let x = dist * sin(az) * cos(el)
+        let y = dist * sin(el)
+        let z = dist * cos(az) * cos(el)
         cameraNode.position = SCNVector3(x, y, z)
         cameraNode.look(at: SCNVector3(0, 0, 0))
     }
@@ -268,17 +279,20 @@ final class ChessScene {
         let dx = target.x - start.x, dz = target.z - start.z
         let dist = (dx * dx + dz * dz).squareRoot()
         let isKnight = mover.kind == .knight
-        let lift: Float = isKnight ? (cinematic ? 1.1 : 0.9) : 0.28 + dist * 0.02
+        let slide = currentTheme == .hockey && !isKnight   // хоккей: фигуры скользят по льду
+        let lift: Float = slide ? 0.02 : isKnight ? (cinematic ? 1.1 : 0.9) : 0.28 + dist * 0.02
         let lean: Float = isKnight ? 0.22 : 0.12
 
         let handled = FlagBox()
         let impact = {
             guard let victim, !handled.on else { return }
             handled.on = true
+            self.onImpact?()
             self.impactEffects(victim: victim, at: target, dirX: dx, dirZ: dz, captureFx: captureFx)
         }
         let moveAction = hopAction(mover, from: start, to: target, total: total, lift: lift, lean: lean,
-                                   impactAt: victim != nil ? Float(MotionTiming.impactFraction) : nil, onImpact: impact)
+                                   impactAt: victim != nil ? Float(MotionTiming.impactFraction) : nil, onImpact: impact,
+                                   slide: slide, slowMo: cinematic && victim != nil)
         if let rook {
             let rookStart = rook.position
             let rookDist = rookTarget.x - rookStart.x
@@ -293,7 +307,7 @@ final class ChessScene {
                 rook.name = rookToName
             }
         }
-        if cinematic { runCinematicCamera(on: target, duration: total) }
+        if cinematic { runCinematicCamera(following: mover, duration: total, dirX: dx, dirZ: dz) }
         mover.runAction(moveAction) { [weak mover] in
             if let victim, !handled.on {
                 // Анимация прервана до контакта — жертву убираем без эффектов
@@ -313,15 +327,43 @@ final class ChessScene {
 
     /// Действие одного прыжка фигуры: дуга, поворот по курсу, наклон и приплюск при посадке.
     private func hopAction(_ holder: PieceHolder, from start: SCNVector3, to end: SCNVector3, total: Double,
-                           lift: Float, lean: Float, impactAt: Float?, onImpact: (() -> Void)?) -> SCNAction {
+                           lift: Float, lean: Float, impactAt: Float?, onImpact: (() -> Void)?,
+                           slide: Bool = false, slowMo: Bool = false) -> SCNAction {
         let dx = end.x - start.x, dz = end.z - start.z
         let heading = atan2(dx, dz)
         let startYaw = holder.eulerAngles.y
         let endYaw = holder.restYaw
         var fired = false
-        return SCNAction.customAction(duration: total) { [weak holder] _, elapsed in
+        var stopped = false
+        // Замедление на ударе: с 75% пути полсекунды время течёт втрое медленнее.
+        let slowStart = 0.75 * total, slowLen = 0.5, slowRate = 0.3
+        let realTotal = total + (slowMo ? slowLen * (1 - slowRate) : 0)
+        return SCNAction.customAction(duration: realTotal) { [weak holder, weak self] _, elapsed in
             guard let holder else { return }
-            let raw = Float(min(1, Double(elapsed) / total))
+            var t = Double(elapsed)
+            if slowMo {
+                if t > slowStart + slowLen { t = slowStart + slowLen * slowRate + (t - slowStart - slowLen) }
+                else if t > slowStart { t = slowStart + (t - slowStart) * slowRate }
+            }
+            let raw = Float(min(1, t / total))
+            if slide {
+                // Скольжение: быстрый разгон, плавное торможение, откат корпуса назад на остановке
+                let e = 1 - pow(1 - raw, 2.4)
+                holder.position = SCNVector3(start.x + dx * e, 0.06, start.z + dz * e)
+                holder.eulerAngles.y = raw < 0.15 ? ChessScene.lerpAngle(startYaw, heading, ChessScene.easeOut(raw / 0.15))
+                                     : raw > 0.9 ? ChessScene.lerpAngle(heading, endYaw, ChessScene.easeInOut((raw - 0.9) / 0.1)) : heading
+                let fwd = lean * sin(Float.pi * min(1, raw / 0.6)) * (raw < 0.6 ? 1 : 0)
+                let back = raw > 0.75 ? -lean * 0.9 * sin(Float.pi * min(1, (raw - 0.75) / 0.25)) : 0
+                holder.tilt.eulerAngles.x = fwd + back
+                holder.tilt.scale = SCNVector3(1, 1, 1)
+                if raw > 0.8, !stopped {
+                    stopped = true
+                    self?.spawnBurst(at: end, color: UIColor(red: 0.85, green: 0.95, blue: 1, alpha: 1), rate: 220)
+                    self?.onSlideStop?()
+                }
+                if let impactAt, !fired, raw >= impactAt { fired = true; onImpact?() }
+                return
+            }
             let e = ChessScene.easeInOut(raw)
             holder.position = SCNVector3(start.x + dx * e, 0.06 + sin(Float.pi * e) * lift, start.z + dz * e)
             let yaw: Float
@@ -450,15 +492,29 @@ final class ChessScene {
         }
     }
 
-    /// Лёгкий наезд камеры на клетку хода и возврат.
-    private func runCinematicCamera(on target: SCNVector3, duration: TimeInterval) {
-        guard let camera = cameraNode.camera else { return }
-        let base = camera.fieldOfView
-        let zoom = SCNAction.customAction(duration: duration + 0.5) { _, t in
-            let k = Double(t) / (duration + 0.5)
-            camera.fieldOfView = base - CGFloat(sin(k * .pi)) * base * 0.22
+    /// Киноплан хода: камера следует за фигурой, чуть облетает по дуге, опускается и приближается,
+    /// затем плавно возвращается на пользовательский ракурс (порт кинокамеры из веба).
+    private func runCinematicCamera(following mover: PieceHolder, duration: TimeInterval, dirX: Float, dirZ: Float) {
+        let total = duration + 0.7
+        let side: Float = dirX >= 0 ? 1 : -1
+        let action = SCNAction.customAction(duration: total) { [weak self, weak mover] _, t in
+            guard let self, let mover else { return }
+            let k = Float(min(1, Double(t) / total))
+            let env = sin(Float.pi * k)               // 0 → 1 → 0
+            let smooth = env * env * (3 - 2 * env)
+            self.cameraOrbit.position = SCNVector3(mover.position.x * 0.6 * smooth, 0, mover.position.z * 0.6 * smooth)
+            self.cineAzimuth = 0.55 * side * (k - 0.5) * 2 * smooth
+            self.cineElevation = -0.28 * smooth
+            self.cineDistance = -3.2 * smooth
+            self.applyCameraTransform()
         }
-        cameraNode.runAction(zoom) { camera.fieldOfView = base }
+        cameraOrbit.removeAction(forKey: "cine")
+        cameraOrbit.runAction(action, forKey: "cine") { [weak self] in
+            guard let self else { return }
+            self.cameraOrbit.position = SCNVector3Zero
+            self.cineAzimuth = 0; self.cineElevation = 0; self.cineDistance = 0
+            self.applyCameraTransform()
+        }
     }
 
     /// Облачко частиц в точке: один короткий всплеск, узел удаляется сам (порт burst() из js/three).

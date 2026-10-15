@@ -19,6 +19,7 @@
 		86F8361ADE3E41B3E6BEC178 /* CarsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 261898F49A86E06DE56BBD20 /* CarsModels.swift */; };
 		8B4D232B8293CD43416D89E7 /* ChessGameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499041A70777F47C6D0C8AFC /* ChessGameViewModel.swift */; };
 		8C0F7C1D59FDE389C1F2470F /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3A77C57F4551D272B340CCD /* GameView.swift */; };
+		9CFDB1A1A4884AEDF22D794D /* CameraJoystick.swift in Sources */ = {isa = PBXBuildFile; fileRef = C174250E34FBFA83F42025F1 /* CameraJoystick.swift */; };
 		9EE7FCFC69112686EF8B9E5A /* SettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C8B68DA17BAA4855765827 /* SettingsSheet.swift */; };
 		C26B828354598D8D74D7ADE8 /* ChessMultiverse3DApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C1C476FAC940C5562D477C /* ChessMultiverse3DApp.swift */; };
 		D271285A84F8D8E762DE156F /* ChessEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D11FAB864D3E625B5F77FB79 /* ChessEngine.swift */; };
@@ -39,6 +40,7 @@
 		9C05E7E2E9AF77EFE200B5FE /* HospitalModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HospitalModels.swift; sourceTree = "<group>"; };
 		B2543EDD09C202FE423142BB /* PieceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceType.swift; sourceTree = "<group>"; };
 		B57B700F22995663E2282C5C /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
+		C174250E34FBFA83F42025F1 /* CameraJoystick.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraJoystick.swift; sourceTree = "<group>"; };
 		C1C1C476FAC940C5562D477C /* ChessMultiverse3DApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessMultiverse3DApp.swift; sourceTree = "<group>"; };
 		C700214B39DE170860047279 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D11FAB864D3E625B5F77FB79 /* ChessEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessEngine.swift; sourceTree = "<group>"; };
@@ -89,6 +91,7 @@
 		55A3F2045357314755C21715 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				C174250E34FBFA83F42025F1 /* CameraJoystick.swift */,
 				F3A77C57F4551D272B340CCD /* GameView.swift */,
 				B57B700F22995663E2282C5C /* MenuView.swift */,
 				DF5795279366730891D128E0 /* ResultView.swift */,
@@ -210,6 +213,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9CFDB1A1A4884AEDF22D794D /* CameraJoystick.swift in Sources */,
 				86F8361ADE3E41B3E6BEC178 /* CarsModels.swift in Sources */,
 				D271285A84F8D8E762DE156F /* ChessEngine.swift in Sources */,
 				8B4D232B8293CD43416D89E7 /* ChessGameViewModel.swift in Sources */,

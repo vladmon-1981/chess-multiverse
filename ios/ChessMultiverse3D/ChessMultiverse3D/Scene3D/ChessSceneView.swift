@@ -12,6 +12,8 @@ struct ChessSceneView: UIViewRepresentable {
         let scnView = SCNView()
         let scene = ChessScene()
         context.coordinator.scene = scene
+        scene.onImpact = { [weak viewModel] in viewModel?.sceneImpact() }
+        scene.onSlideStop = { [weak viewModel] in viewModel?.announcer.playEffect("stop") }
         scnView.scene = scene.scnScene
         scnView.backgroundColor = UIColor(white: 0.08, alpha: 1)
         scnView.antialiasingMode = .multisampling4X
