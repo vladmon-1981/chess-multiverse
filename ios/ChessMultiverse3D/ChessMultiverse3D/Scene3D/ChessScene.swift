@@ -13,6 +13,9 @@ final class ChessScene {
     private let highlightNode = SCNNode()
     private let cameraNode = SCNNode()
     private let cameraOrbit = SCNNode()
+    /// Лампа вспышки живёт в сцене всегда (интенсивность 0): добавление света в рантайме
+    /// заставляет SceneKit перекомпилировать шейдеры всех материалов — отсюда фриз на взятии.
+    private let flashNode = SCNNode()
 
     private var currentTheme: ThemeKey = .classic
     private(set) var orientation: PieceColor = .white
@@ -87,6 +90,8 @@ final class ChessScene {
         directional.light?.intensity = 900
         directional.light?.castsShadow = true
         directional.light?.shadowRadius = 4
+        directional.light?.shadowMapSize = CGSize(width: 1024, height: 1024)
+        directional.light?.shadowSampleCount = 4
         directional.light?.shadowColor = UIColor(white: 0, alpha: 0.5)
         directional.position = SCNVector3(5, 10, 5)
         directional.look(at: SCNVector3(0, 0, 0))
@@ -98,6 +103,14 @@ final class ChessScene {
         fill.light?.intensity = 300
         fill.position = SCNVector3(-6, 6, -6)
         scnScene.rootNode.addChildNode(fill)
+
+        let flash = SCNLight()
+        flash.type = .omni
+        flash.color = UIColor(red: 1, green: 0.85, blue: 0.5, alpha: 1)
+        flash.attenuationEndDistance = 6
+        flash.intensity = 0
+        flashNode.light = flash
+        scnScene.rootNode.addChildNode(flashNode)
     }
 
     // ---------- Камера (орбитальная, аналог управления из оригинала) ----------
@@ -409,7 +422,7 @@ final class ChessScene {
             // Без спецэффектов жертва уменьшается и исчезает в облачке
             spawnBurst(at: pos, color: UIColor(white: 0.9, alpha: 1), rate: 300)
             victim.runAction(.sequence([
-                .group([.scale(to: 0.01, duration: 0.2), .fadeOut(duration: 0.2)]),
+                .scale(to: 0.01, duration: 0.2),
                 .removeFromParentNode()
             ]))
             return
@@ -419,11 +432,8 @@ final class ChessScene {
             // Фигура раскалывается: осколки разлетаются, падают и гаснут
             victim.removeFromParentNode()
             spawnBurst(at: pos, color: UIColor(red: 1, green: 0.8, blue: 0.4, alpha: 1), rate: 700)
-            let woodMat = SCNMaterial()
-            woodMat.diffuse.contents = UIColor(red: 0.85, green: 0.78, blue: 0.62, alpha: 1)
             for _ in 0..<10 {
-                let shard = SCNNode(geometry: SCNBox(width: 0.07, height: 0.05, length: 0.09, chamferRadius: 0.01))
-                shard.geometry?.materials = [woodMat]
+                let shard = SCNNode(geometry: ChessScene.shardGeometry)
                 let p0 = SCNVector3(pos.x, pos.y + 0.25, pos.z)
                 shard.position = p0
                 piecesNode.addChildNode(shard)
@@ -434,7 +444,7 @@ final class ChessScene {
                     let s = Float(time)
                     node.position = SCNVector3(p0.x + vx * s, p0.y + vy * s - 2.6 * s * s, p0.z + vz * s)
                 }
-                shard.runAction(.sequence([fall, .fadeOut(duration: 0.15), .removeFromParentNode()]))
+                shard.runAction(.sequence([fall, .scale(to: 0.01, duration: 0.15), .removeFromParentNode()]))
             }
         case .cars:
             // Таран: машинку подбрасывает, она кувыркается и взрывается облаком
@@ -444,7 +454,7 @@ final class ChessScene {
                     .moveBy(x: CGFloat(dirX * 0.7), y: 0.5, z: CGFloat(dirZ * 0.7), duration: 0.45),
                     .rotateBy(x: 0, y: CGFloat.pi * 4, z: 0, duration: 0.45)
                 ]),
-                .group([.fadeOut(duration: 0.35), .scale(to: 0.2, duration: 0.35)]),
+                .scale(to: 0.01, duration: 0.35),
                 .removeFromParentNode()
             ]))
         case .hospital:
@@ -456,7 +466,7 @@ final class ChessScene {
                     node.scale = SCNVector3(w, w, w)
                 },
                 .scale(to: 1.4, duration: 0.12),
-                .group([.fadeOut(duration: 0.15), .scale(to: 0.01, duration: 0.15)]),
+                .scale(to: 0.01, duration: 0.15),
                 .removeFromParentNode()
             ]))
         case .hockey:
@@ -465,7 +475,7 @@ final class ChessScene {
             victim.tilt.runAction(.rotateBy(x: -1.2, y: 0, z: 0, duration: 0.3))
             victim.runAction(.sequence([
                 .group([.moveBy(x: CGFloat(dirX * 0.6), y: 0.25, z: CGFloat(dirZ * 0.6), duration: 0.35)]),
-                .group([.fadeOut(duration: 0.25)]),
+                .scale(to: 0.01, duration: 0.25),
                 .removeFromParentNode()
             ]))
         }
@@ -531,31 +541,65 @@ final class ChessScene {
         }
         cameraNode.runAction(shake) { [weak self] in self?.shakeAmp = 0; self?.applyCameraTransform() }
 
-        let flash = SCNNode()
-        flash.light = SCNLight()
-        flash.light?.type = .omni
-        flash.light?.color = UIColor(red: 1, green: 0.85, blue: 0.5, alpha: 1)
-        flash.light?.attenuationEndDistance = 6
-        flash.position = SCNVector3(pos.x, pos.y + 1.0, pos.z)
-        piecesNode.addChildNode(flash)
-        flash.runAction(.sequence([
-            .customAction(duration: 0.35) { n, t in n.light?.intensity = 4000 * pow(1 - t / 0.35, 2) },
-            .removeFromParentNode()
-        ]))
+        flashNode.removeAllActions()
+        flashNode.position = SCNVector3(pos.x, pos.y + 1.0, pos.z)
+        flashNode.runAction(.customAction(duration: 0.35) { [weak self] n, t in
+            self?.flashNode.light?.intensity = 4000 * pow(1 - t / 0.35, 2)
+        }) { [weak self] in self?.flashNode.light?.intensity = 0 }
 
-        let ring = SCNNode(geometry: SCNTorus(ringRadius: 0.12, pipeRadius: 0.025))
-        let mat = SCNMaterial()
-        mat.diffuse.contents = UIColor.white
-        mat.emission.contents = UIColor(red: 1, green: 0.8, blue: 0.4, alpha: 1)
-        mat.blendMode = .add
-        mat.writesToDepthBuffer = false
-        ring.geometry?.materials = [mat]
+        let ring = makeRingNode()
         ring.position = SCNVector3(pos.x, 0.09, pos.z)
         piecesNode.addChildNode(ring)
         ring.runAction(.sequence([
             .group([.scale(to: cinematic ? 9 : 6, duration: 0.55), .fadeOut(duration: 0.55)]),
             .removeFromParentNode()
         ]))
+    }
+
+    private static let ringMaterial: SCNMaterial = {
+        let mat = SCNMaterial()
+        mat.diffuse.contents = UIColor.white
+        mat.emission.contents = UIColor(red: 1, green: 0.8, blue: 0.4, alpha: 1)
+        mat.blendMode = .add
+        mat.writesToDepthBuffer = false
+        return mat
+    }()
+    private static let ringGeometry: SCNTorus = {
+        let g = SCNTorus(ringRadius: 0.12, pipeRadius: 0.025)
+        g.materials = [ChessScene.ringMaterial]
+        return g
+    }()
+    private func makeRingNode() -> SCNNode { SCNNode(geometry: ChessScene.ringGeometry) }
+
+    private static let shardMaterial: SCNMaterial = {
+        let m = SCNMaterial()
+        m.diffuse.contents = UIColor(red: 0.85, green: 0.78, blue: 0.62, alpha: 1)
+        return m
+    }()
+    private static let shardGeometry: SCNBox = {
+        let g = SCNBox(width: 0.07, height: 0.05, length: 0.09, chamferRadius: 0.01)
+        g.materials = [ChessScene.shardMaterial]
+        return g
+    }()
+
+    /// Прогрев эффектов: первый показ частиц, свечения и осколков компилирует шейдеры
+    /// и даёт подвисание на первом же взятии. Прогоняем их один раз невидимо при старте.
+    func warmUpEffects() {
+        let ring = makeRingNode()
+        ring.position = SCNVector3(0, 0.09, 0)
+        ring.scale = SCNVector3(0.01, 0.01, 0.01)
+        ring.opacity = 0.99
+        let shard = SCNNode(geometry: ChessScene.shardGeometry)
+        shard.position = SCNVector3(0, 0.1, 0)
+        shard.scale = SCNVector3(0.01, 0.01, 0.01)
+        piecesNode.addChildNode(ring)
+        piecesNode.addChildNode(shard)
+        let cleanup = SCNAction.sequence([.wait(duration: 0.6), .removeFromParentNode()])
+        ring.runAction(cleanup)
+        shard.runAction(cleanup)
+        spawnBurst(at: SCNVector3(0, 0.3, 0), color: UIColor(white: 1, alpha: 0.01), rate: 60)
+        flashNode.light?.intensity = 1
+        flashNode.runAction(.sequence([.wait(duration: 0.3), .run { [weak self] _ in self?.flashNode.light?.intensity = 0 }]))
     }
 
     /// Облачко частиц в точке: один короткий всплеск, узел удаляется сам (порт burst() из js/three).

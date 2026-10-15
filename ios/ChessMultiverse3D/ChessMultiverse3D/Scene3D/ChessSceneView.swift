@@ -43,6 +43,8 @@ struct ChessSceneView: UIViewRepresentable {
         context.coordinator.lastPreset = viewModel.settings.cameraPreset
         context.coordinator.scnView = scnView
         camera.scene = scene
+        scnView.prepare([scene.scnScene]) { _ in }
+        scene.warmUpEffects()
         return scnView
     }
 
