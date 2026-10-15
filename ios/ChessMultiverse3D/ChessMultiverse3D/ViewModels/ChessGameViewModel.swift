@@ -28,6 +28,7 @@ struct GameOverInfo {
 
 /// Протокол озвучки/звука — заглушка на будущую фазу (AVFoundation / AVSpeechSynthesizer).
 protocol SoundAnnouncing {
+    func setTheme(_ key: ThemeKey)
     func playEffect(_ name: String)
     func say(_ text: String, rate: Double, pitch: Double)
     var soundEnabled: Bool { get set }
@@ -35,12 +36,12 @@ protocol SoundAnnouncing {
 }
 
 /// Заглушка озвучки: ничего не воспроизводит, только хранит состояние тумблеров.
-/// Полноценная реализация (синтез речи, звуковые эффекты) — следующая фаза.
 final class NoopAnnouncer: SoundAnnouncing {
     var soundEnabled: Bool = true
     var voiceEnabled: Bool = true
-    func playEffect(_ name: String) { /* заглушка: эффекты появятся в следующей фазе */ }
-    func say(_ text: String, rate: Double, pitch: Double) { /* заглушка: озвучка появится в следующей фазе */ }
+    func setTheme(_ key: ThemeKey) { }
+    func playEffect(_ name: String) { }
+    func say(_ text: String, rate: Double, pitch: Double) { }
 }
 
 /// Настройки, аналогичные chess-app.js: кинорежим, спецэффекты взятия, звук, голос.
@@ -86,7 +87,9 @@ final class ChessGameViewModel: ObservableObject {
 
     // ---------- Публичное состояние для SwiftUI ----------
     @Published var screen: AppScreen = .menu
-    @Published var theme: ThemeKey = .classic
+    @Published var theme: ThemeKey = .classic {
+        didSet { announcer.setTheme(theme) }
+    }
     @Published var mode: GameMode = .pve
     @Published var difficulty: Difficulty = .medium
     @Published var colorChoice: ColorChoice = .white
@@ -119,6 +122,7 @@ final class ChessGameViewModel: ObservableObject {
     private var aiEngine = ChessEngine()
     private var startedAt: Date = Date()
     private var aiTask: Task<Void, Never>? = nil
+    private var impactTask: Task<Void, Never>? = nil
     private var sanHistory: [String] = []
 
     var spec: ThemeSpec { ThemeLibrary.spec(for: theme) }
@@ -248,16 +252,53 @@ final class ChessGameViewModel: ObservableObject {
         legalTargets = []
         lastMove = (from, to)
         recordSAN(applied)
-        if applied.capturedKind != nil || applied.isEnPassant {
-            announcer.playEffect("hit")
+        playMoveAudio(from: from, to: to, applied: applied)
+        afterMove()
+    }
+
+    /// Звук хода: старт движения (ход, рокировка, превращение), кинорежим — «whoosh»,
+    /// удар при взятии — в момент контакта фигур, как onStart/onImpact в js/chess-app.js.
+    private func playMoveAudio(from: Square, to: Square, applied: ChessEngine.AppliedMove) {
+        if applied.promotion != nil {
+            announcer.playEffect("promote")
         } else if applied.isCastle {
             announcer.playEffect("castle")
-        } else if applied.promotion != nil {
-            announcer.playEffect("promote")
         } else {
             announcer.playEffect("move")
         }
-        afterMove()
+        if settings.cinematic { announcer.playEffect("whoosh") }
+        if applied.capturedKind != nil || applied.isEnPassant {
+            let total = MotionTiming.duration(from: from, to: to, cinematic: settings.cinematic)
+            scheduleImpactAudio(after: total * MotionTiming.impactFraction)
+        }
+    }
+
+    /// Удар «hit» в момент контакта; при captureFx — звук эффекта взятия темы (как в вебе).
+    private func scheduleImpactAudio(after delay: Double) {
+        impactTask?.cancel()
+        let captureFx = settings.captureFx
+        let currentTheme = theme
+        impactTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(max(0, delay) * 1_000_000_000))
+            guard !Task.isCancelled, let self else { return }
+            self.announcer.playEffect("hit")
+            guard captureFx else { return }
+            self.announcer.playEffect("impact")
+            let fx: String
+            var follow: String? = nil
+            switch currentTheme {
+            case .classic: fx = "shatter"
+            case .cars: fx = "boom"
+            case .hospital: fx = "zap"; follow = "pop"
+            case .hockey: fx = "boards"; follow = "poof"
+            }
+            self.announcer.playEffect(fx)
+            if let follow {
+                try? await Task.sleep(nanoseconds: 300_000_000)
+                guard !Task.isCancelled else { return }
+                self.announcer.playEffect(follow)
+            }
+        }
     }
 
     private func afterMove() {
@@ -305,11 +346,7 @@ final class ChessGameViewModel: ObservableObject {
                 ) else { return }
                 self.lastMove = (applied.from, applied.to)
                 self.recordSAN(applied)
-                if applied.capturedKind != nil || applied.isEnPassant {
-                    self.announcer.playEffect("hit")
-                } else {
-                    self.announcer.playEffect("move")
-                }
+                self.playMoveAudio(from: applied.from, to: applied.to, applied: applied)
                 self.afterMove()
             }
         }

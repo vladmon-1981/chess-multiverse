@@ -102,8 +102,16 @@ final class ChessScene {
 
     // ---------- Камера (орбитальная, аналог управления из оригинала) ----------
 
-    private var distance: Float = 11
-    private var azimuth: Float = 0            // поворот вокруг Y (аналог ⟲⟳ 45°)
+    // Пределы камеры. Наклон: от 12° над доской (почти вровень) до 85° (почти сверху),
+    // никогда под доску и не за зенит. Дистанция: ближе 10.5 доска вылезает за края
+    // экрана, дальше 22 становится мелкой.
+    static let minElevation: Float = 12 * .pi / 180
+    static let maxElevation: Float = 85 * .pi / 180
+    static let minDistance: Float = 10.5
+    static let maxDistance: Float = 22
+
+    private var distance: Float = 13
+    private var azimuth: Float = 0            // поворот вокруг Y, без ограничений
     private var elevation: Float = 0.9         // угол наклона камеры
 
     private func buildCamera() {
@@ -116,7 +124,18 @@ final class ChessScene {
         applyCameraTransform()
     }
 
+    /// Ориентация угла обзора: на узком (портретном) экране 45° задаём по горизонтали,
+    /// чтобы вся ширина доски помещалась при любом повороте; на широком — по вертикали.
+    func updateViewAspect(_ aspect: CGFloat) {
+        guard let camera = cameraNode.camera, aspect > 0 else { return }
+        let direction: SCNCameraProjectionDirection = aspect < 1 ? .horizontal : .vertical
+        if camera.projectionDirection != direction { camera.projectionDirection = direction }
+    }
+
     private func applyCameraTransform() {
+        azimuth = azimuth.truncatingRemainder(dividingBy: 2 * .pi)
+        elevation = min(Self.maxElevation, max(Self.minElevation, elevation))
+        distance = min(Self.maxDistance, max(Self.minDistance, distance))
         let x = distance * sin(azimuth) * cos(elevation)
         let y = distance * sin(elevation)
         let z = distance * cos(azimuth) * cos(elevation)
@@ -124,35 +143,39 @@ final class ChessScene {
         cameraNode.look(at: SCNVector3(0, 0, 0))
     }
 
-    /// Поворот камеры драгом пальца (дельта в радианах).
+    /// Драг одним пальцем: горизонталь — азимут, вертикаль — наклон (дельты в радианах).
     func rotateCamera(deltaAzimuth: Float, deltaElevation: Float) {
         azimuth += deltaAzimuth
-        elevation = max(0.15, min(1.45, elevation + deltaElevation))
+        elevation += deltaElevation
         applyCameraTransform()
     }
 
-    /// Поворот на фиксированный угол — кнопки ⟲ ⟳.
+    /// Поворот вокруг доски на фиксированный угол — кнопки влево/вправо.
     func rotateBy(_ radians: Float) {
         azimuth += radians
         applyCameraTransform()
     }
 
-    /// Зум колесом/пинчем — множитель к дистанции.
+    /// Наклон на фиксированный угол — кнопки выше/ниже.
+    func tiltBy(_ radians: Float) {
+        elevation += radians
+        applyCameraTransform()
+    }
+
+    /// Зум пинчем и кнопками — множитель к дистанции, в пределах minDistance…maxDistance.
     func zoomBy(_ factor: Float) {
-        distance = max(5, min(22, distance * factor))
+        distance *= factor
         applyCameraTransform()
     }
 
-    func resetView() {
-        distance = 11; azimuth = 0; elevation = 0.9
-        applyCameraTransform()
-    }
-
+    /// Пресет камеры: сброс вращения и дистанции. Вызывается при смене ракурса в настройках,
+    /// двойным тапом и кнопкой «сброс».
     func setCameraPreset(_ preset: CameraPreset) {
+        azimuth = 0
         switch preset {
-        case .normal: distance = 11; elevation = 0.9
-        case .top: distance = 13; elevation = 1.45
-        case .low: distance = 8; elevation = 0.25
+        case .normal: distance = 13; elevation = 0.9
+        case .top: distance = 14; elevation = Self.maxElevation
+        case .low: distance = 11; elevation = Self.minElevation + 0.05
         }
         applyCameraTransform()
     }
@@ -163,78 +186,268 @@ final class ChessScene {
         currentTheme = theme
     }
 
+    private var mateShownOn: Square?
+    private var lastCheck: Square?
+
     /// Полная перестройка фигур по текущей доске модели.
     func setPosition(_ board: [[Piece?]]) {
         piecesNode.childNodes.forEach { $0.removeFromParentNode() }
+        mateShownOn = nil
         for row in 0..<8 {
             for col in 0..<8 {
                 guard let piece = board[row][col] else { continue }
-                let node = PieceFactory.makeNode(piece: piece, theme: currentTheme)
-                node.position = boardPosition(row: row, col: col, y: 0.06)
-                node.name = "piece_\(row)_\(col)"
-                piecesNode.addChildNode(node)
+                let holder = PieceHolder(kind: piece.kind, color: piece.color)
+                holder.restYaw = facingYaw(piece: piece)
+                holder.eulerAngles.y = holder.restYaw
+                holder.tilt.addChildNode(PieceFactory.makeNode(piece: piece, theme: currentTheme))
+                holder.position = boardPosition(row: row, col: col, y: 0.06)
+                holder.name = "piece_\(row)_\(col)"
+                piecesNode.addChildNode(holder)
             }
         }
     }
 
-    /// Анимированный ход одной фигуры: находит ноду "piece_row_col" на исходной клетке,
-    /// удаляет ноду взятой фигуры (если есть) на целевой клетке и анимирует перемещение
-    /// SCNAction.move вместо мгновенной телепортации/полной перестройки всех фигур.
-    /// Возвращает false, если подходящую ноду не нашли — тогда вызывающая сторона должна
-    /// упасть обратно на setPosition (полная перестройка).
+    /// Поворот фигуры «лицом к сопернику» (правило js/three: faceOpponent и yaw темы классика).
+    /// Модели смотрят носом в +z; при ориентации белых белые стоят на +z, при чёрных — на −z,
+    /// поэтому при перевороте доски поворот сдвигается на π.
+    private func facingYaw(piece: Piece) -> Float {
+        var yaw: Float = 0
+        if currentTheme != .classic {
+            yaw = piece.color == .white ? Float.pi : 0
+        } else if piece.kind == .knight {
+            yaw = piece.color == .white ? -0.5 : Float.pi - 0.5
+        }
+        if orientation == .black { yaw += Float.pi }
+        return yaw
+    }
+
+    /// Анимированный ход: фигура летит дугой, поворачивается по курсу, наклоняется вперёд,
+    /// приземляется с приплюском. Рокировка двигает и ладью. Взятие — эффекты темы в момент контакта
+    /// (captureFx). Возвращает false, если фигуры нет на исходной клетке — тогда нужна перестройка.
     @discardableResult
     func animateMove(from: Square, to: Square, promoted: Bool, cinematic: Bool = false, captureFx: Bool = false,
                      duration: TimeInterval = 0.3, completion: @escaping () -> Void) -> Bool {
+        _ = promoted
+        _ = duration
         let fromName = "piece_\(from.row)_\(from.file)"
-        guard let movingNode = piecesNode.childNode(withName: fromName, recursively: false) else {
+        guard let mover = piecesNode.childNode(withName: fromName, recursively: false) as? PieceHolder else {
             completion()
             return false
         }
-        let targetPosition = boardPosition(row: to.row, col: to.file, y: 0.06)
-        // Взятая фигура: сразу убираем, либо (спецэффекты) разлетаемся искрами.
         let toName = "piece_\(to.row)_\(to.file)"
-        if let capturedNode = piecesNode.childNode(withName: toName, recursively: false), capturedNode !== movingNode {
-            if captureFx {
-                capturedNode.name = nil
-                let delay = cinematic ? 0.5 : duration * 0.7
-                capturedNode.runAction(.sequence([
-                    .wait(duration: delay),
-                    .group([.scale(to: 0.01, duration: 0.2), .fadeOut(duration: 0.2)]),
-                    .removeFromParentNode()
-                ]))
-                let burst = Self.makeBurst()
-                burst.position = targetPosition
-                piecesNode.addChildNode(burst)
-                burst.runAction(.sequence([.wait(duration: delay), .run { n in
-                    n.particleSystems?.first?.birthRate = 900
-                }, .wait(duration: 1.2), .removeFromParentNode()]))
-            } else {
-                capturedNode.removeFromParentNode()
+        let total = MotionTiming.duration(from: from, to: to, cinematic: cinematic)
+        let target = boardPosition(row: to.row, col: to.file, y: 0.06)
+
+        // Жертва: на клетке назначения либо (взятие на проходе) рядом
+        var victim: PieceHolder?
+        if let node = piecesNode.childNode(withName: toName, recursively: false) as? PieceHolder, node !== mover {
+            victim = node
+        } else if mover.kind == .pawn, from.file != to.file,
+                  let node = piecesNode.childNode(withName: "piece_\(from.row)_\(to.file)", recursively: false) as? PieceHolder,
+                  node.kind == .pawn, node.color != mover.color {
+            victim = node
+        }
+        victim?.name = nil
+
+        // Ладья при рокировке
+        var rook: PieceHolder?
+        var rookToName = ""
+        var rookTarget = SCNVector3Zero
+        if mover.kind == .king, abs(to.file - from.file) == 2 {
+            let rookFrom = to.file > from.file ? 7 : 0
+            let rookTo = to.file > from.file ? 5 : 3
+            if let node = piecesNode.childNode(withName: "piece_\(from.row)_\(rookFrom)", recursively: false) as? PieceHolder {
+                node.name = nil
+                rook = node
+                rookToName = "piece_\(to.row)_\(rookTo)"
+                rookTarget = boardPosition(row: to.row, col: rookTo, y: 0.06)
             }
         }
-        let total = cinematic ? max(duration, 0.7) : duration
-        let move = SCNAction.move(to: targetPosition, duration: total)
-        move.timingMode = .easeInEaseOut
-        var action = move
-        if cinematic || captureFx {
-            // Фигура «перелетает» дугой.
-            let hop = SCNAction.customAction(duration: total) { [from = movingNode.position] node, t in
-                let k = Float(t / CGFloat(total))
-                node.position.x = from.x + (targetPosition.x - from.x) * k
-                node.position.z = from.z + (targetPosition.z - from.z) * k
-                node.position.y = 0.06 + sinf(k * .pi) * (cinematic ? 0.9 : 0.4)
-            }
-            hop.timingMode = .easeInEaseOut
-            action = hop
+
+        let start = mover.position
+        let dx = target.x - start.x, dz = target.z - start.z
+        let dist = (dx * dx + dz * dz).squareRoot()
+        let isKnight = mover.kind == .knight
+        let lift: Float = isKnight ? (cinematic ? 1.1 : 0.9) : 0.28 + dist * 0.02
+        let lean: Float = isKnight ? 0.22 : 0.12
+
+        let handled = FlagBox()
+        let impact = {
+            guard let victim, !handled.on else { return }
+            handled.on = true
+            self.impactEffects(victim: victim, at: target, dirX: dx, dirZ: dz, captureFx: captureFx)
         }
-        if cinematic { runCinematicCamera(on: targetPosition, duration: total) }
-        movingNode.runAction(action) { [weak movingNode] in
-            movingNode?.position = targetPosition
-            movingNode?.name = toName
+        let moveAction = hopAction(mover, from: start, to: target, total: total, lift: lift, lean: lean,
+                                   impactAt: victim != nil ? Float(MotionTiming.impactFraction) : nil, onImpact: impact)
+        if let rook {
+            let rookStart = rook.position
+            let rookDist = rookTarget.x - rookStart.x
+            let rookLift: Float = 0.28 + abs(rookDist) * 0.02
+            rook.runAction(hopAction(rook, from: rookStart, to: rookTarget, total: total, lift: rookLift, lean: 0.1,
+                                     impactAt: nil, onImpact: nil)) { [weak rook] in
+                guard let rook else { return }
+                rook.position = rookTarget
+                rook.eulerAngles.y = rook.restYaw
+                rook.tilt.eulerAngles = SCNVector3Zero
+                rook.tilt.scale = SCNVector3(1, 1, 1)
+                rook.name = rookToName
+            }
+        }
+        if cinematic { runCinematicCamera(on: target, duration: total) }
+        mover.runAction(moveAction) { [weak mover] in
+            if let victim, !handled.on {
+                // Анимация прервана до контакта — жертву убираем без эффектов
+                handled.on = true
+                victim.removeFromParentNode()
+            }
+            guard let mover else { return }
+            mover.position = target
+            mover.eulerAngles.y = mover.restYaw
+            mover.tilt.eulerAngles = SCNVector3Zero
+            mover.tilt.scale = SCNVector3(1, 1, 1)
+            mover.name = toName
             DispatchQueue.main.async { completion() }
         }
-        _ = promoted
         return true
+    }
+
+    /// Действие одного прыжка фигуры: дуга, поворот по курсу, наклон и приплюск при посадке.
+    private func hopAction(_ holder: PieceHolder, from start: SCNVector3, to end: SCNVector3, total: Double,
+                           lift: Float, lean: Float, impactAt: Float?, onImpact: (() -> Void)?) -> SCNAction {
+        let dx = end.x - start.x, dz = end.z - start.z
+        let heading = atan2(dx, dz)
+        let startYaw = holder.eulerAngles.y
+        let endYaw = holder.restYaw
+        var fired = false
+        return SCNAction.customAction(duration: total) { [weak holder] _, elapsed in
+            guard let holder else { return }
+            let raw = Float(min(1, Double(elapsed) / total))
+            let e = ChessScene.easeInOut(raw)
+            holder.position = SCNVector3(start.x + dx * e, 0.06 + sin(Float.pi * e) * lift, start.z + dz * e)
+            let yaw: Float
+            if raw < 0.2 {
+                yaw = ChessScene.lerpAngle(startYaw, heading, ChessScene.easeOut(raw / 0.2))
+            } else if raw > 0.8 {
+                yaw = ChessScene.lerpAngle(heading, endYaw, ChessScene.easeInOut((raw - 0.8) / 0.2))
+            } else {
+                yaw = heading
+            }
+            holder.eulerAngles.y = yaw
+            holder.tilt.eulerAngles.x = lean * sin(Float.pi * e)
+            if raw > 0.88 {
+                let s = sin(Float.pi * (raw - 0.88) / 0.12)
+                holder.tilt.scale = SCNVector3(1 + 0.08 * s, 1 - 0.14 * s, 1 + 0.08 * s)
+            } else {
+                holder.tilt.scale = SCNVector3(1, 1, 1)
+            }
+            if let impactAt, !fired, raw >= impactAt {
+                fired = true
+                onImpact?()
+            }
+        }
+    }
+
+    private static func easeInOut(_ x: Float) -> Float { x < 0.5 ? 2 * x * x : 1 - pow(-2 * x + 2, 2) / 2 }
+    private static func easeOut(_ x: Float) -> Float { 1 - pow(1 - x, 3) }
+
+    private static func lerpAngle(_ a: Float, _ b: Float, _ t: Float) -> Float {
+        var d = (b - a).truncatingRemainder(dividingBy: 2 * Float.pi)
+        if d > Float.pi { d -= 2 * Float.pi } else if d < -Float.pi { d += 2 * Float.pi }
+        return a + d * t
+    }
+
+    /// Эффекты взятия в момент контакта — порт fxShatter / fxCrash / fxZap / fxCheck из js/three.
+    private func impactEffects(victim: PieceHolder, at pos: SCNVector3, dirX: Float, dirZ: Float, captureFx: Bool) {
+        victim.name = nil
+        guard captureFx else {
+            // Без спецэффектов жертва уменьшается и исчезает в облачке
+            spawnBurst(at: pos, color: UIColor(white: 0.9, alpha: 1), rate: 300)
+            victim.runAction(.sequence([
+                .group([.scale(to: 0.01, duration: 0.2), .fadeOut(duration: 0.2)]),
+                .removeFromParentNode()
+            ]))
+            return
+        }
+        switch currentTheme {
+        case .classic:
+            // Фигура раскалывается: осколки разлетаются, падают и гаснут
+            victim.removeFromParentNode()
+            spawnBurst(at: pos, color: UIColor(red: 1, green: 0.8, blue: 0.4, alpha: 1), rate: 700)
+            let woodMat = SCNMaterial()
+            woodMat.diffuse.contents = UIColor(red: 0.85, green: 0.78, blue: 0.62, alpha: 1)
+            for _ in 0..<10 {
+                let shard = SCNNode(geometry: SCNBox(width: 0.07, height: 0.05, length: 0.09, chamferRadius: 0.01))
+                shard.geometry?.materials = [woodMat]
+                let p0 = SCNVector3(pos.x, pos.y + 0.25, pos.z)
+                shard.position = p0
+                piecesNode.addChildNode(shard)
+                let vx = dirX * Float.random(in: 0.4...1.2) + Float.random(in: -0.8...0.8)
+                let vz = dirZ * Float.random(in: 0.4...1.2) + Float.random(in: -0.8...0.8)
+                let vy = Float.random(in: 1.4...2.6)
+                let fall = SCNAction.customAction(duration: 0.9) { node, time in
+                    let s = Float(time)
+                    node.position = SCNVector3(p0.x + vx * s, p0.y + vy * s - 2.6 * s * s, p0.z + vz * s)
+                }
+                shard.runAction(.sequence([fall, .fadeOut(duration: 0.15), .removeFromParentNode()]))
+            }
+        case .cars:
+            // Таран: машинку подбрасывает, она кувыркается и взрывается облаком
+            spawnBurst(at: pos, color: UIColor(red: 1, green: 0.55, blue: 0.1, alpha: 1), rate: 900)
+            victim.runAction(.sequence([
+                .group([
+                    .moveBy(x: CGFloat(dirX * 0.7), y: 0.5, z: CGFloat(dirZ * 0.7), duration: 0.45),
+                    .rotateBy(x: 0, y: CGFloat.pi * 4, z: 0, duration: 0.45)
+                ]),
+                .group([.fadeOut(duration: 0.35), .scale(to: 0.2, duration: 0.35)]),
+                .removeFromParentNode()
+            ]))
+        case .hospital:
+            // Разряд дефибриллятора: персонаж дрожит и лопается
+            spawnBurst(at: pos, color: UIColor(red: 0.45, green: 0.95, blue: 0.85, alpha: 1), rate: 700)
+            victim.runAction(.sequence([
+                .customAction(duration: 0.3) { node, time in
+                    let w = Float(1 + 0.1 * sin(Double(time) * 70))
+                    node.scale = SCNVector3(w, w, w)
+                },
+                .scale(to: 1.4, duration: 0.12),
+                .group([.fadeOut(duration: 0.15), .scale(to: 0.01, duration: 0.15)]),
+                .removeFromParentNode()
+            ]))
+        case .hockey:
+            // Хоккеиста впечатывают в борт: откидывается и уезжает по льду
+            spawnBurst(at: pos, color: UIColor(white: 0.95, alpha: 1), rate: 600)
+            victim.tilt.runAction(.rotateBy(x: -1.2, y: 0, z: 0, duration: 0.3))
+            victim.runAction(.sequence([
+                .group([.moveBy(x: CGFloat(dirX * 0.6), y: 0.25, z: CGFloat(dirZ * 0.6), duration: 0.35)]),
+                .group([.fadeOut(duration: 0.25)]),
+                .removeFromParentNode()
+            ]))
+        }
+    }
+
+    /// Мат: поверженный король падает, над доской салютуют частицы (порт showMate из js/three).
+    /// Вызывается каждым обновлением сцены — повторно для той же клетки не срабатывает.
+    func announceMate(at square: Square, winnerIsWhite: Bool) {
+        guard mateShownOn != square else { return }
+        mateShownOn = square
+        guard let king = piecesNode.childNode(withName: "piece_\(square.row)_\(square.file)", recursively: false) as? PieceHolder else { return }
+        king.tilt.runAction(SCNAction.customAction(duration: 0.9) { node, time in
+            let k = Float(min(1, Double(time) / 0.9))
+            node.eulerAngles.x = -1.35 * (1 - pow(1 - k, 3))
+        })
+        let colors: [UIColor] = winnerIsWhite
+            ? [UIColor(red: 1, green: 0.97, blue: 0.88, alpha: 1), UIColor(red: 1, green: 0.84, blue: 0.31, alpha: 1)]
+            : [UIColor(red: 0.7, green: 0.53, blue: 1, alpha: 1), UIColor(red: 1, green: 0.32, blue: 0.32, alpha: 1)]
+        for i in 0..<4 {
+            piecesNode.runAction(.sequence([
+                .wait(duration: 0.26 * Double(i)),
+                .run { [weak self] _ in
+                    guard let self else { return }
+                    let pos = SCNVector3(Float.random(in: -2.8...2.8), 1.2, Float.random(in: -2.8...2.8))
+                    self.spawnBurst(at: pos, color: colors[i % colors.count], rate: 500)
+                }
+            ]))
+        }
     }
 
     /// Лёгкий наезд камеры на клетку хода и возврат.
@@ -248,10 +461,11 @@ final class ChessScene {
         cameraNode.runAction(zoom) { camera.fieldOfView = base }
     }
 
-    private static func makeBurst() -> SCNNode {
+    /// Облачко частиц в точке: один короткий всплеск, узел удаляется сам (порт burst() из js/three).
+    private func spawnBurst(at pos: SCNVector3, color: UIColor, rate: CGFloat) {
         let ps = SCNParticleSystem()
-        ps.birthRate = 0
-        ps.emissionDuration = 0.15
+        ps.birthRate = rate
+        ps.emissionDuration = 0.12
         ps.loops = false
         ps.particleLifeSpan = 0.7
         ps.particleVelocity = 2.5
@@ -259,14 +473,16 @@ final class ChessScene {
         ps.spreadingAngle = 180
         ps.emitterShape = SCNSphere(radius: 0.1)
         ps.particleSize = 0.06
-        ps.particleColor = UIColor(red: 1, green: 0.75, blue: 0.2, alpha: 1)
+        ps.particleColor = color
         ps.particleColorVariation = SCNVector4(0.1, 0.3, 0.1, 0)
         ps.blendMode = .additive
         ps.acceleration = SCNVector3(0, -4, 0)
         ps.isAffectedByGravity = false
         let node = SCNNode()
+        node.position = pos
         node.addParticleSystem(ps)
-        return node
+        piecesNode.addChildNode(node)
+        node.runAction(.sequence([.wait(duration: 1.3), .removeFromParentNode()]))
     }
 
     // ---------- Подсветка ----------
@@ -284,11 +500,17 @@ final class ChessScene {
             addMarker(square: lastMove.to, color: UIColor.systemBlue.withAlphaComponent(0.35), height: 0.015)
         }
         if let check {
-            addMarker(square: check, color: UIColor.systemRed.withAlphaComponent(0.6), height: 0.025)
+            let marker = addMarker(square: check, color: UIColor.systemRed.withAlphaComponent(0.6), height: 0.025)
+            // Шах: подсветка короткими ударами, как checkRing в js/three
+            if check != lastCheck {
+                marker.runAction(SCNAction.repeat(.sequence([.scale(to: 1.3, duration: 0.2), .scale(to: 1, duration: 0.2)]), count: 3))
+            }
         }
+        lastCheck = check
     }
 
-    private func addMarker(square: Square, color: UIColor, height: Float, isDot: Bool = false) {
+    @discardableResult
+    private func addMarker(square: Square, color: UIColor, height: Float, isDot: Bool = false) -> SCNNode {
         let geometry: SCNGeometry
         if isDot {
             geometry = SCNSphere(radius: 0.18)
@@ -302,6 +524,7 @@ final class ChessScene {
         let node = SCNNode(geometry: geometry)
         node.position = boardPosition(row: square.row, col: square.file, y: height)
         highlightNode.addChildNode(node)
+        return node
     }
 
     /// Перевод точки на экране (в системе SCNView) в клетку доски — для жестов выбора/хода.
@@ -320,6 +543,43 @@ final class ChessScene {
         }
         return nil
     }
+}
+
+/// Узел фигуры: тип и цвет, базовый поворот (лицом к сопернику) и вложенный узел наклона и приплюска.
+final class PieceHolder: SCNNode {
+    let kind: PieceKind
+    let color: PieceColor
+    let tilt = SCNNode()
+    var restYaw: Float = 0
+
+    init(kind: PieceKind, color: PieceColor) {
+        self.kind = kind
+        self.color = color
+        super.init()
+        addChildNode(tilt)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) не используется")
+    }
+}
+
+/// Общий тайминг хода для сцены и озвучки: звук удара совпадает с контактом фигур.
+enum MotionTiming {
+    /// Доля длительности хода, на которой фигура касается клетки противника.
+    static let impactFraction = 0.8
+
+    static func duration(from: Square, to: Square, cinematic: Bool) -> Double {
+        let dr = Double(to.row - from.row), df = Double(to.file - from.file)
+        let dist = (dr * dr + df * df).squareRoot()
+        let base = min(0.75, 0.3 + dist * 0.07)
+        return cinematic ? base * 1.35 : base
+    }
+}
+
+/// Флаг, общий для замыканий анимации (обработано ли взятие).
+final class FlagBox {
+    var on = false
 }
 
 /// Процедурные фигуры Стаунтона: пешка/ладья/конь/слон/ферзь/король из SCNCylinder/SCNSphere/SCNCone.
@@ -367,6 +627,12 @@ enum PieceFactory {
             addPart(SCNCylinder(radius: 0.18, height: 0.3), y: 0.18)
             let head = SCNCone(topRadius: 0.04, bottomRadius: 0.16, height: 0.32)
             addPart(head, y: 0.46)
+            // Морда коня: конус в сторону −x (как в js/three/classic.js), чтобы у фигуры было «перед»
+            let snout = SCNNode(geometry: SCNCone(topRadius: 0.02, bottomRadius: 0.07, height: 0.14))
+            snout.geometry?.materials = [mat]
+            snout.eulerAngles.z = Float.pi / 2
+            snout.position = SCNVector3(-0.16, 0.44, 0)
+            node.addChildNode(snout)
             addPart(SCNCylinder(radius: 0.24, height: 0.06), y: 0.03)
         case .bishop:
             addPart(SCNCylinder(radius: 0.17, height: 0.38), y: 0.22)

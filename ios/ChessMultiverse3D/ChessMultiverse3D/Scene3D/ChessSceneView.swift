@@ -5,6 +5,8 @@ import SceneKit
 /// но без кинорежима и спецэффектов взятия (заглушки на следующую фазу).
 struct ChessSceneView: UIViewRepresentable {
     @ObservedObject var viewModel: ChessGameViewModel
+    /// Мост к кнопкам камеры в GameView.
+    let camera: CameraController
 
     func makeUIView(context: Context) -> SCNView {
         let scnView = SCNView()
@@ -16,17 +18,29 @@ struct ChessSceneView: UIViewRepresentable {
         scnView.allowsCameraControl = false
         scnView.rendersContinuously = false
 
+        // Один палец — вращение/наклон; два — пинч-зум (pan не реагирует на два пальца).
         let pan = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePan(_:)))
+        pan.minimumNumberOfTouches = 1
+        pan.maximumNumberOfTouches = 1
         scnView.addGestureRecognizer(pan)
         let pinch = UIPinchGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePinch(_:)))
         scnView.addGestureRecognizer(pinch)
+        // Двойной тап — сброс камеры на пресет. Одиночный тап ждёт, пока станет ясно,
+        // что это не второй тап, поэтому выбор клетки срабатывает с небольшой задержкой.
+        let doubleTap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleDoubleTap(_:)))
+        doubleTap.numberOfTapsRequired = 2
+        scnView.addGestureRecognizer(doubleTap)
         let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
+        tap.require(toFail: doubleTap)
         scnView.addGestureRecognizer(tap)
 
         scene.setTheme(viewModel.theme)
         scene.setOrientation(viewModel.orientation)
         scene.setPosition(viewModel.board)
+        scene.setCameraPreset(viewModel.settings.cameraPreset)
+        context.coordinator.lastPreset = viewModel.settings.cameraPreset
         context.coordinator.scnView = scnView
+        camera.scene = scene
         return scnView
     }
 
@@ -56,7 +70,11 @@ struct ChessSceneView: UIViewRepresentable {
         } else if let move, moveChanged {
             let animated = scene.animateMove(from: move.from, to: move.to, promoted: false,
                                          cinematic: viewModel.settings.cinematic,
-                                         captureFx: viewModel.settings.captureFx) {}
+                                         captureFx: viewModel.settings.captureFx) { [weak viewModel, weak scene] in
+                // Превращение пешки: после анимации перестраиваем фигуры, чтобы пешка стала новой фигурой.
+                guard let viewModel, let scene, move.to.row == 0 || move.to.row == 7 else { return }
+                scene.setPosition(viewModel.board)
+            }
             if !animated { scene.setPosition(viewModel.board) }
             coordinator.lastAnimatedMove = move
         } else if coordinator.firstUpdateDone == false {
@@ -77,8 +95,19 @@ struct ChessSceneView: UIViewRepresentable {
                              targets: viewModel.legalTargets,
                              lastMove: viewModel.lastMove,
                              check: viewModel.checkSquare)
-        scene.setCameraPreset(viewModel.settings.cameraPreset)
-        context.coordinator.cameraAction = { [weak viewModel] in _ = viewModel }
+        // Мат: король падает и салютует (announceMate сам не повторяется для той же клетки)
+        if viewModel.gameOver?.kind == .checkmate, let king = viewModel.checkSquare {
+            scene.announceMate(at: king, winnerIsWhite: viewModel.gameOver?.winner == .white)
+        }
+        // Пресет применяем только при смене, иначе каждый апдейт SwiftUI сбрасывал бы зум и наклон.
+        let preset = viewModel.settings.cameraPreset
+        if coordinator.lastPreset != preset {
+            scene.setCameraPreset(preset)
+            coordinator.lastPreset = preset
+        }
+        if scnView.bounds.height > 0 {
+            scene.updateViewAspect(scnView.bounds.width / scnView.bounds.height)
+        }
     }
 
     func makeCoordinator() -> Coordinator { Coordinator(viewModel: viewModel) }
@@ -110,7 +139,7 @@ struct ChessSceneView: UIViewRepresentable {
         var lastAnimatedMove: (from: Square, to: Square)?
         var lastBoardSignature: String = ""
         var firstUpdateDone: Bool = false
-        var cameraAction: (() -> Void)?
+        var lastPreset: CameraPreset = .normal
 
         init(viewModel: ChessGameViewModel) {
             self.viewModel = viewModel
@@ -131,6 +160,13 @@ struct ChessSceneView: UIViewRepresentable {
             }
         }
 
+        @objc func handleDoubleTap(_ gesture: UITapGestureRecognizer) {
+            guard let scene else { return }
+            Task { @MainActor in
+                scene.setCameraPreset(self.viewModel.settings.cameraPreset)
+            }
+        }
+
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
             guard let scnView, let scene else { return }
             let point = gesture.location(in: scnView)
@@ -147,17 +183,13 @@ struct ChessSceneView: UIViewRepresentable {
     }
 }
 
-/// Кнопки управления камерой — аналог ⟲ ⟳ ＋ － ⌖ у доски в оригинале.
-struct CameraControlsView: View {
-    let scene: ChessScene?
-    var body: some View {
-        HStack(spacing: 14) {
-            Button { scene?.rotateBy(-.pi / 4) } label: { Image(systemName: "arrow.counterclockwise") }
-            Button { scene?.rotateBy(.pi / 4) } label: { Image(systemName: "arrow.clockwise") }
-            Button { scene?.zoomBy(0.75) } label: { Image(systemName: "plus.magnifyingglass") }
-            Button { scene?.zoomBy(1 / 0.75) } label: { Image(systemName: "minus.magnifyingglass") }
-            Button { scene?.resetView() } label: { Image(systemName: "scope") }
-        }
-        .buttonStyle(.bordered)
-    }
+/// Мост между кнопками SwiftUI (GameView) и сценой SceneKit.
+/// Сцена появляется в makeUIView и регистрируется здесь; до этого команды ничего не делают.
+final class CameraController {
+    var scene: ChessScene?
+
+    func rotate(_ radians: Float) { scene?.rotateBy(radians) }
+    func tilt(_ radians: Float) { scene?.tiltBy(radians) }
+    func zoom(_ factor: Float) { scene?.zoomBy(factor) }
+    func reset(to preset: CameraPreset) { scene?.setCameraPreset(preset) }
 }

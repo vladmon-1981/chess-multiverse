@@ -5,13 +5,14 @@ struct GameView: View {
     @ObservedObject var vm: ChessGameViewModel
     @State private var showSettings = false
     @State private var showConfirmNewGame = false
+    @State private var camera = CameraController()
 
     var body: some View {
         VStack(spacing: 0) {
             topBar
             statusBar
             ZStack {
-                ChessSceneView(viewModel: vm)
+                ChessSceneView(viewModel: vm, camera: camera)
                 if vm.thinking {
                     VStack {
                         Spacer()
@@ -24,6 +25,7 @@ struct GameView: View {
                 }
             }
             .frame(maxHeight: .infinity)
+            cameraBar
             moveHistoryBar
             controlBar
         }
@@ -82,10 +84,43 @@ struct GameView: View {
         .frame(height: 28)
     }
 
+    /// Панель управления камерой под доской (не перекрывает саму доску).
+    /// Подписи под иконками — чтобы было понятно без догадок; на iPad тот же ряд.
+    private var cameraBar: some View {
+        HStack(spacing: 4) {
+            cameraButton("arrow.counterclockwise", "Влево") { camera.rotate(-.pi / 4) }
+            cameraButton("arrow.clockwise", "Вправо") { camera.rotate(.pi / 4) }
+            cameraButton("arrow.up", "Выше") { camera.tilt(.pi / 36) }
+            cameraButton("arrow.down", "Ниже") { camera.tilt(-.pi / 36) }
+            cameraButton("plus.magnifyingglass", "Ближе") { camera.zoom(0.8) }
+            cameraButton("minus.magnifyingglass", "Дальше") { camera.zoom(1.25) }
+            cameraButton("scope", "Сброс") { camera.reset(to: vm.settings.cameraPreset) }
+            cameraButton("arrow.triangle.2.circlepath", "Сторона") { vm.flipBoard() }
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+    }
+
+    private func cameraButton(_ systemName: String, _ title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 2) {
+                Image(systemName: systemName)
+                    .font(.system(size: 17, weight: .semibold))
+                Text(title)
+                    .font(.system(size: 10))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+            }
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.bordered)
+        .accessibilityLabel(title)
+    }
+
     private var controlBar: some View {
         HStack(spacing: 18) {
             iconButton("arrow.uturn.backward", disabled: !vm.canUndo()) { vm.undo() }
-            iconButton("arrow.left.and.right.righttriangle.left.righttriangle.right") { vm.flipBoard() }
             iconButton("video.fill") { vm.cycleCamera() }
             iconButton("plus.square") { showConfirmNewGame = true }
             iconButton("flag.fill", disabled: vm.gameOver != nil) { vm.resign() }
