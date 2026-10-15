@@ -13,7 +13,7 @@ targets:
       - ChessMultiverse3D
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: kz.vladmon.chessmultiverse
+        PRODUCT_BUNDLE_IDENTIFIER: com.chessmultiverse.app
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: 4N9Z9JPM6C
         SWIFT_VERSION: 5.0

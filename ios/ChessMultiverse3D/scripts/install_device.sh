@@ -12,4 +12,4 @@ xcodebuild -project ChessMultiverse3D.xcodeproj -scheme ChessMultiverse3D -confi
   -destination "platform=iOS,id=$UDID" -derivedDataPath $OUT -allowProvisioningUpdates build | tail -3
 APP=$OUT/Build/Products/Release-iphoneos/ChessMultiverse3D.app
 xcrun devicectl device install app --device "$UDID" "$APP"
-xcrun devicectl device process launch --device "$UDID" kz.vladmon.chessmultiverse || true
+xcrun devicectl device process launch --device "$UDID" com.chessmultiverse.app || true
