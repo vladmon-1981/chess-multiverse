@@ -46,7 +46,7 @@ final class NoopAnnouncer: SoundAnnouncing {
 
 /// Настройки, аналогичные chess-app.js: кинорежим, спецэффекты взятия, звук, голос.
 struct GameSettings {
-    var cinematic: Bool = false
+    var cinematic: Bool = true
     var captureFx: Bool = true
     var sound: Bool = true
     var voice: Bool = true

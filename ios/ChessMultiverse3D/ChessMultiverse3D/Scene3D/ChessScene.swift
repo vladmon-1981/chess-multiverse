@@ -107,7 +107,7 @@ final class ChessScene {
     // экрана, дальше 22 становится мелкой.
     static let minElevation: Float = 12 * .pi / 180
     static let maxElevation: Float = 85 * .pi / 180
-    static let minDistance: Float = 10.5
+    static let minDistance: Float = 5
     static let maxDistance: Float = 22
 
     /// Сигналы сцены для звука: контакт при взятии и остановка на льду (хоккей).
@@ -117,8 +117,9 @@ final class ChessScene {
     /// Временные смещения камеры в кинорежиме (погоня/облёт); складываются с пользовательскими.
     private var cineAzimuth: Float = 0
     private var cineElevation: Float = 0
-    private var cineDistance: Float = 0
-    private var distance: Float = 13
+    private var cineDistance: Float = 0          // доля сближения в киноплане (−0.35 = на 35% ближе); после хода возвращается к зуму пользователя
+    private var shakeAmp: Float = 0               // дрожь камеры на ударе
+    private var distance: Float = 11
     private var azimuth: Float = 0            // поворот вокруг Y, без ограничений
     private var elevation: Float = 0.9         // угол наклона камеры
 
@@ -146,12 +147,14 @@ final class ChessScene {
         distance = min(Self.maxDistance, max(Self.minDistance, distance))
         let az = azimuth + cineAzimuth
         let el = min(Self.maxElevation, max(Self.minElevation, elevation + cineElevation))
-        let dist = max(5, distance + cineDistance)
+        let dist = max(3.5, distance * (1 + cineDistance))
         let x = dist * sin(az) * cos(el)
         let y = dist * sin(el)
         let z = dist * cos(az) * cos(el)
-        cameraNode.position = SCNVector3(x, y, z)
-        cameraNode.look(at: SCNVector3(0, 0, 0))
+        let jx = shakeAmp * Float.random(in: -1...1), jy = shakeAmp * Float.random(in: -1...1)
+        cameraNode.position = SCNVector3(x + jx, y + jy, z)
+        // Горизонт всегда прямо: камера смотрит в центр с вертикальным «верхом», без крена влево-вправо
+        cameraNode.look(at: SCNVector3(0, 0, 0), up: SCNVector3(0, 1, 0), localFront: SCNVector3(0, 0, -1))
     }
 
     /// Драг одним пальцем: горизонталь — азимут, вертикаль — наклон (дельты в радианах).
@@ -184,9 +187,9 @@ final class ChessScene {
     func setCameraPreset(_ preset: CameraPreset) {
         azimuth = 0
         switch preset {
-        case .normal: distance = 13; elevation = 0.9
-        case .top: distance = 14; elevation = Self.maxElevation
-        case .low: distance = 11; elevation = Self.minElevation + 0.05
+        case .normal: distance = 11; elevation = 0.9
+        case .top: distance = 12; elevation = Self.maxElevation
+        case .low: distance = 9.5; elevation = Self.minElevation + 0.05
         }
         applyCameraTransform()
     }
@@ -288,6 +291,7 @@ final class ChessScene {
             guard let victim, !handled.on else { return }
             handled.on = true
             self.onImpact?()
+            if captureFx || cinematic { self.impactFlair(at: target, cinematic: cinematic) }
             self.impactEffects(victim: victim, at: target, dirX: dx, dirZ: dz, captureFx: captureFx)
         }
         let moveAction = hopAction(mover, from: start, to: target, total: total, lift: lift, lean: lean,
@@ -495,17 +499,18 @@ final class ChessScene {
     /// Киноплан хода: камера следует за фигурой, чуть облетает по дуге, опускается и приближается,
     /// затем плавно возвращается на пользовательский ракурс (порт кинокамеры из веба).
     private func runCinematicCamera(following mover: PieceHolder, duration: TimeInterval, dirX: Float, dirZ: Float) {
-        let total = duration + 0.7
+        let total = duration + 0.9
         let side: Float = dirX >= 0 ? 1 : -1
         let action = SCNAction.customAction(duration: total) { [weak self, weak mover] _, t in
             guard let self, let mover else { return }
             let k = Float(min(1, Double(t) / total))
             let env = sin(Float.pi * k)               // 0 → 1 → 0
             let smooth = env * env * (3 - 2 * env)
-            self.cameraOrbit.position = SCNVector3(mover.position.x * 0.6 * smooth, 0, mover.position.z * 0.6 * smooth)
-            self.cineAzimuth = 0.55 * side * (k - 0.5) * 2 * smooth
-            self.cineElevation = -0.28 * smooth
-            self.cineDistance = -3.2 * smooth
+            // Камера скользит за фигурой, облетает по дуге, приседает к доске и наезжает; после хода возвращается к зуму, который выбрал пользователь
+            self.cameraOrbit.position = SCNVector3(mover.position.x * 0.85 * smooth, 0, mover.position.z * 0.85 * smooth)
+            self.cineAzimuth = 0.95 * side * (k - 0.5) * 2 * smooth
+            self.cineElevation = -0.42 * smooth
+            self.cineDistance = -0.38 * smooth
             self.applyCameraTransform()
         }
         cameraOrbit.removeAction(forKey: "cine")
@@ -515,6 +520,42 @@ final class ChessScene {
             self.cineAzimuth = 0; self.cineElevation = 0; self.cineDistance = 0
             self.applyCameraTransform()
         }
+    }
+
+    /// Удар: короткая дрожь камеры, вспышка света и расходящееся кольцо-ударная волна.
+    private func impactFlair(at pos: SCNVector3, cinematic: Bool) {
+        let shake = SCNAction.customAction(duration: 0.4) { [weak self] _, t in
+            guard let self else { return }
+            self.shakeAmp = (cinematic ? 0.16 : 0.07) * pow(1 - Float(t) / 0.4, 2)
+            self.applyCameraTransform()
+        }
+        cameraNode.runAction(shake) { [weak self] in self?.shakeAmp = 0; self?.applyCameraTransform() }
+
+        let flash = SCNNode()
+        flash.light = SCNLight()
+        flash.light?.type = .omni
+        flash.light?.color = UIColor(red: 1, green: 0.85, blue: 0.5, alpha: 1)
+        flash.light?.attenuationEndDistance = 6
+        flash.position = SCNVector3(pos.x, pos.y + 1.0, pos.z)
+        piecesNode.addChildNode(flash)
+        flash.runAction(.sequence([
+            .customAction(duration: 0.35) { n, t in n.light?.intensity = 4000 * pow(1 - t / 0.35, 2) },
+            .removeFromParentNode()
+        ]))
+
+        let ring = SCNNode(geometry: SCNTorus(ringRadius: 0.12, pipeRadius: 0.025))
+        let mat = SCNMaterial()
+        mat.diffuse.contents = UIColor.white
+        mat.emission.contents = UIColor(red: 1, green: 0.8, blue: 0.4, alpha: 1)
+        mat.blendMode = .add
+        mat.writesToDepthBuffer = false
+        ring.geometry?.materials = [mat]
+        ring.position = SCNVector3(pos.x, 0.09, pos.z)
+        piecesNode.addChildNode(ring)
+        ring.runAction(.sequence([
+            .group([.scale(to: cinematic ? 9 : 6, duration: 0.55), .fadeOut(duration: 0.55)]),
+            .removeFromParentNode()
+        ]))
     }
 
     /// Облачко частиц в точке: один короткий всплеск, узел удаляется сам (порт burst() из js/three).

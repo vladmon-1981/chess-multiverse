@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		072F701E4D0412E41B014487 /* ModelSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D589040D82F33AD070A2AB0 /* ModelSnapshot.swift */; };
 		1F86D87643B63533F4D0831E /* ResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF5795279366730891D128E0 /* ResultView.swift */; };
 		2380CE3DD13302036276EEA6 /* ChessScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = E899F98682B1323FD42761BA /* ChessScene.swift */; };
 		24E51A398D08FC2FC5A73831 /* HospitalModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C05E7E2E9AF77EFE200B5FE /* HospitalModels.swift */; };
@@ -29,6 +30,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0D589040D82F33AD070A2AB0 /* ModelSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelSnapshot.swift; sourceTree = "<group>"; };
 		261898F49A86E06DE56BBD20 /* CarsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarsModels.swift; sourceTree = "<group>"; };
 		45784ADDCB17767A73B0683A /* HockeyModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HockeyModels.swift; sourceTree = "<group>"; };
 		499041A70777F47C6D0C8AFC /* ChessGameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessGameViewModel.swift; sourceTree = "<group>"; };
@@ -60,6 +62,7 @@
 				76AE9C13E40A5CED9B795249 /* ChessSceneView.swift */,
 				45784ADDCB17767A73B0683A /* HockeyModels.swift */,
 				9C05E7E2E9AF77EFE200B5FE /* HospitalModels.swift */,
+				0D589040D82F33AD070A2AB0 /* ModelSnapshot.swift */,
 			);
 			path = Scene3D;
 			sourceTree = "<group>";
@@ -225,6 +228,7 @@
 				E0F452A3411AD4C738291227 /* HockeyModels.swift in Sources */,
 				24E51A398D08FC2FC5A73831 /* HospitalModels.swift in Sources */,
 				2D1789D91039FAF08CDA35C6 /* MenuView.swift in Sources */,
+				072F701E4D0412E41B014487 /* ModelSnapshot.swift in Sources */,
 				FECFDC7730FBC64BB705F2E4 /* PieceType.swift in Sources */,
 				1F86D87643B63533F4D0831E /* ResultView.swift in Sources */,
 				9EE7FCFC69112686EF8B9E5A /* SettingsSheet.swift in Sources */,
@@ -246,6 +250,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4N9Z9JPM6C;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = ChessGM;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				"INFOPLIST_KEY_UISupportedInterfaceOrientations~ipad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -333,6 +338,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4N9Z9JPM6C;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = ChessGM;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				"INFOPLIST_KEY_UISupportedInterfaceOrientations~ipad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
