@@ -1,0 +1,424 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1F86D87643B63533F4D0831E /* ResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF5795279366730891D128E0 /* ResultView.swift */; };
+		2380CE3DD13302036276EEA6 /* ChessScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = E899F98682B1323FD42761BA /* ChessScene.swift */; };
+		24E51A398D08FC2FC5A73831 /* HospitalModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C05E7E2E9AF77EFE200B5FE /* HospitalModels.swift */; };
+		2D1789D91039FAF08CDA35C6 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57B700F22995663E2282C5C /* MenuView.swift */; };
+		39ADA93366C68BDCE50A16AC /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75337D653E97058280302B74 /* ContentView.swift */; };
+		426060D6B73F0F2353FA2AD6 /* ThemeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43AB162AADBF1CD21101C83 /* ThemeData.swift */; };
+		69B291EF61E017A74EFFA391 /* SoundEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90D50370FFB566732E4B5CE6 /* SoundEngine.swift */; };
+		6A591C33D85BB1C22CE9A7D7 /* SetupViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = E716371E215415669FDEB86C /* SetupViews.swift */; };
+		72ADA9C30D49510F1DEAEFAD /* ChessSceneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76AE9C13E40A5CED9B795249 /* ChessSceneView.swift */; };
+		86F8361ADE3E41B3E6BEC178 /* CarsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 261898F49A86E06DE56BBD20 /* CarsModels.swift */; };
+		8B4D232B8293CD43416D89E7 /* ChessGameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499041A70777F47C6D0C8AFC /* ChessGameViewModel.swift */; };
+		8C0F7C1D59FDE389C1F2470F /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3A77C57F4551D272B340CCD /* GameView.swift */; };
+		9EE7FCFC69112686EF8B9E5A /* SettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C8B68DA17BAA4855765827 /* SettingsSheet.swift */; };
+		C26B828354598D8D74D7ADE8 /* ChessMultiverse3DApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C1C476FAC940C5562D477C /* ChessMultiverse3DApp.swift */; };
+		D271285A84F8D8E762DE156F /* ChessEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D11FAB864D3E625B5F77FB79 /* ChessEngine.swift */; };
+		E0F452A3411AD4C738291227 /* HockeyModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45784ADDCB17767A73B0683A /* HockeyModels.swift */; };
+		F2EB6C5BC20DED4B9D477D96 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C700214B39DE170860047279 /* Assets.xcassets */; };
+		FECFDC7730FBC64BB705F2E4 /* PieceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2543EDD09C202FE423142BB /* PieceType.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		261898F49A86E06DE56BBD20 /* CarsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarsModels.swift; sourceTree = "<group>"; };
+		45784ADDCB17767A73B0683A /* HockeyModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HockeyModels.swift; sourceTree = "<group>"; };
+		499041A70777F47C6D0C8AFC /* ChessGameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessGameViewModel.swift; sourceTree = "<group>"; };
+		54C8B68DA17BAA4855765827 /* SettingsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSheet.swift; sourceTree = "<group>"; };
+		75337D653E97058280302B74 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		76AE9C13E40A5CED9B795249 /* ChessSceneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessSceneView.swift; sourceTree = "<group>"; };
+		90D50370FFB566732E4B5CE6 /* SoundEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundEngine.swift; sourceTree = "<group>"; };
+		9517EE56082EAB074B75271E /* ChessMultiverse3D.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ChessMultiverse3D.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9C05E7E2E9AF77EFE200B5FE /* HospitalModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HospitalModels.swift; sourceTree = "<group>"; };
+		B2543EDD09C202FE423142BB /* PieceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceType.swift; sourceTree = "<group>"; };
+		B57B700F22995663E2282C5C /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
+		C1C1C476FAC940C5562D477C /* ChessMultiverse3DApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessMultiverse3DApp.swift; sourceTree = "<group>"; };
+		C700214B39DE170860047279 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D11FAB864D3E625B5F77FB79 /* ChessEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessEngine.swift; sourceTree = "<group>"; };
+		D43AB162AADBF1CD21101C83 /* ThemeData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeData.swift; sourceTree = "<group>"; };
+		DF5795279366730891D128E0 /* ResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultView.swift; sourceTree = "<group>"; };
+		E716371E215415669FDEB86C /* SetupViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupViews.swift; sourceTree = "<group>"; };
+		E899F98682B1323FD42761BA /* ChessScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessScene.swift; sourceTree = "<group>"; };
+		F3A77C57F4551D272B340CCD /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		10811D8BDA79AECE56E96F5D /* Scene3D */ = {
+			isa = PBXGroup;
+			children = (
+				261898F49A86E06DE56BBD20 /* CarsModels.swift */,
+				E899F98682B1323FD42761BA /* ChessScene.swift */,
+				76AE9C13E40A5CED9B795249 /* ChessSceneView.swift */,
+				45784ADDCB17767A73B0683A /* HockeyModels.swift */,
+				9C05E7E2E9AF77EFE200B5FE /* HospitalModels.swift */,
+			);
+			path = Scene3D;
+			sourceTree = "<group>";
+		};
+		25132C36C203075272560DC1 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				499041A70777F47C6D0C8AFC /* ChessGameViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		3AC1B879BC53811BFFF6A7DB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9517EE56082EAB074B75271E /* ChessMultiverse3D.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		401A9F769068E2E5F074C2A0 /* Sound */ = {
+			isa = PBXGroup;
+			children = (
+				90D50370FFB566732E4B5CE6 /* SoundEngine.swift */,
+			);
+			path = Sound;
+			sourceTree = "<group>";
+		};
+		55A3F2045357314755C21715 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				F3A77C57F4551D272B340CCD /* GameView.swift */,
+				B57B700F22995663E2282C5C /* MenuView.swift */,
+				DF5795279366730891D128E0 /* ResultView.swift */,
+				54C8B68DA17BAA4855765827 /* SettingsSheet.swift */,
+				E716371E215415669FDEB86C /* SetupViews.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		781A704CDD7455BD7E241937 = {
+			isa = PBXGroup;
+			children = (
+				878EC27FE3675FD315C636F1 /* ChessMultiverse3D */,
+				3AC1B879BC53811BFFF6A7DB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		878EC27FE3675FD315C636F1 /* ChessMultiverse3D */ = {
+			isa = PBXGroup;
+			children = (
+				C700214B39DE170860047279 /* Assets.xcassets */,
+				C1C1C476FAC940C5562D477C /* ChessMultiverse3DApp.swift */,
+				75337D653E97058280302B74 /* ContentView.swift */,
+				99AA1BD786C2FC4DF55071AB /* Models */,
+				10811D8BDA79AECE56E96F5D /* Scene3D */,
+				401A9F769068E2E5F074C2A0 /* Sound */,
+				DC263480ED602DEF639A6B90 /* Theme */,
+				25132C36C203075272560DC1 /* ViewModels */,
+				55A3F2045357314755C21715 /* Views */,
+			);
+			path = ChessMultiverse3D;
+			sourceTree = "<group>";
+		};
+		99AA1BD786C2FC4DF55071AB /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				D11FAB864D3E625B5F77FB79 /* ChessEngine.swift */,
+				B2543EDD09C202FE423142BB /* PieceType.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		DC263480ED602DEF639A6B90 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				D43AB162AADBF1CD21101C83 /* ThemeData.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		6AD8D39F1AC0CA482CFF364E /* ChessMultiverse3D */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 477DCABC87C1B1F821B11075 /* Build configuration list for PBXNativeTarget "ChessMultiverse3D" */;
+			buildPhases = (
+				3503A79A40FDE995BD8310FB /* Sources */,
+				EF536ACC56A822A367FA83B9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ChessMultiverse3D;
+			packageProductDependencies = (
+			);
+			productName = ChessMultiverse3D;
+			productReference = 9517EE56082EAB074B75271E /* ChessMultiverse3D.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DE39F4B6D650D1F87D7AB224 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					6AD8D39F1AC0CA482CFF364E = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 2BCB467618E200CB271B8288 /* Build configuration list for PBXProject "ChessMultiverse3D" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 781A704CDD7455BD7E241937;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 3AC1B879BC53811BFFF6A7DB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				6AD8D39F1AC0CA482CFF364E /* ChessMultiverse3D */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		EF536ACC56A822A367FA83B9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F2EB6C5BC20DED4B9D477D96 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3503A79A40FDE995BD8310FB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86F8361ADE3E41B3E6BEC178 /* CarsModels.swift in Sources */,
+				D271285A84F8D8E762DE156F /* ChessEngine.swift in Sources */,
+				8B4D232B8293CD43416D89E7 /* ChessGameViewModel.swift in Sources */,
+				C26B828354598D8D74D7ADE8 /* ChessMultiverse3DApp.swift in Sources */,
+				2380CE3DD13302036276EEA6 /* ChessScene.swift in Sources */,
+				72ADA9C30D49510F1DEAEFAD /* ChessSceneView.swift in Sources */,
+				39ADA93366C68BDCE50A16AC /* ContentView.swift in Sources */,
+				8C0F7C1D59FDE389C1F2470F /* GameView.swift in Sources */,
+				E0F452A3411AD4C738291227 /* HockeyModels.swift in Sources */,
+				24E51A398D08FC2FC5A73831 /* HospitalModels.swift in Sources */,
+				2D1789D91039FAF08CDA35C6 /* MenuView.swift in Sources */,
+				FECFDC7730FBC64BB705F2E4 /* PieceType.swift in Sources */,
+				1F86D87643B63533F4D0831E /* ResultView.swift in Sources */,
+				9EE7FCFC69112686EF8B9E5A /* SettingsSheet.swift in Sources */,
+				6A591C33D85BB1C22CE9A7D7 /* SetupViews.swift in Sources */,
+				69B291EF61E017A74EFFA391 /* SoundEngine.swift in Sources */,
+				426060D6B73F0F2353FA2AD6 /* ThemeData.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		52E9D1D7D2616CD0C0605B81 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				"INFOPLIST_KEY_UISupportedInterfaceOrientations~ipad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.chessmultiverse.ChessMultiverse3D;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		CE8AAD9A04F2442B1AE337CC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		D6966D523B18C1B12121080E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				"INFOPLIST_KEY_UISupportedInterfaceOrientations~ipad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.chessmultiverse.ChessMultiverse3D;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E5C43CD6867F1647A4AA34FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2BCB467618E200CB271B8288 /* Build configuration list for PBXProject "ChessMultiverse3D" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CE8AAD9A04F2442B1AE337CC /* Debug */,
+				E5C43CD6867F1647A4AA34FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		477DCABC87C1B1F821B11075 /* Build configuration list for PBXNativeTarget "ChessMultiverse3D" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D6966D523B18C1B12121080E /* Debug */,
+				52E9D1D7D2616CD0C0605B81 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DE39F4B6D650D1F87D7AB224 /* Project object */;
+}

@@ -1,0 +1,25 @@
+name: ChessMultiverse3D
+options:
+  bundleIdPrefix: com.chessmultiverse
+  deploymentTarget:
+    iOS: "16.0"
+
+targets:
+  ChessMultiverse3D:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - ChessMultiverse3D
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.chessmultiverse.ChessMultiverse3D
+        CODE_SIGN_STYLE: Automatic
+        SWIFT_VERSION: 5.0
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_UISupportedInterfaceOrientations~ipad: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
