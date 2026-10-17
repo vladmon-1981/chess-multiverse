@@ -44,6 +44,8 @@ struct WebGameView: UIViewRepresentable {
             """, injectionTime: .atDocumentStart, forMainFrameOnly: true)
         config.userContentController.addUserScript(audioSession)
         if CommandLine.arguments.contains("-webLog") { WebLog.install(in: config) }
+        let tts = NativeSpeech()
+        config.userContentController.add(tts, name: "tts")
 
         let web = WKWebView(frame: .zero, configuration: config)
         web.isOpaque = false
@@ -54,6 +56,7 @@ struct WebGameView: UIViewRepresentable {
         web.scrollView.pinchGestureRecognizer?.isEnabled = false
         web.allowsLinkPreview = false
         if #available(iOS 16.4, *) { web.isInspectable = true }
+        tts.webView = web
 
         if let dir = Bundle.main.url(forResource: "Web", withExtension: nil) {
             web.loadFileURL(dir.appendingPathComponent("index.html"), allowingReadAccessTo: dir)
@@ -87,4 +90,60 @@ final class WebLog: NSObject, WKScriptMessageHandler {
     func userContentController(_ c: WKUserContentController, didReceive message: WKScriptMessage) {
         NSLog("[web] %@", String(describing: message.body))
     }
+}
+
+/// Голос диктора через системный синтезатор: игра шлёт {cmd: 'say', text, rate, pitch, gender}.
+/// В отличие от speechSynthesis внутри WebView, AVSpeechSynthesizer видит скачанные голоса
+/// («Юрий», улучшенная «Милена») и знает их пол — так у хоккея звучит мужской комментатор.
+final class NativeSpeech: NSObject, WKScriptMessageHandler, AVSpeechSynthesizerDelegate {
+    weak var webView: WKWebView?
+    private let synth = AVSpeechSynthesizer()
+
+    override init() {
+        super.init()
+        synth.delegate = self
+        if CommandLine.arguments.contains("-webLog") {
+            NSLog("[web] male=%@ female=%@", Self.voice(gender: "male")?.name ?? "-", Self.voice(gender: "female")?.name ?? "-")
+        }
+    }
+
+    func userContentController(_ c: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard let body = message.body as? [String: Any], let cmd = body["cmd"] as? String else { return }
+        if cmd == "cancel" { synth.stopSpeaking(at: .immediate); return }
+        guard cmd == "say", let text = body["text"] as? String, !text.isEmpty else { return }
+        synth.stopSpeaking(at: .immediate)
+        let u = AVSpeechUtterance(string: text)
+        u.voice = Self.voice(gender: body["gender"] as? String)
+        // rate из веба: 1 — обычная речь; у AVSpeech обычная речь — 0.5
+        let rate = (body["rate"] as? Double) ?? 1
+        u.rate = Float(min(max(Double(AVSpeechUtteranceDefaultSpeechRate) * rate, Double(AVSpeechUtteranceMinimumSpeechRate)), Double(AVSpeechUtteranceMaximumSpeechRate)))
+        u.pitchMultiplier = Float(min(max((body["pitch"] as? Double) ?? 1, 0.5), 2))
+        synth.speak(u)
+    }
+
+    /// Лучший по качеству русский голос нужного пола; без пола — лучший русский.
+    static func voice(gender: String?) -> AVSpeechSynthesisVoice? {
+        let ru = AVSpeechSynthesisVoice.speechVoices()
+            .filter { $0.language.hasPrefix("ru") }
+            .sorted { $0.quality.rawValue > $1.quality.rawValue }
+        if CommandLine.arguments.contains("-webLog") {
+            NSLog("[web] voices %@", ru.map { "\($0.name)/\($0.gender.rawValue)/q\($0.quality.rawValue)" }.joined(separator: ", "))
+        }
+        guard let gender, !gender.isEmpty else { return ru.first }
+        let male = gender == "male"
+        let byGender = ru.first { $0.gender == (male ? .male : .female) }
+        let byName = ru.first {
+            let n = $0.name.lowercased()
+            return male ? (n.contains("yuri") || n.contains("юри") || n.contains("юрий"))
+                        : (n.contains("milena") || n.contains("милена") || n.contains("katya") || n.contains("катя"))
+        }
+        return byGender ?? byName ?? ru.first
+    }
+
+    private func notify(_ kind: String) {
+        DispatchQueue.main.async { [weak self] in self?.webView?.evaluateJavaScript("window.__ttsEvent && __ttsEvent('\(kind)')") }
+    }
+    func speechSynthesizer(_ s: AVSpeechSynthesizer, didStart u: AVSpeechUtterance) { notify("start") }
+    func speechSynthesizer(_ s: AVSpeechSynthesizer, didFinish u: AVSpeechUtterance) { notify("end") }
+    func speechSynthesizer(_ s: AVSpeechSynthesizer, didCancel u: AVSpeechUtterance) { notify("end") }
 }

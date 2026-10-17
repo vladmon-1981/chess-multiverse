@@ -658,6 +658,16 @@
     class Voice {
         constructor() {
             this.synth = typeof window !== 'undefined' && window.speechSynthesis ? window.speechSynthesis : null;
+            // В iOS-приложении речь идёт через системный синтезатор (мост «tts»): WebView не видит
+            // скачанные голоса вроде «Юрия», а нативный AVSpeechSynthesizer знает их и их пол.
+            this.native = typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers &&
+                window.webkit.messageHandlers.tts ? window.webkit.messageHandlers.tts : null;
+            if (this.native) {
+                window.__ttsEvent = (kind) => {
+                    if (kind === 'start' && this.onstart) this.onstart();
+                    if (kind === 'end' && this.onend) this.onend();
+                };
+            }
             this.voice = null;
             this.enabled = store.get('chess-voice', true);
             this.onstart = null;
@@ -672,7 +682,7 @@
             }
         }
 
-        get available() { return !!this.synth; }
+        get available() { return !!(this.native || this.synth); }
 
         pick() {
             try {
@@ -704,7 +714,7 @@
 
         /** iOS разрешает речь только из жеста пользователя — «будим» синтезатор беззвучной фразой. */
         prime() {
-            if (this.primed || !this.synth || !this.enabled) return;
+            if (this.primed || this.native || !this.synth || !this.enabled) return;
             this.primed = true;
             try {
                 const u = new SpeechSynthesisUtterance(' ');
@@ -714,7 +724,15 @@
         }
 
         say(text, o = {}) {
-            if (!this.enabled || !this.synth || !text) return;
+            if (!this.enabled || !text) return;
+            if (this.native) {
+                const go = () => {
+                    try { this.native.postMessage({ cmd: 'say', text, rate: o.rate || 1, pitch: o.pitch || 1, gender: o.gender || '' }); } catch (e) { /* молчим */ }
+                };
+                if (o.delay) setTimeout(go, o.delay); else go();
+                return;
+            }
+            if (!this.synth) return;
             const go = () => {
                 try {
                     this.synth.cancel();
@@ -734,6 +752,7 @@
         }
 
         cancel() {
+            try { if (this.native) this.native.postMessage({ cmd: 'cancel' }); } catch (e) { /* ничего */ }
             try { if (this.synth) this.synth.cancel(); } catch (e) { /* ничего */ }
         }
     }
