@@ -37,6 +37,13 @@ struct WebGameView: UIViewRepresentable {
             })();
             """, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
         config.userContentController.addUserScript(noZoom)
+        // Web Audio в WKWebView по умолчанию идёт как «ambient» и глохнет при беззвучном режиме
+        // (переключатель на боку). Audio Session API (iOS 17+) переводит его в «playback».
+        let audioSession = WKUserScript(source: """
+            try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+            """, injectionTime: .atDocumentStart, forMainFrameOnly: true)
+        config.userContentController.addUserScript(audioSession)
+        if CommandLine.arguments.contains("-webLog") { WebLog.install(in: config) }
 
         let web = WKWebView(frame: .zero, configuration: config)
         web.isOpaque = false
@@ -57,3 +64,27 @@ struct WebGameView: UIViewRepresentable {
     func updateUIView(_ web: WKWebView, context: Context) {}
 }
 
+
+/// Отладка (запуск с аргументом -webLog): раз в 3 с пишет в системный лог состояние Web Audio —
+/// так звук проверяется в симуляторе без ушей: `log stream --predicate 'eventMessage CONTAINS "[web]"'`.
+final class WebLog: NSObject, WKScriptMessageHandler {
+    static func install(in config: WKWebViewConfiguration) {
+        config.userContentController.add(WebLog(), name: "log")
+        config.userContentController.addUserScript(WKUserScript(source: """
+            (function () {
+              var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+              var list = [];
+              var W = function (o) { var c = new AC(o); list.push(c); return c; };
+              W.prototype = AC.prototype;
+              window.AudioContext = W; window.webkitAudioContext = W;
+              setInterval(function () {
+                window.webkit.messageHandlers.log.postMessage('audio ' + list.map(function (c) { return c.state + '@' + c.currentTime.toFixed(1); }).join(',') +
+                  ' session=' + (navigator.audioSession ? navigator.audioSession.type : 'none'));
+              }, 3000);
+            })();
+            """, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+    }
+    func userContentController(_ c: WKUserContentController, didReceive message: WKScriptMessage) {
+        NSLog("[web] %@", String(describing: message.body))
+    }
+}

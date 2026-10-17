@@ -736,7 +736,10 @@
             this.voice.onstart = () => this.duck(true);
             this.voice.onend = () => this.duck(false);
             const unlock = () => this.ensure();
+            // iOS (Safari и WKWebView) разрешает запуск звука только из touchend/click, не из pointerdown
             window.addEventListener('pointerdown', unlock, { passive: true });
+            window.addEventListener('touchend', unlock, { passive: true });
+            window.addEventListener('click', unlock);
             window.addEventListener('keydown', unlock);
         }
 
