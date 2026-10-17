@@ -679,10 +679,21 @@
                 const all = this.synth.getVoices() || [];
                 const ru = all.filter((v) => /^ru/i.test(v.lang));
                 const score = (v) => (/natural|online|neural/i.test(v.name) ? 4 : 0) + (/google/i.test(v.name) ? 3 : 0) +
+                    (/enhanced|premium|улучш|высок/i.test(v.name) ? 5 : 0) +
                     (/milena|irina|svetlana|dariya|yuri|pavel|dmitry/i.test(v.name) ? 2 : 0) + (v.localService ? 0 : 1);
                 ru.sort((a, b) => score(b) - score(a));
+                this.ru = ru;
                 this.voice = ru[0] || null;
             } catch (e) { this.voice = null; }
+        }
+
+        /** Лучший русский голос нужного пола; если такого нет — голос по умолчанию. */
+        voiceFor(gender) {
+            if (!gender || !this.ru || !this.ru.length) return this.voice;
+            const re = gender === 'male'
+                ? /yuri|юрий|pavel|павел|dmitr|дмитр|maxim|максим|aleksandr|александр|ivan|иван|artem|артём|boris|борис|denis|денис/i
+                : /milena|милена|irina|ирина|svetlana|светлана|dariya|дария|alena|алёна|ekaterina|екатерина|katya|катя|google/i;
+            return this.ru.find((v) => re.test(v.name)) || this.voice;
         }
 
         setEnabled(v) {
@@ -709,7 +720,8 @@
                     this.synth.cancel();
                     const u = new SpeechSynthesisUtterance(text);
                     u.lang = 'ru-RU';
-                    if (this.voice) u.voice = this.voice;
+                    const voice = this.voiceFor(o.gender);
+                    if (voice) u.voice = voice;
                     u.rate = o.rate || 1;
                     u.pitch = o.pitch || 1;
                     u.volume = 1;

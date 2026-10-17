@@ -454,7 +454,7 @@
             }
             const T = THEMES[this.theme];
             this.sound.play('start');
-            this.sound.say(T.voice.start, { rate: T.voice.rate, pitch: T.voice.pitch, delay: 350 });
+            this.speak(T, T.voice.start, 350);
             if (this.isAITurn()) this.scheduleAI(this.theme === 'cars' ? 2300 : 1200);
         }
 
@@ -624,11 +624,44 @@
             document.body.classList.remove('is-cine');
             if (token !== this.gameToken) return true;
             this.busy = false;
-            this.afterMove();
+            this.afterMove(move);
             return true;
         }
 
-        afterMove() {
+        /** Реплика диктора темы: строка, массив вариантов (берётся случайный) или функция. */
+        speak(T, line, delay = 0, ...args) {
+            if (Array.isArray(line)) line = line[Math.floor(Math.random() * line.length)];
+            if (typeof line === 'function') line = line(...args);
+            if (!line) return false;
+            this.sound.say(line, { rate: T.voice.rate, pitch: T.voice.pitch, gender: T.voice.gender, delay });
+            return true;
+        }
+
+        /**
+         * Комментарий к ходу (есть не у всех тем — в хоккее ведёт репортаж комментатор).
+         * Шах, превращение и крупное взятие комментируются всегда, обычные ходы — через раз.
+         */
+        commentMove(T, move) {
+            const C = T.voice.comments;
+            if (!C || !move) return false;
+            const opp = move.color === 'w' ? 'b' : 'w';
+            const ctx = {
+                side: T.sides[move.color], opp: T.sides[opp],
+                actor: T.pieceNames[move.color][move.piece],
+                victim: move.captured ? T.pieceNames[opp][move.captured] : ''
+            };
+            let pool = null;
+            if (this.game.isCheck()) pool = C.check;
+            else if (move.promotion) pool = C.promote;
+            else if (move.captured && PIECE_VALUES[move.captured] >= 5) pool = C.bigCapture;
+            else if (move.captured) pool = Math.random() < 0.75 ? C.capture : null;
+            else if (move.flags.includes('k') || move.flags.includes('q')) pool = C.castle;
+            else if (Math.random() < (C.moveChance || 0.3)) pool = C.move;
+            if (!pool) return false;
+            return this.speak(T, pool, this.game.isCheck() ? 250 : 450, ctx);
+        }
+
+        afterMove(move) {
             this.updateHistory();
             this.updatePlayers();
             this.updateControls();
@@ -637,11 +670,12 @@
                 return;
             }
             const T = THEMES[this.theme];
+            const commented = this.commentMove(T, move);
             if (this.game.isCheck()) {
                 this.view.showCheck(this.findKing(this.game.turn()));
                 this.sound.play('check', 0.05);
                 this.banner(T.texts.checkBanner, 'check');
-                this.sound.say(T.voice.check, { rate: T.voice.rate, pitch: T.voice.pitch, delay: 250 });
+                if (!commented) this.speak(T, T.voice.check, 250);
             }
             if (this.mode === 'pvp' && this.autoFlip) this.setOrientation(this.game.turn());
             this.updateStatus();
@@ -799,10 +833,10 @@
             const winnerName = result.winner ? this.names[result.winner] : '';
             let line;
             if (outcome === 'draw') line = T.voice.draw;
-            else if (this.mode === 'pvp') line = T.voice.pvpWin(winnerName);
+            else if (this.mode === 'pvp') line = T.voice.pvpWin;
             else if (result.type === 'resign') line = outcome === 'win' ? T.voice.resignWin : T.voice.resignLose;
             else line = outcome === 'win' ? T.voice.win : T.voice.lose;
-            this.sound.say(line, { rate: T.voice.rate, pitch: T.voice.pitch, delay: outcome === 'lose' ? 1500 : 1000 });
+            this.speak(T, line, outcome === 'lose' ? 1500 : 1000, winnerName);
 
             if (outcome === 'win') {
                 this.fx.confetti(this.theme, { side: result.winner });
