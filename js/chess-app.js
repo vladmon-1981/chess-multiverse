@@ -17,17 +17,14 @@
         set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* приватный режим браузера */ } }
     };
 
-    const DIFF_NAMES = { easy: 'Лёгкий', medium: 'Средний', hard: 'Тяжёлый' };
-    const ROLE_NAMES = { k: 'Король', q: 'Ферзь', r: 'Ладья', b: 'Слон', n: 'Конь', p: 'Пешка' };
+    const DIFF_NAMES = { easy: tr('Лёгкий'), medium: tr('Средний'), hard: tr('Тяжёлый') };
+    const ROLE_NAMES = { k: tr('Король'), q: tr('Ферзь'), r: tr('Ладья'), b: tr('Слон'), n: tr('Конь'), p: tr('Пешка') };
     const GLYPHS = { w: { k: '♔', q: '♕', r: '♖', b: '♗', n: '♘', p: '♙' }, b: { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' } };
-    const PRESETS = [['normal', 'Обычный ракурс'], ['top', 'Вид сверху'], ['low', 'Кинематографичный ракурс']];
+    const PRESETS = [['normal', tr('Обычный ракурс')], ['top', tr('Вид сверху')], ['low', tr('Кинематографичный ракурс')]];
 
-    function plural(n, one, few, many) {
-        const m10 = n % 10, m100 = n % 100;
-        if (m10 === 1 && m100 !== 11) return one;
-        if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
-        return many;
-    }
+    const plural = (n, one, few, many) => I18N.plural(n, one, few, many);
+    /** «N ход / хода / ходов» или «N move / moves» */
+    const movesWord = (n) => I18N.plural(n, 'ход', 'хода', 'ходов', 'move', 'moves');
 
     function webglAvailable() {
         try {
@@ -60,7 +57,7 @@
             // Кинематографичные ходы — по желанию, спецэффекты взятия — по умолчанию включены
             this.cinematic = store.get('chess-cinema', '0') === '1';
             this.captureFx = store.get('chess-fx', '1') === '1';
-            this.names = { w: 'Белые', b: 'Чёрные' };
+            this.names = { w: tr('Белые'), b: tr('Чёрные') };
             this.orientation = 'w';
             this.selected = null;
             this.targets = [];
@@ -162,6 +159,13 @@
             $('#menuBtn').addEventListener('click', () => this.backToMenu());
             $('#brandBtn').addEventListener('click', () => this.backToMenu());
             $$('.theme-switch button').forEach((b) => b.addEventListener('click', () => this.chooseTheme(b.dataset.theme)));
+            $('#historyToggle').addEventListener('click', () => {
+                const list = $('#moveList');
+                const open = list.hidden;
+                list.hidden = !open;
+                $('#historyToggle').textContent = open ? tr('Свернуть') : tr('Раскрыть');
+                $('#historyToggle').setAttribute('aria-expanded', String(open));
+            });
 
             // Итоги
             $('#againBtn').addEventListener('click', () => { this.hideResult(); this.startGame(this.mode, this.difficulty, true); });
@@ -172,15 +176,15 @@
             $('#soundBtn').addEventListener('click', () => {
                 this.sound.setEnabled(!this.sound.enabled);
                 this.updateToggles();
-                this.toast(this.sound.enabled ? 'Звуковые эффекты включены' : 'Звуковые эффекты выключены');
+                this.toast(this.sound.enabled ? tr('Звуковые эффекты включены') : tr('Звуковые эффекты выключены'));
                 if (this.sound.enabled) this.sound.play('uiClick');
             });
             $('#voiceBtn').addEventListener('click', () => {
-                if (!this.sound.voice.available) { this.toast('В этом браузере нет синтеза речи'); return; }
+                if (!this.sound.voice.available) { this.toast(tr('В этом браузере нет синтеза речи')); return; }
                 this.sound.voice.setEnabled(!this.sound.voice.enabled);
                 this.updateToggles();
-                this.toast(this.sound.voice.enabled ? 'Голос диктора включён' : 'Голос диктора выключен');
-                if (this.sound.voice.enabled) this.sound.say('Диктор на месте!', { rate: 1.05 });
+                this.toast(this.sound.voice.enabled ? tr('Голос диктора включён') : tr('Голос диктора выключен'));
+                if (this.sound.voice.enabled) this.sound.say(tr('Диктор на месте!'), { rate: 1.05 });
             });
             $('#fullscreenBtn').addEventListener('click', () => this.toggleFullscreen());
 
@@ -211,7 +215,7 @@
                 if (!this.sound.voice.available) return;
                 this.sound.voice.setEnabled(e.target.checked);
                 this.updateToggles();
-                if (this.sound.voice.enabled) this.sound.say('Диктор на месте!', { rate: 1.05 });
+                if (this.sound.voice.enabled) this.sound.say(tr('Диктор на месте!'), { rate: 1.05 });
             });
 
             // Модальные окна
@@ -249,7 +253,7 @@
             $('#autoFlip').checked = this.autoFlip;
         }
 
-        playerName() { return $('#playerName').value.trim() || 'Игрок'; }
+        playerName() { return $('#playerName').value.trim() || tr('Игрок'); }
 
         saveName() { store.set('chess-player-name', $('#playerName').value.trim()); }
 
@@ -257,7 +261,7 @@
             $('#soundBtn').setAttribute('aria-pressed', String(this.sound.enabled));
             const v = $('#voiceBtn');
             v.setAttribute('aria-pressed', String(this.sound.voice.available && this.sound.voice.enabled));
-            if (!this.sound.voice.available) v.title = 'Голос диктора недоступен в этом браузере';
+            if (!this.sound.voice.available) v.title = tr('Голос диктора недоступен в этом браузере');
             $$('#colorChoice button').forEach((b) => {
                 const on = b.dataset.color === this.colorChoice;
                 b.classList.toggle('is-active', on);
@@ -285,7 +289,7 @@
             this.cinematic = !!on;
             store.set('chess-cinema', this.cinematic ? '1' : '0');
             this.updateToggles();
-            if (announce) this.toast(this.cinematic ? '🎬 Кинематографичные ходы включены' : 'Кинематографичные ходы выключены', 1600);
+            if (announce) this.toast(this.cinematic ? tr('🎬 Кинематографичные ходы включены') : tr('Кинематографичные ходы выключены'), 1600);
         }
 
         setCaptureFx(on) {
@@ -326,7 +330,7 @@
                 if (!d.fullscreenElement) (d.documentElement.requestFullscreen || d.documentElement.webkitRequestFullscreen).call(d.documentElement);
                 else (d.exitFullscreen || d.webkitExitFullscreen).call(d);
             } catch (e) {
-                this.toast('Полноэкранный режим недоступен');
+                this.toast(tr('Полноэкранный режим недоступен'));
             }
         }
 
@@ -341,7 +345,7 @@
             wipe.classList.add('run');
             if (inGame) await sleep(380);
             await this.applyTheme(key);
-            if (inGame) this.toast(`Вселенная: ${THEMES[key].name}`);
+            if (inGame) this.toast(tr('Вселенная: {name}', { name: THEMES[key].name }));
         }
 
         async applyTheme(key, o = {}) {
@@ -389,7 +393,7 @@
                 this.view = new Board2D(host, handlers);
                 $('#viewBtn').disabled = true;
                 $('#camControls').hidden = true;
-                this.toast('3D-режим недоступен в этом браузере — включена плоская доска', 4000);
+                this.toast(tr('3D-режим недоступен в этом браузере — включена плоская доска'), 4000);
             }
             return this.view;
         }
@@ -402,11 +406,11 @@
                 this.humanColor = this.colorChoice === 'random' ? (Math.random() < 0.5 ? 'w' : 'b') : this.colorChoice;
                 this.names = {};
                 this.names[this.humanColor] = name;
-                this.names[other(this.humanColor)] = `Компьютер · ${DIFF_NAMES[this.difficulty]}`;
+                this.names[other(this.humanColor)] = tr('Компьютер · {level}', { level: DIFF_NAMES[this.difficulty] });
                 this.orientation = this.humanColor;
             } else {
                 if (!again) {
-                    const w = $('#whiteName').value.trim() || name, b = $('#blackName').value.trim() || 'Игрок 2';
+                    const w = $('#whiteName').value.trim() || name, b = $('#blackName').value.trim() || tr('Игрок 2');
                     store.set('chess-pvp-white', w);
                     store.set('chess-pvp-black', b);
                     this.names = { w, b };
@@ -448,8 +452,8 @@
                 store.set('chess-cam-hint', '1');
                 const touch = window.matchMedia && matchMedia('(pointer: coarse)').matches;
                 const hint = touch
-                    ? 'Доску можно крутить: веди пальцем мимо фигур. Два пальца — приблизить и повернуть'
-                    : 'Доску можно крутить: тяни мимо фигур или правой кнопкой. Колёсико — приблизить';
+                    ? tr('Доску можно крутить: веди пальцем мимо фигур. Два пальца — приблизить и повернуть')
+                    : tr('Доску можно крутить: тяни мимо фигур или правой кнопкой. Колёсико — приблизить');
                 setTimeout(() => { if (token === this.gameToken) this.toast(hint, 4500); }, 1500);
             }
             const T = THEMES[this.theme];
@@ -460,7 +464,7 @@
 
         async newGame() {
             if (!this.game) return;
-            if (this.game.history().length && !this.over && !(await this.confirm('Начать новую партию? Текущая будет потеряна.'))) return;
+            if (this.game.history().length && !this.over && !(await this.confirm(tr('Начать новую партию? Текущая будет потеряна.')))) return;
             this.hideResult();
             this.startGame(this.mode, this.difficulty, true);
         }
@@ -468,7 +472,7 @@
         async backToMenu(force = false) {
             if (document.body.dataset.screen !== 'game') { this.showScreen('menu'); return; }
             if (!force && this.game && this.game.history().length && !this.over &&
-                !(await this.confirm('Выйти в меню? Текущая партия будет потеряна.'))) return;
+                !(await this.confirm(tr('Выйти в меню? Текущая партия будет потеряна.')))) return;
             this.cancelAI();
             this.gameToken++;
             this.hideResult();
@@ -500,7 +504,7 @@
         onDown(sq) {
             this.pressWasSelected = !!sq && sq === this.selected;
             if (!this.canInteract()) {
-                if (this.game && !this.over && sq && this.thinking) this.toast('Подожди, соперник думает…', 1200);
+                if (this.game && !this.over && sq && this.thinking) this.toast(tr('Подожди, соперник думает…'), 1200);
                 return false;
             }
             if (!sq) { this.deselect(); return false; }
@@ -547,7 +551,10 @@
             const T = THEMES[this.theme];
             const pn = T.pieceNames[p.color][p.type];
             $('#pieceHint').textContent = this.theme === 'classic'
-                ? `${pn} · ${marks.length ? plural(marks.length, 'доступен', 'доступно', 'доступно') + ' ' + marks.length + ' ' + plural(marks.length, 'ход', 'хода', 'ходов') : 'ходов нет'}`
+                ? (marks.length
+                    ? (I18N.lang === 'en' ? tr('{pn} · доступно ходов: {n}', { pn, n: marks.length, moves: movesWord(marks.length) })
+                        : `${pn} · ${plural(marks.length, 'доступен', 'доступно', 'доступно')} ${marks.length} ${movesWord(marks.length)}`)
+                    : tr('{pn} · ходов нет', { pn }))
                 : `${pn} — ${ROLE_NAMES[p.type].toLowerCase()}`;
             if (!marks.length) this.sound.play('illegal');
         }
@@ -749,7 +756,7 @@
             this.syncBoardMarks();
             this.lastStatus = '';
             this.updateAll();
-            this.toast(n === 2 ? 'Отменены твой ход и ответ соперника' : 'Ход отменён', 1500);
+            this.toast(n === 2 ? tr('Отменены твой ход и ответ соперника') : tr('Ход отменён'), 1500);
         }
 
         flip() {
@@ -776,7 +783,7 @@
         async resign() {
             if (!this.game || this.over) return;
             const who = this.mode === 'pve' ? this.humanColor : this.game.turn();
-            const q = this.mode === 'pve' ? 'Сдаться и признать поражение?' : `${this.names[who]} сдаётся?`;
+            const q = this.mode === 'pve' ? tr('Сдаться и признать поражение?') : tr('{name} сдаётся?', { name: this.names[who] });
             if (!(await this.confirm(q))) return;
             if (this.over) return;
             this.cancelAI();
@@ -798,10 +805,10 @@
             let result;
             if (forced) result = forced;
             else if (g.isCheckmate()) result = { type: 'mate', winner: other(g.turn()) };
-            else if (g.isStalemate()) result = { type: 'draw', reason: 'Пат' };
-            else if (g.isInsufficientMaterial()) result = { type: 'draw', reason: 'Недостаточно фигур для мата' };
-            else if (g.isThreefoldRepetition()) result = { type: 'draw', reason: 'Троекратное повторение позиции' };
-            else result = { type: 'draw', reason: 'Правило 50 ходов' };
+            else if (g.isStalemate()) result = { type: 'draw', reason: tr('Пат') };
+            else if (g.isInsufficientMaterial()) result = { type: 'draw', reason: tr('Недостаточно фигур для мата') };
+            else if (g.isThreefoldRepetition()) result = { type: 'draw', reason: tr('Троекратное повторение позиции') };
+            else result = { type: 'draw', reason: tr('Правило 50 ходов') };
             this.over = result;
             this.thinking = false;
             this.deselect();
@@ -860,14 +867,14 @@
             } else if (this.mode === 'pvp') {
                 title = T.texts.pvpWin.title;
                 sub = result.type === 'resign'
-                    ? `${this.names[other(result.winner)]} сдаётся. ${this.names[result.winner]} — победитель!`
+                    ? tr('{loser} сдаётся. {winner} — победитель!', { loser: this.names[other(result.winner)], winner: this.names[result.winner] })
                     : T.texts.pvpWin.sub(this.names[result.winner]);
             } else if (outcome === 'win') {
                 title = T.texts.win.title;
-                sub = result.type === 'resign' ? 'Соперник признал поражение!' : T.texts.win.sub;
+                sub = result.type === 'resign' ? tr('Соперник признал поражение!') : T.texts.win.sub;
             } else {
                 title = T.texts.lose.title;
-                sub = result.type === 'resign' ? 'Партия сдана — в следующий раз получится!' : T.texts.lose.sub;
+                sub = result.type === 'resign' ? tr('Партия сдана — в следующий раз получится!') : T.texts.lose.sub;
             }
             // Буквы вылетают по одной; слова не разрываются при переносе строки
             const titleEl = $('#resultTitle');
@@ -891,8 +898,8 @@
             $('#resultLoser').src = this.sprite(other(winner), 'k');
             const moves = Math.ceil(this.game.history().length / 2);
             const secs = Math.round((Date.now() - (this.startedAt || Date.now())) / 1000);
-            const stats = [`${moves} ${plural(moves, 'ход', 'хода', 'ходов')}`, `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`];
-            if (this.mode === 'pve') stats.push(`Уровень: ${DIFF_NAMES[this.difficulty]}`);
+            const stats = [`${moves} ${movesWord(moves)}`, `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`];
+            if (this.mode === 'pve') stats.push(tr('Уровень: {level}', { level: DIFF_NAMES[this.difficulty] }));
             $('#resultStats').replaceChildren(...stats.map((t) => { const s = document.createElement('span'); s.textContent = t; return s; }));
             $('#resultSub').textContent = '';
             modal.hidden = false;
@@ -1010,7 +1017,7 @@
                 if (avatar.getAttribute('src') !== url) avatar.src = url;
                 card.querySelector('.pc-name').textContent = this.names[color];
                 const isAI = this.mode === 'pve' && color !== this.humanColor;
-                card.querySelector('.pc-sub').textContent = `${T.sides[color]}${this.theme === 'classic' ? '' : color === 'w' ? ' · белые' : ' · чёрные'}${isAI ? '' : this.mode === 'pve' ? ' · это ты' : ''}`;
+                card.querySelector('.pc-sub').textContent = `${T.sides[color]}${this.theme === 'classic' ? '' : color === 'w' ? tr(' · белые') : tr(' · чёрные')}${isAI ? '' : this.mode === 'pve' ? tr(' · это ты') : ''}`;
                 card.classList.toggle('is-turn', !this.over && this.game.turn() === color);
                 card.classList.toggle('is-thinking', this.thinking && isAI);
                 const cap = card.querySelector('.pc-captured');
@@ -1043,7 +1050,7 @@
                 const li = document.createElement('li');
                 const s = document.createElement('span');
                 s.className = 'empty';
-                s.textContent = 'Ходов пока нет — начинают белые';
+                s.textContent = tr('Ходов пока нет — начинают белые');
                 li.appendChild(s);
                 list.appendChild(li);
             }
@@ -1066,22 +1073,22 @@
             }
             list.scrollTop = list.scrollHeight;
             const full = Math.ceil(moves.length / 2);
-            $('#moveCount').textContent = moves.length ? `${full} ${plural(full, 'ход', 'хода', 'ходов')}` : '';
+            $('#moveCount').textContent = moves.length ? `${full} ${movesWord(full)}` : '';
         }
 
         updateStatus() {
             if (!this.game) return;
             const T = THEMES[this.theme];
             const turn = this.game.turn();
-            let text, kicker = `Ход ${this.game.moveNumber()} · ${T.sides[turn]}`;
+            let text, kicker = tr('Ход {n} · {side}', { n: this.game.moveNumber(), side: T.sides[turn] });
             const card = $('.status-card');
             card.classList.toggle('is-check', !this.over && this.game.isCheck());
             if (this.over) {
                 const r = this.over;
-                kicker = 'Партия окончена';
+                kicker = tr('Партия окончена');
                 if (r.type === 'draw') text = `${T.texts.draw.title}: ${r.reason.toLowerCase()}`;
-                else if (r.type === 'resign') text = `${this.names[other(r.winner)]} сдаётся`;
-                else text = `${T.texts.mateBanner} Победа: ${this.names[r.winner]}`;
+                else if (r.type === 'resign') text = tr('{loser} сдаётся', { loser: this.names[other(r.winner)] });
+                else text = tr('{mate} Победа: {name}', { mate: T.texts.mateBanner, name: this.names[r.winner] });
             } else if (this.thinking) {
                 text = T.texts.thinking + '…';
             } else if (this.mode === 'pve') {
@@ -1089,7 +1096,7 @@
                 else text = T.texts.thinking + '…';
             } else {
                 const nm = this.names[turn];
-                text = this.game.isCheck() ? `${T.texts.checkBanner} ${nm}, спасай короля!` : `${nm}, твой ход`;
+                text = this.game.isCheck() ? tr('{banner} {name}, спасай короля!', { banner: T.texts.checkBanner, name: nm }) : tr('{name}, твой ход', { name: nm });
             }
             $('#statusKicker').textContent = kicker;
             if (text !== this.lastStatus) {

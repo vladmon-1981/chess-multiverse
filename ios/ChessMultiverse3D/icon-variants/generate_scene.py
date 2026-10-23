@@ -191,7 +191,7 @@ def paint_piece(layer, cx, base, s, col, hi, outline=None, outline_px=0):
     return paint(layer, hprof(shade, cx - R, cx + R), m)
 
 
-# ---------- машинка «Тачки»: красная, с молнией ----------
+# ---------- машинка «Гонки»: красная, с золотой гоночной полосой ----------
 
 CAR_OX, CAR_S = 14, 0.8
 
@@ -242,10 +242,10 @@ def paint_car(layer):
                                                     car_line([(342, 30), (346, 62)], 6)))
     # белая гоночная полоса вдоль борта
     layer = paint(layer, solid((255, 255, 255)), car_line([(36, 104), (300, 98)], 5))
-    # жёлтая молния на борту
-    bolt = [(190, 60), (164, 100), (182, 100), (168, 132), (210, 86), (192, 86), (206, 60)]
-    layer = paint(layer, solid((70, 46, 0)), dilate(car_poly(bolt), 7))
-    layer = paint(layer, solid((255, 210, 31)), car_poly(bolt))
+    # золотая гоночная полоса вдоль борта (вместо молнии, 23.10.2026)
+    stripe = car_line([(30, 118), (306, 112)], 10)
+    layer = paint(layer, solid((70, 46, 0)), dilate(stripe, 3))
+    layer = paint(layer, solid((255, 210, 31)), stripe)
     # колёса и диски
     tyre = union(car_ell(56, 90, 116, 150), car_ell(240, 90, 300, 150))
     layer = paint(layer, solid((21, 21, 26)), tyre)
@@ -256,7 +256,7 @@ def paint_car(layer):
     return layer
 
 
-# ---------- доктор-лиса в халате (Animal Hospital) ----------
+# ---------- доктор-лиса в халате (Ветклиника) ----------
 
 def fox_parts(cx):
     """Список (маска, заливка) в порядке рисования."""

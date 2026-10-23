@@ -2,7 +2,7 @@
  * Звук и озвучка.
  * Все эффекты и музыкальные заставки синтезируются через Web Audio API (без файлов):
  * у каждой вселенной свой набор — дерево и колокола в «Классике», моторы и клаксоны
- * в «Тачках», кардиомонитор и маримба в «Animal Hospital», коньки, свисток судьи,
+ * в «Гонках», кардиомонитор и маримба в «Ветклинике», коньки, свисток судьи,
  * удары о борт, сирена гола и стадионный орган в «Хоккее».
  * Диктор говорит по-русски через Web Speech API (speechSynthesis), если он есть в браузере.
  */
@@ -687,10 +687,11 @@
         pick() {
             try {
                 const all = this.synth.getVoices() || [];
-                const ru = all.filter((v) => /^ru/i.test(v.lang));
+                const EN = window.I18N && I18N.lang === 'en';
+                const ru = all.filter((v) => (EN ? /^en/i.test(v.lang) : /^ru/i.test(v.lang)));
                 const score = (v) => (/natural|online|neural/i.test(v.name) ? 4 : 0) + (/google/i.test(v.name) ? 3 : 0) +
                     (/enhanced|premium|улучш|высок/i.test(v.name) ? 5 : 0) +
-                    (/milena|irina|svetlana|dariya|yuri|pavel|dmitry/i.test(v.name) ? 2 : 0) + (v.localService ? 0 : 1);
+                    (/milena|irina|svetlana|dariya|yuri|pavel|dmitry|samantha|daniel|alex|ava|allison/i.test(v.name) ? 2 : 0) + (v.localService ? 0 : 1);
                 ru.sort((a, b) => score(b) - score(a));
                 this.ru = ru;
                 this.voice = ru[0] || null;
@@ -700,6 +701,13 @@
         /** Лучший русский голос нужного пола; если такого нет — голос по умолчанию. */
         voiceFor(gender) {
             if (!gender || !this.ru || !this.ru.length) return this.voice;
+            const EN = window.I18N && I18N.lang === 'en';
+            if (EN) {
+                const reEn = gender === 'male'
+                    ? /daniel|aaron|arthur|alex|fred|oliver|tom|james|google uk english male|\bmale\b/i
+                    : /samantha|ava|allison|nicky|karen|serena|susan|zoe|google us english|\bfemale\b/i;
+                return this.ru.find((v) => reEn.test(v.name)) || this.voice;
+            }
             const re = gender === 'male'
                 ? /yuri|юрий|pavel|павел|dmitr|дмитр|maxim|максим|aleksandr|александр|ivan|иван|artem|артём|boris|борис|denis|денис/i
                 : /milena|милена|irina|ирина|svetlana|светлана|dariya|дария|alena|алёна|ekaterina|екатерина|katya|катя|google/i;
@@ -727,7 +735,7 @@
             if (!this.enabled || !text) return;
             if (this.native) {
                 const go = () => {
-                    try { this.native.postMessage({ cmd: 'say', text, rate: o.rate || 1, pitch: o.pitch || 1, gender: o.gender || '' }); } catch (e) { /* молчим */ }
+                    try { this.native.postMessage({ cmd: 'say', text, rate: o.rate || 1, pitch: o.pitch || 1, gender: o.gender || '', lang: (window.I18N && I18N.lang) || 'ru' }); } catch (e) { /* молчим */ }
                 };
                 if (o.delay) setTimeout(go, o.delay); else go();
                 return;
@@ -737,7 +745,7 @@
                 try {
                     this.synth.cancel();
                     const u = new SpeechSynthesisUtterance(text);
-                    u.lang = 'ru-RU';
+                    u.lang = (window.I18N && I18N.lang === 'en') ? 'en-US' : 'ru-RU';
                     const voice = this.voiceFor(o.gender);
                     if (voice) u.voice = voice;
                     u.rate = o.rate || 1;

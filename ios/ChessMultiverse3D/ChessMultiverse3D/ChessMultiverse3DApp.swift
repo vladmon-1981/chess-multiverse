@@ -2,7 +2,11 @@ import SwiftUI
 
 @main
 struct ChessMultiverse3DApp: App {
-    init() { ModelSnapshot.runIfRequested() }
+    init() {
+        #if DEBUG
+        ModelSnapshot.runIfRequested()
+        #endif
+    }
     var body: some Scene {
         WindowGroup {
             ContentView()

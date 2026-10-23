@@ -1,6 +1,6 @@
 /*
- * Тема «Тачки»: мультяшные машинки с глазами на лобовом стекле и ртом на бампере.
- * Белые — команда Радиатор-Спрингс, чёрные — соперники.
+ * Тема «Гонки»: мультяшные машинки с глазами на лобовом стекле и ртом на бампере.
+ * Белые — команда «Вираж», чёрные — соперники.
  * Все модели процедурные: кузов и кабина — скруглённые коробки с атласом-раскраской (common.js).
  */
 (function () {
@@ -244,33 +244,22 @@
         ctx.restore();
     }
 
-    function boltPath(ctx, x, y, len, h, flip) {
-        // Молния вдоль оси x: от x до x+len, высота h
-        const p = [
-            [0, 0.1], [0.46, 0.35], [0.4, 0.05], [1, 0.62], [0.52, 0.42], [0.58, 0.8], [0.02, 0.36]
-        ];
-        ctx.beginPath();
-        p.forEach(([px, py], i) => {
-            const X = flip ? x + len - px * len : x + px * len;
-            const Y = y + py * h;
-            if (i === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
-        });
-        ctx.closePath();
-    }
-
-    function drawBolt(ctx, x, y, len, h, flip) {
+    /**
+     * Гоночная полоса (золотая): прямоугольник x..x+w, y..y+h с градиентом поперёк короткой стороны
+     * и тонким тёмно-оранжевым кантом. Заменила молнию (23.10.2026).
+     * vertical = true: полоса идёт вдоль оси y (по длине машины на капоте и крыше).
+     */
+    function drawRaceStripe(ctx, x, y, w, h, vertical) {
         ctx.save();
-        ctx.lineJoin = 'round';
-        boltPath(ctx, x, y, len, h, flip);
-        const g = ctx.createLinearGradient(x, y, x, y + h);
+        const g = vertical ? ctx.createLinearGradient(x, 0, x + w, 0) : ctx.createLinearGradient(0, y, 0, y + h);
         g.addColorStop(0, '#fff176');
         g.addColorStop(0.5, '#ffd21f');
         g.addColorStop(1, '#ff8f00');
         ctx.fillStyle = g;
-        ctx.fill();
-        ctx.lineWidth = h * 0.06;
+        ctx.fillRect(x, y, w, h);
+        ctx.lineWidth = Math.min(w, h) * 0.12;
         ctx.strokeStyle = '#e65100';
-        ctx.stroke();
+        ctx.strokeRect(x, y, w, h);
         ctx.restore();
     }
 
@@ -502,8 +491,60 @@
         g.add(mesh(lens, Mat.glow(glow, 0.6), x, y, z, { ry: rotY }));
     }
 
+    // ---------- Маркеры ранга на крыше/капоте ----------
+    // Король — корона: кольцо, 5 чередующихся зубцов, шар наверху
+    function crownMark(g, x, y, z, gold) {
+        const g2 = new T.Group();
+        g2.position.set(x, y, z);
+        g.add(g2);
+        g2.add(mesh(new T.TorusGeometry(0.045, 0.009, 10, 28), Mat.chrome(), 0, 0, 0, { rx: Math.PI / 2 }));
+        const n = 5;
+        for (let i = 0; i < n; i++) {
+            const a = (i / n) * Math.PI * 2;
+            const h = i % 2 === 0 ? 0.045 : 0.03;
+            g2.add(mesh(new T.ConeGeometry(0.013, h, 10), Mat.metal(gold, 0.22), Math.cos(a) * 0.044, h / 2, Math.sin(a) * 0.044));
+        }
+        g2.add(mesh(new T.SphereGeometry(0.013, 12, 10), Mat.metal(gold, 0.22), 0, 0.05, 0));
+    }
+
+    // Королева — открытая тиара: полукольцо и 3 зубца, без замкнутого обода
+    function tiaraMark(g, x, y, z, gold) {
+        const g2 = new T.Group();
+        g2.position.set(x, y, z);
+        g.add(g2);
+        g2.add(mesh(new T.TorusGeometry(0.04, 0.006, 8, 24, Math.PI), Mat.metal(gold, 0.22), 0, 0, 0, { rx: Math.PI / 2, ry: -Math.PI / 2 }));
+        for (let i = 0; i < 3; i++) {
+            const t = (i / 2) * Math.PI;
+            const px = Math.cos(t) * 0.04, pz = Math.sin(t) * 0.04;
+            const h = i === 1 ? 0.035 : 0.022;
+            g2.add(mesh(new T.ConeGeometry(0.009, h, 8), Mat.metal(gold, 0.22), px, h / 2, pz));
+        }
+    }
+
+    // Ладья — зубчатый бруствер: кольцо и 6 коробочек-зубцов
+    function crenelMark(g, x, y, z) {
+        const g2 = new T.Group();
+        g2.position.set(x, y, z);
+        g.add(g2);
+        g2.add(mesh(new T.TorusGeometry(0.045, 0.009, 8, 24), Mat.chrome(), 0, 0, 0, { rx: Math.PI / 2 }));
+        const n = 6;
+        for (let i = 0; i < n; i++) {
+            const a = (i / n) * Math.PI * 2;
+            g2.add(mesh(new T.BoxGeometry(0.013, 0.02, 0.013), Mat.chrome(), Math.cos(a) * 0.045, 0.013, Math.sin(a) * 0.045));
+        }
+    }
+
+    // Слон — митра: одинокий остроконечный конус на тонком кольце
+    function mitreMark(g, x, y, z, color) {
+        const g2 = new T.Group();
+        g2.position.set(x, y, z);
+        g.add(g2);
+        g2.add(mesh(new T.TorusGeometry(0.026, 0.005, 8, 20), Mat.metal(color, 0.3), 0, 0, 0, { rx: Math.PI / 2 }));
+        g2.add(mesh(new T.ConeGeometry(0.022, 0.045, 12), Mat.metal(color, 0.3), 0, 0.025, 0));
+    }
+
     // ---------- Персонажи ----------
-    function mcqueen() {
+    function redArrow() {
         const paint = '#d4141c';
         return buildCar({
             L: 0.94, W: 0.58, bodyH: 0.2, clear: 0.07, radius: 0.085,
@@ -513,20 +554,25 @@
             eyes: { irisColor: '#2f86e6', expr: 'confident', look: [0.05, 0] },
             mouth: { type: 'grin', y: 0.44, w: 0.6, h: 0.46 },
             hood: (ctx, fw, fh) => {
-                drawBolt(ctx, fw * 0.28, fh * 0.64, fw * 0.44, fh * 0.2, false);
+                // Две продольные золотые полосы по капоту и багажнику
+                drawRaceStripe(ctx, fw * 0.30, 0, fw * 0.1, fh, true);
+                drawRaceStripe(ctx, fw * 0.60, 0, fw * 0.1, fh, true);
             },
             side: (ctx, fw, fh, dir) => {
-                const flip = dir === 'left';
-                drawBolt(ctx, fw * 0.08, fh * 0.28, fw * 0.84, fh * 0.46, !flip);
-                drawNumber(ctx, '95', fw * 0.5, fh * 0.52, fh * 0.5, '#fff8e1', '#e65100');
+                // Золотая полоса вдоль борта
+                drawRaceStripe(ctx, 0, fh * 0.74, fw, fh * 0.1, false);
+                drawNumber(ctx, '7', fw * 0.5, fh * 0.52, fh * 0.5, '#fff8e1', '#e65100');
             },
-            roof: (ctx, fw, fh) => drawNumber(ctx, '95', fw / 2, fh * 0.52, fh * 0.46, '#fff8e1', '#e65100'),
+            roof: (ctx, fw, fh) => drawNumber(ctx, '7', fw / 2, fh * 0.52, fh * 0.46, '#fff8e1', '#e65100'),
             wheelZ: [0.29, -0.3], wheelR: [0.105, 0.11], wheelW: [0.085, 0.09], rim: '#c4121a', cap: '#ffd21f',
-            spoiler: { h: 0.08, w: 0.84 }
+            spoiler: { h: 0.08, w: 0.84 },
+            extras(g, info) {
+                crownMark(g, 0, info.cabTop + 0.01, -0.08, '#ffd21f');
+            }
         });
     }
 
-    function sally() {
+    function azure() {
         const paint = '#4fa6e0';
         return buildCar({
             L: 0.88, W: 0.56, bodyH: 0.19, clear: 0.07, radius: 0.09,
@@ -553,17 +599,18 @@
             },
             wheelZ: [0.27, -0.28], wheelR: [0.1, 0.105], wheelW: [0.08, 0.09], spokes: 5,
             extras(g, info) {
-                // Круглые «лягушачьи» фары Porsche на крыльях
+                // Круглые «лягушачьи» фары на крыльях
                 for (const side of [-1, 1]) {
                     const lamp = ellipsoid(0.055, 0.04, 0.07, 20, 14);
                     g.add(mesh(lamp, Mat.paint(paint), side * 0.19, info.top - 0.045, 0.33));
                     g.add(mesh(ellipsoid(0.042, 0.03, 0.035, 18, 12), Mat.glow('#fffbe6', 0.5), side * 0.19, info.top - 0.043, 0.37));
                 }
+                tiaraMark(g, 0, info.cabTop + 0.008, -0.08, '#e2b447');
             }
         });
     }
 
-    function docHudson() {
+    function captainBlue() {
         const paint = '#1b3a73';
         return buildCar({
             L: 0.96, W: 0.6, bodyH: 0.22, clear: 0.065, radius: 0.1,
@@ -573,7 +620,7 @@
             eyes: { irisColor: '#3d7fd0', expr: 'serious', look: [0, 0.1] },
             mouth: { type: 'serious', y: 0.7, w: 0.34, h: 0.22 },
             front: (ctx, fw, fh) => {
-                // Хромированная решётка Hudson
+                // Хромированная решётка
                 ctx.fillStyle = '#c9d1d8';
                 rr(ctx, fw * 0.2, fh * 0.26, fw * 0.6, fh * 0.3, fh * 0.12); ctx.fill();
                 ctx.fillStyle = '#26303a';
@@ -587,7 +634,7 @@
             side: (ctx, fw, fh, dir) => {
                 ctx.fillStyle = '#f4f1e6';
                 ctx.beginPath(); ctx.arc(fw * 0.5, fh * 0.5, fh * 0.3, 0, Math.PI * 2); ctx.fill();
-                drawNumber(ctx, '51', fw * 0.5, fh * 0.52, fh * 0.34, '#1b3a73', null, { italic: false });
+                drawNumber(ctx, '4', fw * 0.5, fh * 0.52, fh * 0.34, '#1b3a73', null, { italic: false });
                 ctx.strokeStyle = '#d7dde2';
                 ctx.lineWidth = fh * 0.04;
                 ctx.beginPath(); ctx.moveTo(fw * 0.08, fh * 0.2); ctx.lineTo(fw * 0.92, fh * 0.2); ctx.stroke();
@@ -595,18 +642,19 @@
             roof: (ctx, fw, fh) => {
                 ctx.fillStyle = '#f4f1e6';
                 ctx.beginPath(); ctx.arc(fw / 2, fh * 0.5, fh * 0.3, 0, Math.PI * 2); ctx.fill();
-                drawNumber(ctx, '51', fw / 2, fh * 0.52, fh * 0.34, '#1b3a73', null, { italic: false });
+                drawNumber(ctx, '4', fw / 2, fh * 0.52, fh * 0.34, '#1b3a73', null, { italic: false });
             },
             wheelZ: [0.3, -0.3], wheelR: [0.1, 0.1], wheelW: [0.085, 0.085], whitewall: true,
             extras(g, info) {
                 for (const side of [-1, 1]) roundLamp(g, side * 0.21, info.top - 0.07, 0.47, 0.04);
                 // Хромированный бампер
                 g.add(mesh(new T.CapsuleGeometry(0.02, 0.46, 6, 12).rotateZ(Math.PI / 2), Mat.chrome(), 0, 0.095, 0.485));
+                mitreMark(g, 0, info.cabTop + 0.005, -0.06, '#1b3a73');
             }
         });
     }
 
-    function luigi() {
+    function lemon() {
         const paint = '#f3c318';
         return buildCar({
             L: 0.7, W: 0.48, bodyH: 0.2, clear: 0.06, radius: 0.1,
@@ -624,7 +672,7 @@
             },
             wheelZ: [0.22, -0.22], wheelR: [0.085, 0.085], wheelW: [0.07, 0.07], rim: '#f4efe0',
             extras(g, info) {
-                // Хромированные «усы» Fiat 500
+                // Хромированные «усы» на капоте
                 for (const side of [-1, 1]) {
                     const pts = [[0, 0.155, 0.356], [side * 0.06, 0.162, 0.354], [side * 0.12, 0.17, 0.345], [side * 0.17, 0.185, 0.325]];
                     g.add(mesh(tube(pts, 0.009, 16, 8), Mat.chrome()));
@@ -635,8 +683,8 @@
         });
     }
 
-    // Чик Хикс — зелёный гонщик с «усами»-решёткой
-    function chickHicks() {
+    // Изумруд — зелёный гонщик с «усами»-решёткой
+    function emeraldRacer() {
         const paint = '#3d9a34';
         return buildCar({
             L: 0.94, W: 0.58, bodyH: 0.2, clear: 0.07, radius: 0.075,
@@ -664,16 +712,19 @@
             side: (ctx, fw, fh) => {
                 ctx.fillStyle = '#f2f7ea';
                 ctx.beginPath(); ctx.ellipse(fw * 0.5, fh * 0.5, fh * 0.42, fh * 0.34, 0, 0, Math.PI * 2); ctx.fill();
-                drawNumber(ctx, '86', fw * 0.5, fh * 0.52, fh * 0.46, '#2e7d32', '#0d2b0f');
+                drawNumber(ctx, '3', fw * 0.5, fh * 0.52, fh * 0.46, '#2e7d32', '#0d2b0f');
             },
-            roof: (ctx, fw, fh) => drawNumber(ctx, '86', fw / 2, fh * 0.52, fh * 0.46, '#f2f7ea', '#0d2b0f'),
+            roof: (ctx, fw, fh) => drawNumber(ctx, '3', fw / 2, fh * 0.52, fh * 0.46, '#f2f7ea', '#0d2b0f'),
             wheelZ: [0.29, -0.3], wheelR: [0.105, 0.11], wheelW: [0.085, 0.09], rim: '#2f7d29', cap: '#d9e7c8',
-            spoiler: { h: 0.08, w: 0.84 }
+            spoiler: { h: 0.08, w: 0.84 },
+            extras(g, info) {
+                crownMark(g, 0, info.cabTop + 0.01, -0.08, '#ffd21f');
+            }
         });
     }
 
-    // Джексон Шторм — угловатый гонщик нового поколения
-    function jacksonStorm() {
+    // Тень — угловатый гонщик нового поколения
+    function shadowRacer() {
         const paint = '#161b25';
         return buildCar({
             L: 0.96, W: 0.6, bodyH: 0.18, clear: 0.06, radius: 0.045,
@@ -706,19 +757,20 @@
                 ctx.moveTo(fw * 0.05, fh * 0.7); ctx.lineTo(fw * 0.62, fh * 0.34); ctx.lineTo(fw * 0.95, fh * 0.34);
                 ctx.lineTo(fw * 0.95, fh * 0.42); ctx.lineTo(fw * 0.64, fh * 0.42); ctx.lineTo(fw * 0.1, fh * 0.76);
                 ctx.closePath(); ctx.fill();
-                drawNumber(ctx, '20', fw * 0.36, fh * 0.46, fh * 0.44, '#e3f6ff', '#0277bd');
+                drawNumber(ctx, '9', fw * 0.36, fh * 0.46, fh * 0.44, '#e3f6ff', '#0277bd');
             },
-            roof: (ctx, fw, fh) => drawNumber(ctx, '20', fw / 2, fh * 0.52, fh * 0.46, '#29c4ff', '#0b1a2a'),
+            roof: (ctx, fw, fh) => drawNumber(ctx, '9', fw / 2, fh * 0.52, fh * 0.46, '#29c4ff', '#0b1a2a'),
             wheelZ: [0.3, -0.31], wheelR: [0.1, 0.105], wheelW: [0.09, 0.095], rim: '#10141c', cap: '#29c4ff',
             spoiler: { h: 0.07, w: 0.92, color: '#161b25', post: '#29c4ff' },
             extras(g, info) {
                 g.add(mesh(roundedBox(0.52, 0.018, 0.08, 0.008, 2), Mat.glow('#29c4ff', 0.9), 0, 0.045, 0.43));
+                tiaraMark(g, 0, info.cabTop + 0.008, -0.08, '#d32f2f');
             }
         });
     }
 
-    // Бууст — тюнингованная машина уличной банды: пламя, огромное антикрыло, неоновая подсветка
-    function boost() {
+    // Неон — тюнингованная машина уличной банды: пламя, огромное антикрыло, неоновая подсветка
+    function neon() {
         const paint = '#6b2d93';
         return buildCar({
             L: 0.92, W: 0.6, bodyH: 0.17, clear: 0.045, radius: 0.06,
@@ -752,8 +804,8 @@
         });
     }
 
-    // Профессор Зет — крошечная пузатая микромашина с моноклем
-    function professorZ() {
+    // Малыш Микро — крошечная пузатая микромашина с моноклем
+    function micro() {
         const paint = '#6c7a57';
         const g = buildCar({
             L: 0.66, W: 0.48, bodyH: 0.24, clear: 0.05, radius: 0.11,
@@ -779,13 +831,14 @@
                 lens.position.set(x, y, z + 0.003); lens.rotation.x = -0.35;
                 g.add(lens);
                 g.add(mesh(tube([[x + 0.05, y - 0.03, z], [x + 0.1, y - 0.1, z - 0.02], [x + 0.14, y - 0.12, z - 0.08]], 0.004, 16, 6), Mat.metal('#d4a93a', 0.25)));
+                mitreMark(g, -0.08, info.cabTop + 0.005, -0.02, '#6c7a57');
             }
         });
         return g;
     }
 
     // Мак — красный тягач (только кабина), с выхлопными трубами-«башнями»
-    function mack() {
+    function thunder() {
         const g = new T.Group();
         const paint = '#c8161d';
         const W = 0.64, H = 0.5, L = 0.6, clear = 0.1;
@@ -833,6 +886,7 @@
         for (let i = 0; i < 5; i++) {
             g.add(mesh(roundedBox(0.045, 0.025, 0.03, 0.008, 2), Mat.glow('#ffb300', 0.9), -0.16 + i * 0.08, clear + H + 0.012, L / 2 - 0.07));
         }
+        crenelMark(g, 0, clear + H + 0.02, -0.08);
         // Бампер
         g.add(mesh(roundedBox(W * 1.02, 0.06, 0.08, 0.025, 3), Mat.chrome(), 0, clear + 0.02, L / 2 + 0.005));
         // Выхлопные трубы
@@ -844,7 +898,7 @@
         return g;
     }
 
-    // Мэтр — ржавый эвакуатор со стрелой и крюком
+    // Ржавчик — ржавый эвакуатор со стрелой и крюком
     function rustTexture() {
         return CM.Tex.canvas(512, 512, (ctx, w, h) => {
             const rnd = CM.Tex.rng(95);
@@ -867,7 +921,7 @@
     }
     let rustTex = null;
 
-    function mater() {
+    function rusty() {
         const g = new T.Group();
         rustTex = rustTex || rustTexture();
         const paint = '#8c5a33';
@@ -920,8 +974,8 @@
         return g;
     }
 
-    // Фрэнк — грозный красный комбайн с вращающимся мотовилом
-    function frank() {
+    // Жнец — грозный красный комбайн с вращающимся мотовилом
+    function reaper() {
         const g = new T.Group();
         const paint = '#c62828';
         const W = 0.5, H = 0.3, L = 0.5, clear = 0.18;
@@ -937,6 +991,7 @@
         }, { background: paint, density: 1100 });
         deform(cab.geometry, (v) => { if (v.z > 0) v.z -= 0.05 * (v.y + cH / 2) / cH; });
         g.add(mesh(cab.geometry, new T.MeshPhysicalMaterial({ map: cab.texture, roughness: 0.3, clearcoat: 1 }), 0, clear + H + cH / 2 - 0.03, 0.08));
+        crenelMark(g, 0, clear + H + cH - 0.015, 0.08);
         // Жатка — широкий короб-«пасть» с зубьями, внутри вращается мотовило
         const hx = 0.4;
         const back = roundedBox(hx * 2, 0.2, 0.03, 0.012, 2);
@@ -1002,13 +1057,13 @@
     }
 
     const BUILDERS = {
-        w: { k: mcqueen, q: sally, r: mack, b: docHudson, n: mater, p: luigi },
-        b: { k: chickHicks, q: jacksonStorm, r: frank, b: professorZ, n: boost, p: tractor }
+        w: { k: redArrow, q: azure, r: thunder, b: captainBlue, n: rusty, p: lemon },
+        b: { k: emeraldRacer, q: shadowRacer, r: reaper, b: micro, n: neon, p: tractor }
     };
 
     const NAMES = {
-        w: { k: 'Молния Маккуин', q: 'Салли', r: 'Мак', b: 'Док Хадсон', n: 'Мэтр', p: 'Луиджи' },
-        b: { k: 'Чик Хикс', q: 'Джексон Шторм', r: 'Фрэнк', b: 'Профессор Зет', n: 'Бууст', p: 'Трактор' }
+        w: { k: 'Красная Стрела', q: 'Лазурь', r: 'Гром', b: 'Капитан Синь', n: 'Ржавчик', p: 'Лимон' },
+        b: { k: 'Изумруд', q: 'Тень', r: 'Жнец', b: 'Малыш Микро', n: 'Неон', p: 'Трактор' }
     };
 
     function buildPiece(type, color) {

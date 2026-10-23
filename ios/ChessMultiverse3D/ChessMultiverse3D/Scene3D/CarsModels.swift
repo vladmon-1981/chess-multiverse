@@ -1,7 +1,7 @@
 import SceneKit
 import UIKit
 
-/// Тема «Тачки»: процедурные мультяшные персонажи.
+/// Тема «Гонки»: процедурные мультяшные персонажи.
 /// Кузов — выдавленный (SCNShape) гладкий боковой силуэт с арками колёс, отдельная кабина,
 /// колёса с шиной/диском/болтами, глаза на лобовом стекле, рот на бампере, наклейки (CoreGraphics → SCNPlane).
 /// Машинка смотрит в +z, стоит на y=0.
@@ -16,17 +16,17 @@ enum CarsModels {
         if let p = protoCache[key] { return p.clone() }
         let def: Def?
         switch (color, kind) {
-        case (.white, .king):   def = lightning()     // Молния Маккуин
-        case (.white, .queen):  def = sally()         // Салли
-        case (.white, .rook):   def = mack()          // Мак
-        case (.white, .bishop): def = doc()           // Док Хадсон
-        case (.white, .knight): def = mater()         // Мэтр
-        case (.white, .pawn):   def = luigi()         // Луиджи
-        case (.black, .king):   def = chick()         // Чик Хикс
-        case (.black, .queen):  def = storm()         // Джексон Шторм
-        case (.black, .rook):   def = frank()         // Фрэнк
-        case (.black, .bishop): def = professorZ()    // Профессор Зет
-        case (.black, .knight): def = boost()         // Бууст
+        case (.white, .king):   def = lightning()     // Красная Стрела
+        case (.white, .queen):  def = sally()         // Лазурь
+        case (.white, .rook):   def = mack()          // Гром
+        case (.white, .bishop): def = doc()           // Капитан Синь
+        case (.white, .knight): def = mater()         // Ржавчик
+        case (.white, .pawn):   def = luigi()         // Лимон
+        case (.black, .king):   def = chick()         // Изумруд
+        case (.black, .queen):  def = storm()         // Тень
+        case (.black, .rook):   def = frank()         // Жнец
+        case (.black, .bishop): def = professorZ()    // Малыш Микро
+        case (.black, .knight): def = boost()         // Неон
         case (.black, .pawn):   def = tractor()       // Трактор
         case (_, .none):        def = nil
         }

@@ -43,7 +43,18 @@ struct WebGameView: UIViewRepresentable {
             try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
             """, injectionTime: .atDocumentStart, forMainFrameOnly: true)
         config.userContentController.addUserScript(audioSession)
+        #if DEBUG
         if CommandLine.arguments.contains("-webLog") { WebLog.install(in: config) }
+        #endif
+        #if DEBUG
+        // Сценарий для снимков App Store (AppStore/shoot.sh): JS из переменной CM_SCRIPT выполняется
+        // через 1,5 с после загрузки страницы. В Release этого кода нет.
+        if let js = ProcessInfo.processInfo.environment["CM_SCRIPT"], !js.isEmpty {
+            config.userContentController.addUserScript(WKUserScript(
+                source: "setTimeout(function () { \(js) }, 1500);",
+                injectionTime: .atDocumentEnd, forMainFrameOnly: true))
+        }
+        #endif
         let tts = NativeSpeech()
         config.userContentController.add(tts, name: "tts")
 
@@ -55,7 +66,9 @@ struct WebGameView: UIViewRepresentable {
         web.scrollView.contentInsetAdjustmentBehavior = .never   // отступы под вырез считает CSS (env(safe-area-inset-*))
         web.scrollView.pinchGestureRecognizer?.isEnabled = false
         web.allowsLinkPreview = false
+        #if DEBUG
         if #available(iOS 16.4, *) { web.isInspectable = true }
+        #endif
         tts.webView = web
 
         if let dir = Bundle.main.url(forResource: "Web", withExtension: nil) {
@@ -68,6 +81,7 @@ struct WebGameView: UIViewRepresentable {
 }
 
 
+#if DEBUG
 /// Отладка (запуск с аргументом -webLog): раз в 3 с пишет в системный лог состояние Web Audio —
 /// так звук проверяется в симуляторе без ушей: `log stream --predicate 'eventMessage CONTAINS "[web]"'`.
 final class WebLog: NSObject, WKScriptMessageHandler {
@@ -92,6 +106,8 @@ final class WebLog: NSObject, WKScriptMessageHandler {
     }
 }
 
+#endif
+
 /// Голос диктора через системный синтезатор: игра шлёт {cmd: 'say', text, rate, pitch, gender}.
 /// В отличие от speechSynthesis внутри WebView, AVSpeechSynthesizer видит скачанные голоса
 /// («Юрий», улучшенная «Милена») и знает их пол — так у хоккея звучит мужской комментатор.
@@ -102,9 +118,11 @@ final class NativeSpeech: NSObject, WKScriptMessageHandler, AVSpeechSynthesizerD
     override init() {
         super.init()
         synth.delegate = self
+        #if DEBUG
         if CommandLine.arguments.contains("-webLog") {
-            NSLog("[web] male=%@ female=%@", Self.voice(gender: "male")?.name ?? "-", Self.voice(gender: "female")?.name ?? "-")
+            NSLog("[web] male=%@ female=%@", Self.voice(gender: "male", lang: "ru")?.name ?? "-", Self.voice(gender: "female", lang: "ru")?.name ?? "-")
         }
+        #endif
     }
 
     func userContentController(_ c: WKUserContentController, didReceive message: WKScriptMessage) {
@@ -113,7 +131,8 @@ final class NativeSpeech: NSObject, WKScriptMessageHandler, AVSpeechSynthesizerD
         guard cmd == "say", let text = body["text"] as? String, !text.isEmpty else { return }
         synth.stopSpeaking(at: .immediate)
         let u = AVSpeechUtterance(string: text)
-        u.voice = Self.voice(gender: body["gender"] as? String)
+        let lang = (body["lang"] as? String) == "en" ? "en" : "ru"
+        u.voice = Self.voice(gender: body["gender"] as? String, lang: lang)
         // rate из веба: 1 — обычная речь; у AVSpeech обычная речь — 0.5
         let rate = (body["rate"] as? Double) ?? 1
         u.rate = Float(min(max(Double(AVSpeechUtteranceDefaultSpeechRate) * rate, Double(AVSpeechUtteranceMinimumSpeechRate)), Double(AVSpeechUtteranceMaximumSpeechRate)))
@@ -121,19 +140,25 @@ final class NativeSpeech: NSObject, WKScriptMessageHandler, AVSpeechSynthesizerD
         synth.speak(u)
     }
 
-    /// Лучший по качеству русский голос нужного пола; без пола — лучший русский.
-    static func voice(gender: String?) -> AVSpeechSynthesisVoice? {
+    /// Лучший по качеству голос языка интерфейса ("ru" или "en") нужного пола; без пола — лучший из языка.
+    static func voice(gender: String?, lang: String = "ru") -> AVSpeechSynthesisVoice? {
         let ru = AVSpeechSynthesisVoice.speechVoices()
-            .filter { $0.language.hasPrefix("ru") }
+            .filter { $0.language.hasPrefix(lang) }
             .sorted { $0.quality.rawValue > $1.quality.rawValue }
+        #if DEBUG
         if CommandLine.arguments.contains("-webLog") {
             NSLog("[web] voices %@", ru.map { "\($0.name)/\($0.gender.rawValue)/q\($0.quality.rawValue)" }.joined(separator: ", "))
         }
+        #endif
         guard let gender, !gender.isEmpty else { return ru.first }
         let male = gender == "male"
         let byGender = ru.first { $0.gender == (male ? .male : .female) }
         let byName = ru.first {
             let n = $0.name.lowercased()
+            if lang == "en" {
+                return male ? (n.contains("daniel") || n.contains("aaron") || n.contains("arthur") || n.contains("alex"))
+                            : (n.contains("samantha") || n.contains("ava") || n.contains("allison") || n.contains("nicky"))
+            }
             return male ? (n.contains("yuri") || n.contains("юри") || n.contains("юрий"))
                         : (n.contains("milena") || n.contains("милена") || n.contains("katya") || n.contains("катя"))
         }

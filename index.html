@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#120f24">
-    <meta name="description" content="Шахматы в 3D: классика, «Тачки», Animal Hospital и хоккей «Металлург» — «Авангард». Игра вдвоём или против компьютера.">
+    <meta name="description" content="Шахматы в 3D: классика, гонки, ветклиника и хоккей «Ледяные Лисы» — «Полярные Ястребы». Игра вдвоём или против компьютера.">
     <title>Шахматы: Мультивселенная</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Nunito:wght@600;700;800;900&family=Oswald:wght@500;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Russo+One&family=Unbounded:wght@700;900&display=swap">
-    <link rel="stylesheet" href="css/styles.css?v=2.3.0">
+    <!-- Шрифты не блокируют первую отрисовку: без интернета страница сразу показывается системными шрифтами -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Nunito:wght@600;700;800;900&family=Oswald:wght@500;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Russo+One&family=Unbounded:wght@700;900&display=swap" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/styles.css?v=2.8.0">
 </head>
 <body data-theme="classic" data-screen="menu">
     <!-- Фоны вселенных -->
@@ -56,18 +57,18 @@
                 </button>
                 <button class="universe-card" data-theme="cars" type="button" role="radio" aria-checked="false">
                     <span class="uc-scene"><img class="uc-piece uc-white" alt=""><img class="uc-piece uc-black" alt=""></span>
-                    <span class="uc-name">Тачки</span>
-                    <span class="uc-tag">Молния Маккуин против Чика Хикса</span>
+                    <span class="uc-name">Гонки</span>
+                    <span class="uc-tag">Красная Стрела против Изумруда</span>
                 </button>
                 <button class="universe-card" data-theme="hospital" type="button" role="radio" aria-checked="false">
                     <span class="uc-scene"><img class="uc-piece uc-white" alt=""><img class="uc-piece uc-black" alt=""></span>
-                    <span class="uc-name">Animal Hospital</span>
-                    <span class="uc-tag">Доктор Харлоу против аномалий</span>
+                    <span class="uc-name">Ветклиника</span>
+                    <span class="uc-tag">Доктор Ольха против аномалий</span>
                 </button>
                 <button class="universe-card" data-theme="hockey" type="button" role="radio" aria-checked="false">
                     <span class="uc-scene"><img class="uc-piece uc-white" alt=""><img class="uc-piece uc-black" alt=""></span>
                     <span class="uc-name">Хоккей</span>
-                    <span class="uc-tag">«Металлург» против «Авангарда»</span>
+                    <span class="uc-tag">«Ледяные Лисы» против «Полярных Ястребов»</span>
                 </button>
             </div>
 
@@ -138,8 +139,8 @@
         <!-- Партия -->
         <section id="gameScreen" class="screen" aria-label="Партия">
             <div class="game-layout">
-                <!-- Игроки: на широком экране — в колонке справа, на телефоне — строкой над доской -->
-                <div class="players">
+                <div class="stage-wrap">
+                    <!-- Игроки: в горизонтальной раскладке — в верхних углах доски, в вертикальной — сверху и снизу -->
                     <div class="player-card" id="topPlayer">
                         <img class="pc-avatar" alt="">
                         <div class="pc-info">
@@ -158,14 +159,21 @@
                         <div class="pc-captured" aria-label="Взятые фигуры"></div>
                         <div class="pc-thinking" aria-hidden="true"><i></i><i></i><i></i></div>
                     </div>
-                </div>
 
-                <div class="stage-wrap">
                     <div class="board-stage" id="boardStage">
                         <div id="board3d" class="board3d"></div>
                         <div class="banner" id="banner" aria-live="assertive"></div>
                         <div class="board-loading" id="boardLoading"><span class="spinner"></span><span>Открываем портал во вселенную…</span></div>
                     </div>
+
+                    <!-- Чей ход и номер хода — по центру над доской -->
+                    <div class="status-card">
+                        <div class="status-kicker" id="statusKicker">Партия</div>
+                        <div class="status-text" id="statusText" aria-live="polite"></div>
+                        <div class="piece-hint" id="pieceHint"></div>
+                    </div>
+
+                    <!-- Камера — по центру под доской -->
                     <div class="cam-controls" id="camControls" role="toolbar" aria-label="Камера">
                         <button type="button" class="cam-btn" data-cam="left" title="Повернуть доску против часовой стрелки (←)" aria-label="Повернуть доску против часовой стрелки">⟲</button>
                         <button type="button" class="cam-btn" data-cam="right" title="Повернуть доску по часовой стрелке (→)" aria-label="Повернуть доску по часовой стрелке">⟳</button>
@@ -174,14 +182,7 @@
                         <button type="button" class="cam-btn" data-cam="reset" title="Обычный вид (0)" aria-label="Вернуть обычный вид">⌖</button>
                         <button type="button" class="cam-btn cam-cine" id="cineBtn" aria-pressed="false" title="Кинематографичные ходы" aria-label="Кинематографичные ходы">🎬</button>
                     </div>
-                </div>
 
-                <aside class="side-panel">
-                    <div class="status-card">
-                        <div class="status-kicker" id="statusKicker">Партия</div>
-                        <div class="status-text" id="statusText" aria-live="polite"></div>
-                        <div class="piece-hint" id="pieceHint"></div>
-                    </div>
                     <div class="controls">
                         <button class="tile-btn" id="undoBtn" type="button" title="Отменить ход"><span class="ti">↶</span><span>Отменить</span></button>
                         <button class="tile-btn" id="flipBtn" type="button" title="Развернуть доску"><span class="ti">⇅</span><span>Развернуть</span></button>
@@ -190,18 +191,16 @@
                         <button class="tile-btn" id="resignBtn" type="button" title="Сдаться"><span class="ti">🏳️</span><span>Сдаться</span></button>
                         <button class="tile-btn" id="menuBtn" type="button" title="В главное меню"><span class="ti">⌂</span><span>Меню</span></button>
                     </div>
-                    <div class="theme-switch" role="radiogroup" aria-label="Сменить вселенную">
-                        <span class="ts-label">Вселенная</span>
-                        <button type="button" data-theme="classic" title="Классика">♞</button>
-                        <button type="button" data-theme="cars" title="Тачки">🏁</button>
-                        <button type="button" data-theme="hospital" title="Animal Hospital">🩺</button>
-                        <button type="button" data-theme="hockey" title="Хоккей">🏒</button>
-                    </div>
+
                     <div class="history-card">
-                        <div class="history-head"><h3>Ходы</h3><span class="move-count" id="moveCount"></span></div>
-                        <ol class="move-list" id="moveList"></ol>
+                        <div class="history-head">
+                            <h3>Ходы</h3>
+                            <span class="move-count" id="moveCount"></span>
+                            <button class="history-toggle" id="historyToggle" type="button" aria-expanded="false">Раскрыть</button>
+                        </div>
+                        <ol class="move-list" id="moveList" hidden></ol>
                     </div>
-                </aside>
+                </div>
             </div>
         </section>
     </main>
@@ -219,6 +218,15 @@
     <div class="modal" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" hidden>
         <div class="modal-card settings-card">
             <h3 id="settingsTitle">Настройки</h3>
+            <div class="settings-block">
+                <div class="setting-text"><b>🌌 Вселенная</b></div>
+                <div class="theme-switch" role="radiogroup" aria-label="Сменить вселенную">
+                    <button type="button" data-theme="classic" title="Классика">♞</button>
+                    <button type="button" data-theme="cars" title="Гонки">🏁</button>
+                    <button type="button" data-theme="hospital" title="Ветклиника">🩺</button>
+                    <button type="button" data-theme="hockey" title="Хоккей">🏒</button>
+                </div>
+            </div>
             <div class="settings-list">
                 <label class="toggle setting">
                     <input type="checkbox" id="setCinema">
@@ -287,21 +295,24 @@
 
     <noscript><div class="noscript">Для игры нужен JavaScript.</div></noscript>
 
-    <script src="js/vendor/chess.js?v=2.3.0"></script>
-    <script src="js/vendor/three.min.js?v=2.3.0"></script>
-    <script src="js/engine.js?v=2.3.0"></script>
-    <script src="js/ai.js?v=2.3.0"></script>
-    <script src="js/three/common.js?v=2.3.0"></script>
-    <script src="js/three/classic.js?v=2.3.0"></script>
-    <script src="js/three/cars.js?v=2.3.0"></script>
-    <script src="js/three/hospital.js?v=2.3.0"></script>
-    <script src="js/three/hockey.js?v=2.3.0"></script>
-    <script src="js/three/boards.js?v=2.3.0"></script>
-    <script src="js/three/board3d.js?v=2.3.0"></script>
-    <script src="js/board2d.js?v=2.3.0"></script>
-    <script src="js/themes.js?v=2.3.0"></script>
-    <script src="js/sounds.js?v=2.3.0"></script>
-    <script src="js/effects.js?v=2.3.0"></script>
-    <script src="js/chess-app.js?v=2.3.0"></script>
+    <script src="js/i18n.js?v=2.8.0"></script>
+    <script src="js/i18n-en.js?v=2.8.0"></script>
+    <script>I18N.applyDom();</script>
+    <script src="js/vendor/chess.js?v=2.8.0"></script>
+    <script src="js/vendor/three.min.js?v=2.8.0"></script>
+    <script src="js/engine.js?v=2.8.0"></script>
+    <script src="js/ai.js?v=2.8.0"></script>
+    <script src="js/three/common.js?v=2.8.0"></script>
+    <script src="js/three/classic.js?v=2.8.0"></script>
+    <script src="js/three/cars.js?v=2.8.0"></script>
+    <script src="js/three/hospital.js?v=2.8.0"></script>
+    <script src="js/three/hockey.js?v=2.8.0"></script>
+    <script src="js/three/boards.js?v=2.8.0"></script>
+    <script src="js/three/board3d.js?v=2.8.0"></script>
+    <script src="js/board2d.js?v=2.8.0"></script>
+    <script src="js/themes.js?v=2.8.0"></script>
+    <script src="js/sounds.js?v=2.8.0"></script>
+    <script src="js/effects.js?v=2.8.0"></script>
+    <script src="js/chess-app.js?v=2.8.0"></script>
 </body>
 </html>

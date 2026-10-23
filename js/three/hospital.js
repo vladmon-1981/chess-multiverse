@@ -1,7 +1,7 @@
 /*
- * Тема «Animal Hospital» (по мотивам игры в Roblox): большеголовые звери-персонажи.
- * Белые — персонал больницы: Доктор Харлоу, Медсестра, Офицер Дакман, Рон из бухгалтерии,
- * Лиз и Рэттью. Чёрные — аномалии: Барни и жуткие двойники персонала с пустыми глазами
+ * Тема «Ветклиника»: большеголовые звери-персонажи.
+ * Белые — персонал больницы: Доктор Ольха, Медсестра, Офицер Селезень, Тихон-бухгалтер,
+ * Репортёр Кара и Крысёнок Хвостик. Чёрные — аномалии: Мистер Ушастик и жуткие двойники персонала с пустыми глазами
  * и острыми зубами, пешки — слизни-аномалии.
  * Лица рисуются на canvas и натягиваются на сферу головы (развёртка «широта/долгота»).
  */
@@ -258,11 +258,67 @@
         return m;
     }
 
+    // ---------- Маркеры ранга на макушке ----------
+    // Король — корона: кольцо, 5 чередующихся зубцов, шар наверху
+    function crownMark(g, info, gold, out = 0.03) {
+        const p = onHead(info, 0, 1.35, out);
+        const g2 = new T.Group();
+        g2.position.copy(p);
+        g.add(g2);
+        g2.add(mesh(new T.TorusGeometry(0.05, 0.01, 10, 28), Mat.metal('#d8dde3', 0.3), 0, 0, 0, { rx: Math.PI / 2 }));
+        const n = 5;
+        for (let i = 0; i < n; i++) {
+            const a = (i / n) * Math.PI * 2;
+            const h = i % 2 === 0 ? 0.05 : 0.033;
+            g2.add(mesh(new T.ConeGeometry(0.014, h, 10), Mat.metal(gold, 0.22), Math.cos(a) * 0.048, h / 2, Math.sin(a) * 0.048));
+        }
+        g2.add(mesh(new T.SphereGeometry(0.014, 12, 10), Mat.metal(gold, 0.22), 0, 0.055, 0));
+    }
+
+    // Королева — открытая тиара: полукольцо и 3 зубца, без замкнутого обода
+    function tiaraMark(g, info, gold, out = 0.03) {
+        const p = onHead(info, 0, 1.35, out);
+        const g2 = new T.Group();
+        g2.position.copy(p);
+        g.add(g2);
+        g2.add(mesh(new T.TorusGeometry(0.044, 0.007, 8, 24, Math.PI), Mat.metal(gold, 0.22), 0, 0, 0, { rx: Math.PI / 2, ry: -Math.PI / 2 }));
+        for (let i = 0; i < 3; i++) {
+            const t = (i / 2) * Math.PI;
+            const px = Math.cos(t) * 0.044, pz = Math.sin(t) * 0.044;
+            const h = i === 1 ? 0.038 : 0.024;
+            g2.add(mesh(new T.ConeGeometry(0.01, h, 8), Mat.metal(gold, 0.22), px, h / 2, pz));
+        }
+    }
+
+    // Ладья — зубчатый бруствер: кольцо и 6 коробочек-зубцов
+    function crenelMark(g, info, out = 0.03) {
+        const p = onHead(info, 0, 1.35, out);
+        const g2 = new T.Group();
+        g2.position.copy(p);
+        g.add(g2);
+        g2.add(mesh(new T.TorusGeometry(0.05, 0.01, 8, 24), Mat.metal('#d8dde3', 0.3), 0, 0, 0, { rx: Math.PI / 2 }));
+        const n = 6;
+        for (let i = 0; i < n; i++) {
+            const a = (i / n) * Math.PI * 2;
+            g2.add(mesh(new T.BoxGeometry(0.014, 0.022, 0.014), Mat.metal('#d8dde3', 0.3), Math.cos(a) * 0.05, 0.014, Math.sin(a) * 0.05));
+        }
+    }
+
+    // Слон — митра: одинокий остроконечный конус на тонком кольце
+    function mitreMark(g, info, color) {
+        const p = onHead(info, 0, 1.35, 0.03);
+        const g2 = new T.Group();
+        g2.position.copy(p);
+        g.add(g2);
+        g2.add(mesh(new T.TorusGeometry(0.028, 0.005, 8, 20), Mat.metal(color, 0.3), 0, 0, 0, { rx: Math.PI / 2 }));
+        g2.add(mesh(new T.ConeGeometry(0.024, 0.05, 12), Mat.metal(color, 0.3), 0, 0.027, 0));
+    }
+
     // ---------- Персонажи ----------
     function palette(anomaly, normal, dark) { return anomaly ? dark : normal; }
 
-    // Доктор Харлоу — оранжевый мунтжак: рога, зеркало-рефлектор, голубая маска, халат, стетоскоп
-    function harlow() {
+    // Доктор Ольха — оранжевый мунтжак: рога, зеркало-рефлектор, голубая маска, халат, стетоскоп
+    function alder() {
         const fur = '#f08a3c';
         return buildCharacter({
             fur,
@@ -343,6 +399,7 @@
                 g.add(mesh(new T.CylinderGeometry(0.028, 0.028, 0.014, 20).rotateX(Math.PI / 2), Mat.chrome(), 0.0, n - 0.2, 0.14));
                 // Чемоданчик «TOP SECRET»
                 addBriefcase(g, info, 1);
+                crownMark(g, info, '#e2b447');
             }
         });
     }
@@ -435,12 +492,13 @@
                 cross.add(mesh(new T.BoxGeometry(0.036, 0.011, 0.006), Mat.vinyl('#ffffff', 0.4)));
                 cross.add(mesh(new T.BoxGeometry(0.011, 0.036, 0.006), Mat.vinyl('#ffffff', 0.4)));
                 g.add(cross);
+                tiaraMark(g, info, anomaly ? '#8e44ad' : '#e2b447');
             }
         });
     }
 
-    // Офицер Дакман — чёрная утка в синей полицейской фуражке со значком
-    function duckman(anomaly) {
+    // Офицер Селезень — чёрная утка в синей полицейской фуражке со значком
+    function mallard(anomaly) {
         const fur = palette(anomaly, '#2b2b31', '#141418');
         const shirt = palette(anomaly, '#3d74d6', '#223963');
         return buildCharacter({
@@ -499,11 +557,12 @@
                     if (i === 0) star.moveTo(Math.cos(a) * r, Math.sin(a) * r); else star.lineTo(Math.cos(a) * r, Math.sin(a) * r);
                 }
                 g.add(mesh(extrude(star, 0.01, 0.004, 2, 4), Mat.metal(anomaly ? '#8a8f96' : '#dfe4ea', 0.25), 0, capY + 0.005, 0.18, { rx: -0.12 }));
+                crenelMark(g, info, 0.1);
             }
         });
     }
 
-    // Рон из бухгалтерии — голубой вислоухий кролик в рубашке с галстуком и чемоданчиком
+    // Тихон-бухгалтер — голубой вислоухий кролик в рубашке с галстуком и чемоданчиком
     function ron(anomaly) {
         const fur = palette(anomaly, '#6f9fd8', '#465873');
         const shirt = palette(anomaly, '#cfe2f7', '#6d7c93');
@@ -545,11 +604,12 @@
                     ear(g, info, s, { color: earC, inner: shade(fur, 0.35), w: 0.07, h: 0.2, d: 0.035, az: 1.2, el: 0.55, tilt: 0.15, down: true, dz: -0.01 });
                 }
                 addBriefcase(g, info, -1);
+                mitreMark(g, info, anomaly ? '#223963' : '#3a79c9');
             }
         });
     }
 
-    // Лиз — каракал-журналистка в голубой кепке, тёмной куртке, с фотоаппаратом
+    // Репортёр Кара — каракал-журналистка в голубой кепке, тёмной куртке, с фотоаппаратом
     function liz(anomaly) {
         const fur = palette(anomaly, '#d9a066', '#7e5634');
         const jacket = palette(anomaly, '#1d3557', '#101a2c');
@@ -622,8 +682,8 @@
         });
     }
 
-    // Рэттью — маленький чёрный крыс с белой мордочкой, зубками и розовым хвостом-завитком
-    function ratthew() {
+    // Крысёнок Хвостик — маленький чёрный крыс с белой мордочкой, зубками и розовым хвостом-завитком
+    function littleTail() {
         const fur = '#2e2a35';
         return buildCharacter({
             fur,
@@ -660,8 +720,8 @@
         });
     }
 
-    // Барни — белый кролик с чёрными усами и беретом; в форме аномалии
-    function barney() {
+    // Мистер Ушастик — белый кролик с чёрными усами и беретом; в форме аномалии
+    function floppy() {
         const fur = '#f2f0ec';
         return buildCharacter({
             fur,
@@ -720,6 +780,7 @@
                 cup.add(mesh(new T.CylinderGeometry(0.03, 0.03, 0.005, 20), Mat.vinyl('#4a2a14', 0.3), 0, 0.034, 0));
                 cup.add(mesh(new T.TorusGeometry(0.018, 0.006, 8, 16), Mat.vinyl('#f5f1e8', 0.4), 0.04, 0, 0, { ry: Math.PI / 2 }));
                 g.add(cup);
+                crownMark(g, info, '#8e44ad', 0.11);
             }
         });
     }
@@ -762,13 +823,13 @@
     }
 
     const BUILDERS = {
-        w: { k: harlow, q: () => nurse(false), r: () => duckman(false), b: () => ron(false), n: () => liz(false), p: ratthew },
-        b: { k: barney, q: () => nurse(true), r: () => duckman(true), b: () => ron(true), n: () => liz(true), p: slime }
+        w: { k: alder, q: () => nurse(false), r: () => mallard(false), b: () => ron(false), n: () => liz(false), p: littleTail },
+        b: { k: floppy, q: () => nurse(true), r: () => mallard(true), b: () => ron(true), n: () => liz(true), p: slime }
     };
 
     const NAMES = {
-        w: { k: 'Доктор Харлоу', q: 'Медсестра', r: 'Офицер Дакман', b: 'Рон из бухгалтерии', n: 'Лиз', p: 'Рэттью' },
-        b: { k: 'Барни', q: 'Аномалия-медсестра', r: 'Аномалия-Дакман', b: 'Аномалия-Рон', n: 'Аномалия-Лиз', p: 'Слизень-аномалия' }
+        w: { k: 'Доктор Ольха', q: 'Медсестра', r: 'Офицер Селезень', b: 'Бухгалтер Тихон', n: 'Репортёр Кара', p: 'Крысёнок Хвостик' },
+        b: { k: 'Мистер Ушастик', q: 'Аномалия-медсестра', r: 'Аномалия-Селезень', b: 'Аномалия-Тихон', n: 'Аномалия-Кара', p: 'Слизень-аномалия' }
     };
 
     const SCALE = { k: 1.2, q: 1.15, r: 1.12, b: 1.1, n: 1.1, p: 0.95 };

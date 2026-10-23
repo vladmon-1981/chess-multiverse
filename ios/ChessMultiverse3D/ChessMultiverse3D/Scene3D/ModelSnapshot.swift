@@ -1,3 +1,4 @@
+#if DEBUG
 import SceneKit
 import UIKit
 import Metal
@@ -62,3 +63,4 @@ enum ModelSnapshot {
         return renderer.snapshot(atTime: 0, with: CGSize(width: 2000, height: 900), antialiasingMode: .multisampling4X)
     }
 }
+#endif

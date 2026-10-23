@@ -157,7 +157,7 @@
             r.shadowMap.enabled = !low;
             r.shadowMap.type = T.PCFShadowMap;
             r.domElement.className = 'board3d-canvas';
-            r.domElement.setAttribute('aria-label', 'Шахматная доска');
+            r.domElement.setAttribute('aria-label', window.tr ? tr('Шахматная доска') : 'Шахматная доска');
             this.container.appendChild(r.domElement);
             CM.Tex.setMaxAnisotropy(Math.min(8, r.capabilities.getMaxAnisotropy()));
             this.renderer = r;
@@ -427,8 +427,10 @@
         presetElevation(name = this.preset || 'normal') {
             const base = (this.theme && CM.Themes3D[this.theme].elevation) || 54;
             // На квадратной или вытянутой вверх сцене (телефон) смотрим круче: доска почти квадратом
-            // заполняет ширину экрана и получается крупнее
-            const steep = this.camera && this.camera.aspect < 1.12 ? 12 : 0;
+            // заполняет ширину экрана и получается крупнее. Чем уже экран, тем круче взгляд —
+            // иначе перспектива растягивает доску «в глубину» и сверху/снизу остаются пустые поля
+            const asp = this.camera ? this.camera.aspect : 1;
+            const steep = asp < 1.12 ? Math.min(28, 12 + (1.12 - asp) * 14) : 0;
             return ({ normal: base + steep, top: 80, low: base - 16 + steep / 2 }[name] || base) * Math.PI / 180;
         }
 
@@ -1236,7 +1238,7 @@
             this.removeVictim(victim);
         }
 
-        /** Тачки: таран — искры, машинка кувырком отлетает, падает и взрывается. */
+        /** Гонки: таран — искры, машинка кувырком отлетает, падает и взрывается. */
         fxCrash(victim, x, z, dx, dz, strong, fx) {
             const cols = this.pieceColors(victim);
             this.flash(x, 0.5, z, '#ffb45c', strong ? 48 : 34);
@@ -1281,7 +1283,7 @@
         }
 
         /**
-         * Animal Hospital: разряд дефибриллятора — атакующий бьёт током, жертву отбрасывает
+         * Ветклиника: разряд дефибриллятора — атакующий бьёт током, жертву отбрасывает
          * и приподнимает, она трясётся и светится, потом лопается брызгами (у аномалий — слизью),
          * а огонёк-душа улетает вверх.
          */

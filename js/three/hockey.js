@@ -1,11 +1,11 @@
 /*
- * Тема «Хоккей»: «Металлург» (Магнитогорск) против «Авангарда» (Омск).
- * Белые — «Металлург» в белой выездной форме с синими и красными полосами, чёрные —
- * «Авангард» в чёрной форме с красным. Эмблемы на свитерах и маски вратарей — собственная
- * стилизация по мотивам клубов, а не официальные логотипы.
+ * Тема «Хоккей»: «Ледяные Лисы» против «Полярных Ястребов» (вымышленные команды).
+ * Белые — «Ледяные Лисы» в белой выездной форме с синими и красными полосами, чёрные —
+ * «Полярные Ястребы» в чёрной форме с красным. Эмблемы на свитерах — простые собственные знаки
+ * с буквой, маски вратарей — собственный рисунок.
  * Король — вратарь в маске и щитках, ферзь — капитан с кубком над головой, ладья — защитник
  * с клюшкой поперёк, слон — снайпер, замахнувшийся для щелчка, конь — талисман клуба
- * (лисёнок Тимоша у «Металлурга», ястреб у «Авангарда»), пешка — юниор с шайбой.
+ * (лисёнок Рыжик у «Лис», ястреб у «Ястребов»), пешка — юниор с шайбой.
  * Все фигуры стоят на шайбах.
  */
 (function () {
@@ -68,8 +68,9 @@
         ctx.closePath();
     }
 
-    // ---------- Эмблемы (квадрат −1…1, ось y вниз) ----------
-    // «Металлург»: синий щит в бело-красной кайме, белая «М» и огонёк плавки над ней
+    // ---------- Эмблемы (квадрат −1…1, ось y вниз): простые собственные знаки с буквой ----------
+    const EN_UI = !!(window.I18N && I18N.lang === 'en');
+    // «Ледяные Лисы»: синий щит в бело-красной кайме, белая буква
     function emblemMMG(ctx) {
         const shield = () => {
             ctx.beginPath();
@@ -97,28 +98,10 @@
         ctx.fillStyle = g;
         ctx.fill();
         ctx.restore();
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        const M = [[-0.44, 0.42], [-0.44, -0.3], [-0.24, -0.3], [0, 0.04], [0.24, -0.3], [0.44, -0.3], [0.44, 0.42],
-            [0.26, 0.42], [0.26, -0.02], [0.03, 0.3], [-0.03, 0.3], [-0.26, -0.02], [-0.26, 0.42]];
-        M.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
-        ctx.closePath();
-        ctx.fill();
-        ctx.fillStyle = '#ff9a1a';
-        ctx.beginPath();
-        ctx.moveTo(0, -0.66);
-        ctx.quadraticCurveTo(0.17, -0.44, 0, -0.3);
-        ctx.quadraticCurveTo(-0.17, -0.44, 0, -0.66);
-        ctx.fill();
-        ctx.fillStyle = '#ffe066';
-        ctx.beginPath();
-        ctx.moveTo(0, -0.55);
-        ctx.quadraticCurveTo(0.08, -0.42, 0, -0.35);
-        ctx.quadraticCurveTo(-0.08, -0.42, 0, -0.55);
-        ctx.fill();
+        text(ctx, EN_UI ? 'F' : 'Л', 0, 0.02, 1.35, { fill: '#ffffff' });
     }
 
-    // «Авангард»: красная «А», вершина которой — голова ястреба, белые крылья, чёрный круг
+    // «Полярные Ястребы»: чёрный круг в красно-белом ободке, красная буква
     function emblemAVG(ctx) {
         ctx.fillStyle = '#ffffff';
         ctx.beginPath(); ctx.arc(0, 0, 1, 0, Math.PI * 2); ctx.fill();
@@ -126,34 +109,7 @@
         ctx.beginPath(); ctx.arc(0, 0, 0.9, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#121216';
         ctx.beginPath(); ctx.arc(0, 0, 0.78, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ffffff';
-        for (const s of [-1, 1]) {
-            for (let i = 0; i < 3; i++) {
-                leaf(ctx, s * 0.14, 0.2 - i * 0.07, s * (0.66 - i * 0.06), -0.3 + i * 0.16, 0.07);
-                ctx.fill();
-            }
-        }
-        ctx.fillStyle = '#e0262f';
-        ctx.beginPath();
-        ctx.moveTo(-0.11, -0.46); ctx.lineTo(0.11, -0.46);
-        ctx.lineTo(0.5, 0.6); ctx.lineTo(0.28, 0.6); ctx.lineTo(0.19, 0.34);
-        ctx.lineTo(-0.19, 0.34); ctx.lineTo(-0.28, 0.6); ctx.lineTo(-0.5, 0.6);
-        ctx.closePath();
-        ctx.fill();
-        ctx.fillStyle = '#121216';
-        ctx.beginPath(); ctx.moveTo(0, -0.12); ctx.lineTo(0.12, 0.2); ctx.lineTo(-0.12, 0.2); ctx.closePath(); ctx.fill();
-        ctx.fillStyle = '#e0262f';
-        ctx.beginPath(); ctx.arc(0, -0.5, 0.17, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.moveTo(0.12, -0.6);
-        ctx.quadraticCurveTo(0.36, -0.58, 0.34, -0.4);
-        ctx.quadraticCurveTo(0.26, -0.46, 0.14, -0.43);
-        ctx.closePath();
-        ctx.fill();
-        ctx.beginPath(); ctx.arc(0.02, -0.54, 0.05, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#121216';
-        ctx.beginPath(); ctx.arc(0.035, -0.54, 0.026, 0, Math.PI * 2); ctx.fill();
+        text(ctx, EN_UI ? 'H' : 'Я', 0, 0.02, 1.35, { fill: '#e0262f' });
     }
 
     // ---------- Рисунки на масках вратарей (x — азимут от переда, y — вниз от «экватора», рад) ----------
@@ -238,7 +194,7 @@
 
     // ---------- Команды ----------
     const TEAMS = {
-        // «Металлург»: белый свитер, синие шлем и трусы, сине-красные полосы
+        // «Ледяные Лисы»: белый свитер, синие шлем и трусы, сине-красные полосы
         w: {
             jersey: '#f3f5f9', main: '#1f4fa3', second: '#d7262e', yoke: '#1f4fa3', collar: '#d7262e',
             helmet: '#1f4fa3', helmetStripe: '#f3f5f9', pants: '#1f4fa3', pantsStripe: '#f3f5f9', socks: '#f3f5f9',
@@ -247,7 +203,7 @@
             maskBase: '#1f4fa3', maskChin: '#1f4fa3', maskArt: maskMMG,
             skin: '#f4c9a4', hair: '#8a5a32', eye: '#3f78c8', puck: '#3a78e6', emblem: emblemMMG
         },
-        // «Авангард»: чёрный свитер с красной кокеткой, красно-белые полосы
+        // «Полярные Ястребы»: чёрный свитер с красной кокеткой, красно-белые полосы
         b: {
             jersey: '#16161b', main: '#d4202c', second: '#ffffff', yoke: '#d4202c', collar: '#ffffff', dark: true,
             helmet: '#16161b', helmetStripe: '#d4202c', pants: '#16161b', pantsStripe: '#d4202c', socks: '#16161b',
@@ -772,6 +728,50 @@
         g.add(b);
     }
 
+    // Точка над макушкой для коронок рангов (az=0, почти вертикально вверх)
+    function topPoint(info, out) {
+        return onHead(info, 0, 1.4, out);
+    }
+
+    /** Маленькая коронка-ранг на шлеме/маске: king — корона с зубцами, queen — диадема,
+     * rook — зубчатый обод (мерлоны), bishop — митра. */
+    function rankMark(g, info, rank) {
+        const p = topPoint(info, rank === 'r' ? 0.03 : 0.07);
+        if (rank === 'k') {
+            const gold = Mat.metal('#e6be4a', 0.22);
+            g.add(mesh(new T.TorusGeometry(0.052, 0.009, 8, 24), gold, p.x, p.y, p.z, { rx: Math.PI / 2 }));
+            const n = 5;
+            for (let i = 0; i < n; i++) {
+                const a = (i / n) * Math.PI * 2;
+                const tall = i % 2 === 0;
+                g.add(mesh(new T.ConeGeometry(0.011, tall ? 0.034 : 0.02, 10), gold, p.x + Math.cos(a) * 0.052, p.y + (tall ? 0.017 : 0.01), p.z + Math.sin(a) * 0.052));
+            }
+            g.add(mesh(new T.SphereGeometry(0.011, 10, 8), Mat.vinyl('#d4202c', 0.3), p.x, p.y + 0.055, p.z));
+        } else if (rank === 'q') {
+            const silver = Mat.metal('#eceff2', 0.18);
+            g.add(mesh(new T.TorusGeometry(0.044, 0.006, 8, 20, Math.PI * 1.3), silver, p.x, p.y, p.z, { rx: Math.PI / 2, ry: -Math.PI * 0.15 }));
+            for (let i = -1; i <= 1; i++) {
+                const a = i * 0.5;
+                const mid = i === 0;
+                g.add(mesh(new T.ConeGeometry(0.009, mid ? 0.03 : 0.018, 8), silver, p.x + Math.sin(a) * 0.044, p.y + (mid ? 0.015 : 0.009), p.z + Math.cos(a) * 0.044));
+            }
+            g.add(mesh(new T.SphereGeometry(0.01, 10, 8), Mat.glow(info.team.puck, 0.7), p.x, p.y + 0.03, p.z));
+        } else if (rank === 'r') {
+            const metal = Mat.metal(info.team.helmetStripe, 0.3);
+            const r = info.headR * info.hs[0] * 0.62;
+            const n = 8;
+            for (let i = 0; i < n; i++) {
+                const a = (i / n) * Math.PI * 2;
+                g.add(mesh(roundedBox(0.028, 0.026, 0.016, 0.006, 2), metal, p.x + Math.sin(a) * r, p.y, p.z + Math.cos(a) * r));
+            }
+            g.add(mesh(new T.CylinderGeometry(r * 0.92, r * 0.95, 0.014, 24), metal, p.x, p.y - 0.012, p.z));
+        } else if (rank === 'b') {
+            const col = Mat.vinyl(info.team.main, 0.4);
+            g.add(mesh(new T.ConeGeometry(0.028, 0.065, 14), col, p.x, p.y + 0.028, p.z, { rx: -0.15 }));
+            g.add(mesh(roundedBox(0.009, 0.04, 0.007, 0.003, 1), Mat.vinyl(info.team.second, 0.4), p.x, p.y + 0.042, p.z + 0.022));
+        }
+    }
+
     function trophy(g, base) {
         const cup = new T.Group();
         cup.position.copy(base);
@@ -858,6 +858,7 @@
         }
         if (o.gear === 'visor' || o.gear === 'cage') helmet(g, info, team, o.gear);
         else if (o.gear === 'mask') goalieMask(g, info, team);
+        if (o.rank) rankMark(g, info, o.rank);
         if (o.extras) o.extras(g, info);
         return g;
     }
@@ -868,14 +869,14 @@
         const team = TEAMS[color];
         const hl = V(0.235, 0.31, 0.15), hr = V(-0.215, 0.3, 0.15);
         return build({
-            team, R: 0.168, legX: 0.088, pantsR: 0.18, number: color === 'w' ? '30' : '1', gear: 'mask',
+            team, R: 0.168, legX: 0.088, pantsR: 0.18, number: color === 'w' ? '30' : '1', gear: 'mask', rank: 'k',
             hands: { l: hl, r: hr },
             hand(g, H, dir, side) {
                 if (side === 'l') catcher(g, H, team);
                 else { glove(g, H, dir, team); blocker(g, H, team); }
             },
             face: playerFace({ iris: team.eye, brow: team.hair, browTilt: 0.8, browY: 1.45, lid: 0.16, skin: team.skin, mouth: 'flat', mouthY: 0.2, mouthW: 0.16 }),
-            extras(g) {
+            extras(g, info) {
                 pads(g, team);
                 stick(g, hr.clone().add(V(0.03, 0.08, -0.02)), V(-0.03, 0.006, 0.3), V(1, 0, 0.08), team, { blade: 0.16, bladeH: 0.048, curve: 0.2, paddle: 0.2 });
             }
@@ -887,7 +888,7 @@
         const team = TEAMS[color];
         const cupY = 0.865;
         return build({
-            team, number: color === 'w' ? '17' : '13', letter: 'К', gear: 'visor', elbowOut: 0.07,
+            team, number: color === 'w' ? '17' : '13', letter: (window.I18N && I18N.lang === 'en') ? 'C' : 'К', gear: 'visor', elbowOut: 0.07, rank: 'q',
             hands: { l: V(0.145, cupY + 0.12, 0.03), r: V(-0.145, cupY + 0.12, 0.03) },
             face: playerFace({ iris: team.eye, brow: team.hair, browTilt: -0.15, skin: team.skin, mouth: 'grin', mouthY: 0.27, mouthW: 0.28, look: [0, -0.6] }),
             extras(g) { trophy(g, V(0, cupY, 0.03)); }
@@ -900,7 +901,7 @@
         const knob = V(0.23, 0.395, 0.2), heel = V(-0.27, 0.37, 0.2);
         const at = (t) => knob.clone().lerp(heel, t);
         return build({
-            team, R: 0.172, headR: 0.186, legX: 0.078, pantsR: 0.18, number: color === 'w' ? '44' : '5', letter: 'А', gear: 'visor',
+            team, R: 0.172, headR: 0.186, legX: 0.078, pantsR: 0.18, number: color === 'w' ? '44' : '5', letter: (window.I18N && I18N.lang === 'en') ? 'A' : 'А', gear: 'visor', rank: 'r',
             hands: { l: at(0.12), r: at(0.66) },
             face: playerFace({ iris: team.eye, brow: team.hair, browTilt: 1, lid: 0.14, skin: team.skin, mouth: 'gap', mouthY: 0.29, mouthW: 0.28, beard: team.hair, plaster: true }),
             extras(g) { stick(g, knob, heel, V(0.1, -1, 0.3), team, { blade: 0.12 }); }
@@ -913,7 +914,7 @@
         const knob = V(-0.01, 0.37, 0.14), heel = V(-0.34, 0.86, -0.1);
         const at = (t) => knob.clone().lerp(heel, t);
         return build({
-            team, number: color === 'w' ? '91' : '87', gear: 'visor',
+            team, number: color === 'w' ? '91' : '87', gear: 'visor', rank: 'b',
             hands: { l: at(0.05), r: at(0.42) },
             face: playerFace({ iris: team.eye, brow: team.hair, browTilt: 0.9, lid: 0.1, skin: team.skin, mouth: 'shout', mouthY: 0.28, mouthW: 0.22 }),
             extras(g) { stick(g, knob, heel, V(-0.75, 0.55, -0.35), team, { blade: 0.13, bladeH: 0.042 }); }
@@ -937,7 +938,7 @@
         });
     }
 
-    // Конь «Металлурга» — лисёнок Тимоша: рыжий, с белой мордочкой и пышным хвостом, машет лапой
+    // Конь «Лис» — лисёнок Рыжик: рыжий, с белой мордочкой и пышным хвостом, машет лапой
     function fox() {
         const team = TEAMS.w;
         const fur = '#ee8a2e', cream = '#fff6ea', dark = '#2b1b12';
@@ -1002,7 +1003,7 @@
         }
     }
 
-    // Конь «Авангарда» — ястреб: хмурые жёлтые глаза, клюв-крючок, красный хохолок, крылья
+    // Конь «Ястребов» — ястреб: хмурые жёлтые глаза, клюв-крючок, красный хохолок, крылья
     function hawk() {
         const team = TEAMS.b;
         const plume = '#3b3236', cheek = '#6e5d57', light = '#efe7da', beak = '#f5b90a', red = '#d4202c';
@@ -1067,47 +1068,22 @@
         });
     }
 
-    // ---------- Шайба-подставка ----------
-    let puckMat = null;
-    function puckBase(color) {
-        if (!puckMat) {
-            // Рифлёный бок шайбы: в развёртке токарного профиля бок — узкая полоса посередине
-            const tex = CM.Tex.canvas(512, 64, (ctx, w, h) => {
-                ctx.fillStyle = '#141417';
-                ctx.fillRect(0, 0, w, h);
-                ctx.fillStyle = '#2c2c33';
-                for (let x = 0; x < w; x += 6) ctx.fillRect(x, h * 0.43, 3, h * 0.14);
-            });
-            puckMat = Mat.textured(tex, { roughness: 0.55, clearcoat: 0.25, clearcoatRoughness: 0.4 });
-        }
-        const g = new T.Group();
-        const r = 0.4, h = 0.085;
-        const pts = profile([['M', 0, 0], ['L', r - 0.014, 0], ['Q', r, 0, r, 0.014], ['L', r, h - 0.014], ['Q', r, h, r - 0.014, h], ['L', 0, h]], 4);
-        g.add(mesh(lathe(pts, 64), puckMat));
-        g.add(mesh(new T.TorusGeometry(r - 0.04, 0.01, 8, 64), Mat.vinyl(TEAMS[color].puck, 0.35), 0, h - 0.004, 0, { rx: Math.PI / 2, shadow: false }));
-        g.userData.top = h;
-        return g;
-    }
-
     const BUILDERS = {
         k: goalie, q: captain, r: defenseman, b: sniper, p: junior,
         n: (color) => (color === 'w' ? fox() : hawk())
     };
 
     const NAMES = {
-        w: { k: 'Вратарь «Металлурга»', q: 'Капитан «Металлурга»', r: 'Защитник «Металлурга»', b: 'Снайпер «Металлурга»', n: 'Лисёнок Тимоша', p: 'Юниор «Металлурга»' },
-        b: { k: 'Вратарь «Авангарда»', q: 'Капитан «Авангарда»', r: 'Защитник «Авангарда»', b: 'Снайпер «Авангарда»', n: 'Ястреб', p: 'Юниор «Авангарда»' }
+        w: { k: 'Вратарь «Ледяных Лис»', q: 'Капитан «Ледяных Лис»', r: 'Защитник «Ледяных Лис»', b: 'Снайпер «Ледяных Лис»', n: 'Лисёнок Рыжик', p: 'Юниор «Ледяных Лис»' },
+        b: { k: 'Вратарь «Полярных Ястребов»', q: 'Капитан «Полярных Ястребов»', r: 'Защитник «Полярных Ястребов»', b: 'Снайпер «Полярных Ястребов»', n: 'Ястреб', p: 'Юниор «Полярных Ястребов»' }
     };
 
     const SCALE = { k: 1.16, q: 1.1, r: 1.14, b: 1.1, n: 1.1, p: 0.92 };
 
     function buildPiece(type, color) {
         const root = new T.Group();
-        const pod = puckBase(color);
-        root.add(pod);
         const ch = BUILDERS[type](color);
         ch.scale.setScalar(SCALE[type]);
-        ch.position.y = pod.userData.top;
         root.add(ch);
         CM.optimize(root);
         const box = new T.Box3().setFromObject(root);

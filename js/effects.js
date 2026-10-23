@@ -7,7 +7,7 @@
 
     const PALETTES = {
         classic: { colors: ['#f7d774', '#fff3c4', '#d9a441', '#ffffff', '#b8860b'], shapes: ['rect', 'star', 'circle'] },
-        cars: { colors: ['#e53935', '#ffd21f', '#ffffff', '#111111', '#29b6f6'], shapes: ['flag', 'rect', 'bolt'] },
+        cars: { colors: ['#e53935', '#ffd21f', '#ffffff', '#111111', '#29b6f6'], shapes: ['flag', 'rect', 'stripe'] },
         hospital: { colors: ['#ff8fb1', '#2dd4bf', '#ffffff', '#fde68a', '#a78bfa'], shapes: ['heart', 'cross', 'circle'] },
         // Хоккей: шайбы, звёзды и ленты цветов команды-победителя
         hockey: {
@@ -176,11 +176,9 @@
                     ctx.fillStyle = '#4a4a55';
                     ctx.fillRect(-s * 0.58, -s * 0.04, s * 1.16, s * 0.08);
                     break;
-                case 'bolt':
-                    ctx.beginPath();
-                    ctx.moveTo(-s * 0.1, -s * 0.6); ctx.lineTo(s * 0.35, -s * 0.6); ctx.lineTo(s * 0.05, -s * 0.05);
-                    ctx.lineTo(s * 0.35, -s * 0.05); ctx.lineTo(-s * 0.25, s * 0.65); ctx.lineTo(0, s * 0.1); ctx.lineTo(-s * 0.3, s * 0.1);
-                    ctx.closePath(); ctx.fill(); break;
+                case 'stripe':
+                    // Гоночная полоса: длинная узкая лента
+                    ctx.fillRect(-s * 0.7, -s * 0.12, s * 1.4, s * 0.24); break;
                 default:
                     ctx.fillRect(-s / 2, -s * 0.3, s, s * 0.6);
             }

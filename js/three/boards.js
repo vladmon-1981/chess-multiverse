@@ -105,7 +105,7 @@
         drawCoords(ctx, L, '700 {px}px "Playfair Display", Georgia, serif', '#e8c878', 'rgba(0,0,0,0.6)');
     }
 
-    // ---------- Тачки ----------
+    // ---------- Гонки ----------
     function carsTop(ctx, L) {
         const rnd = CM.Tex.rng(95);
         // Рамка — асфальт с бордюром «красный-белый»
@@ -164,7 +164,7 @@
         drawCoords(ctx, L, '900 {px}px "Russo One", "Arial Black", sans-serif', '#ffe14d', 'rgba(0,0,0,0.7)');
     }
 
-    // ---------- Animal Hospital ----------
+    // ---------- Ветклиника ----------
     function hospitalTop(ctx, L) {
         const rnd = CM.Tex.rng(7);
         ctx.fillStyle = '#eef3f2';
@@ -398,8 +398,8 @@
             });
             return new T.MeshStandardMaterial({ map: tex, roughness: 0.4 });
         };
-        const avg = ad('АВАНГАРД · ОМСК', '#ffffff', '#c8202b');
-        const mmg = ad('МЕТАЛЛУРГ · МАГНИТОГОРСК', '#ffffff', '#1f4fa3');
+        const avg = ad(window.tr ? tr('ПОЛЯРНЫЕ ЯСТРЕБЫ') : 'ПОЛЯРНЫЕ ЯСТРЕБЫ', '#ffffff', '#c8202b');
+        const mmg = ad(window.tr ? tr('ЛЕДЯНЫЕ ЛИСЫ') : 'ЛЕДЯНЫЕ ЛИСЫ', '#ffffff', '#1f4fa3');
         const panel = new T.PlaneGeometry(3.1, 0.13);
         const zi = I / 2 - 0.004;
         for (const s of [-1, 1]) {

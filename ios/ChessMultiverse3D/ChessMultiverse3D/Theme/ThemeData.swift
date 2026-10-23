@@ -112,12 +112,12 @@ enum ThemeLibrary {
 
     static let cars = ThemeSpec(
         key: .cars,
-        name: "Тачки",
-        tagline: "Радиатор-Спрингс против соперников",
-        sideName: [.white: "Радиатор-Спрингс", .black: "Соперники"],
+        name: "Гонки",
+        tagline: "Команда «Вираж» против соперников",
+        sideName: [.white: "Команда «Вираж»", .black: "Соперники"],
         pieceNames: PieceNames(
-            white: [.king: "Молния Маккуин", .queen: "Салли", .rook: "Мак", .bishop: "Док Хадсон", .knight: "Мэтр", .pawn: "Луиджи"],
-            black: [.king: "Чик Хикс", .queen: "Джексон Шторм", .rook: "Фрэнк", .bishop: "Профессор Зет", .knight: "Бууст", .pawn: "Трактор"]
+            white: [.king: "Красная Стрела", .queen: "Лазурь", .rook: "Гром", .bishop: "Капитан Синь", .knight: "Ржавчик", .pawn: "Лимон"],
+            black: [.king: "Изумруд", .queen: "Тень", .rook: "Жнец", .bishop: "Малыш Микро", .knight: "Неон", .pawn: "Трактор"]
         ),
         texts: ThemeTexts(
             start: "На старт! Внимание! Марш!",
@@ -152,12 +152,12 @@ enum ThemeLibrary {
 
     static let hospital = ThemeSpec(
         key: .hospital,
-        name: "Animal Hospital",
+        name: "Ветклиника",
         tagline: "Ночная смена против аномалий",
         sideName: [.white: "Персонал", .black: "Аномалии"],
         pieceNames: PieceNames(
-            white: [.king: "Доктор Харлоу", .queen: "Медсестра", .rook: "Офицер Дакман", .bishop: "Рон из бухгалтерии", .knight: "Лиз", .pawn: "Рэттью"],
-            black: [.king: "Барни", .queen: "Аномалия-медсестра", .rook: "Аномалия-Дакман", .bishop: "Аномалия-Рон", .knight: "Аномалия-Лиз", .pawn: "Слизень-аномалия"]
+            white: [.king: "Доктор Ольха", .queen: "Медсестра", .rook: "Офицер Селезень", .bishop: "Бухгалтер Тихон", .knight: "Репортёр Кара", .pawn: "Крысёнок Хвостик"],
+            black: [.king: "Мистер Ушастик", .queen: "Аномалия-медсестра", .rook: "Аномалия-Селезень", .bishop: "Аномалия-Тихон", .knight: "Аномалия-Кара", .pawn: "Слизень-аномалия"]
         ),
         texts: ThemeTexts(
             start: "Ночная смена началась. Будь начеку!",
@@ -193,11 +193,11 @@ enum ThemeLibrary {
     static let hockey = ThemeSpec(
         key: .hockey,
         name: "Хоккей",
-        tagline: "«Металлург» против «Авангарда»",
-        sideName: [.white: "«Металлург»", .black: "«Авангард»"],
+        tagline: "«Ледяные Лисы» против «Полярных Ястребов»",
+        sideName: [.white: "«Ледяные Лисы»", .black: "«Полярные Ястребы»"],
         pieceNames: PieceNames(
-            white: [.king: "Вратарь Металлурга", .queen: "Капитан", .rook: "Защитник", .bishop: "Снайпер", .knight: "Тимоша", .pawn: "Юниор"],
-            black: [.king: "Вратарь Авангарда", .queen: "Капитан", .rook: "Защитник", .bishop: "Снайпер", .knight: "Ястреб", .pawn: "Юниор"]
+            white: [.king: "Вратарь Лис", .queen: "Капитан", .rook: "Защитник", .bishop: "Снайпер", .knight: "Рыжик", .pawn: "Юниор"],
+            black: [.king: "Вратарь Ястребов", .queen: "Капитан", .rook: "Защитник", .bishop: "Снайпер", .knight: "Ястреб", .pawn: "Юниор"]
         ),
         texts: ThemeTexts(
             start: "Вбрасывание! Шайба в игре!",
