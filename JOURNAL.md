@@ -1,5 +1,9 @@
 # Журнал
 
+## 28.10.2026 (днём) — первый архив и подпись App Store
+- После перезахода владельца в Xcode консольный `xcodebuild archive` прошёл: `~/Library/Developer/Xcode/Archives/2026-10-28/ChessMultiverse3D.xcarchive`, 1.0 (20261028), имя ChessGM, команда `646ZQ353UC`.
+- Пробный `-exportArchive` (method app-store-connect, destination export, без выгрузки) успешен: «iOS Team Store Provisioning Profile: com.chessmultiverse.app» и облачный сертификат распространения до 28.10.2027. Выгрузку (Organizer → Distribute → App Store Connect) не делал — нет записи приложения в App Store Connect.
+
 ## 28.10.2026 — платная команда 646ZQ353UC
 - Решение владельца: перевести на платную команду `646ZQ353UC`. `project.yml`: `DEVELOPMENT_TEAM`, сборка `20261028`; проект перегенерирован xcodegen. Правило «команду не трогать» в `CLAUDE.md` заменено.
 - В рабочей копии лежало незакоммиченное переименование на экране «Chess 3D»/«Шахматы 3D» → **ChessGM** (`project.yml`, `InfoPlist.xcstrings`) — не моё, закоммичено отдельным коммитом как найденное. Название в App Store (`metadata/*/name.txt`) осталось «Chess Multiverse 3D» — не совпадает с именем на экране, решает владелец.
