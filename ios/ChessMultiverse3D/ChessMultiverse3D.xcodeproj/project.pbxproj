@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		03B2A39E29ABF1361CED0175 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 0FD4DC2464456A5DA16097FE /* InfoPlist.xcstrings */; };
 		072F701E4D0412E41B014487 /* ModelSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D589040D82F33AD070A2AB0 /* ModelSnapshot.swift */; };
 		1F86D87643B63533F4D0831E /* ResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF5795279366730891D128E0 /* ResultView.swift */; };
 		2380CE3DD13302036276EEA6 /* ChessScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = E899F98682B1323FD42761BA /* ChessScene.swift */; };
@@ -23,20 +24,21 @@
 		9CFDB1A1A4884AEDF22D794D /* CameraJoystick.swift in Sources */ = {isa = PBXBuildFile; fileRef = C174250E34FBFA83F42025F1 /* CameraJoystick.swift */; };
 		9EE7FCFC69112686EF8B9E5A /* SettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C8B68DA17BAA4855765827 /* SettingsSheet.swift */; };
 		C26B828354598D8D74D7ADE8 /* ChessMultiverse3DApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C1C476FAC940C5562D477C /* ChessMultiverse3DApp.swift */; };
+		C7C54B43EF8756EFB08236B4 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 58B939880DE5B730AFBEB04E /* PrivacyInfo.xcprivacy */; };
 		D271285A84F8D8E762DE156F /* ChessEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D11FAB864D3E625B5F77FB79 /* ChessEngine.swift */; };
 		E0F452A3411AD4C738291227 /* HockeyModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45784ADDCB17767A73B0683A /* HockeyModels.swift */; };
 		F2EB6C5BC20DED4B9D477D96 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C700214B39DE170860047279 /* Assets.xcassets */; };
 		FECFDC7730FBC64BB705F2E4 /* PieceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2543EDD09C202FE423142BB /* PieceType.swift */; };
-		5A1C0DE0A1B2C3D4E5F60002 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5A1C0DE0A1B2C3D4E5F60001 /* InfoPlist.xcstrings */; };
-		5A1C0DE0A1B2C3D4E5F60004 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5A1C0DE0A1B2C3D4E5F60003 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0D589040D82F33AD070A2AB0 /* ModelSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelSnapshot.swift; sourceTree = "<group>"; };
+		0FD4DC2464456A5DA16097FE /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		261898F49A86E06DE56BBD20 /* CarsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarsModels.swift; sourceTree = "<group>"; };
 		45784ADDCB17767A73B0683A /* HockeyModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HockeyModels.swift; sourceTree = "<group>"; };
 		499041A70777F47C6D0C8AFC /* ChessGameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessGameViewModel.swift; sourceTree = "<group>"; };
 		54C8B68DA17BAA4855765827 /* SettingsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSheet.swift; sourceTree = "<group>"; };
+		58B939880DE5B730AFBEB04E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		75337D653E97058280302B74 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		76AE9C13E40A5CED9B795249 /* ChessSceneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessSceneView.swift; sourceTree = "<group>"; };
 		90D50370FFB566732E4B5CE6 /* SoundEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundEngine.swift; sourceTree = "<group>"; };
@@ -53,8 +55,6 @@
 		E716371E215415669FDEB86C /* SetupViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupViews.swift; sourceTree = "<group>"; };
 		E899F98682B1323FD42761BA /* ChessScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessScene.swift; sourceTree = "<group>"; };
 		F3A77C57F4551D272B340CCD /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
-		5A1C0DE0A1B2C3D4E5F60001 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
-		5A1C0DE0A1B2C3D4E5F60003 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -120,10 +120,10 @@
 			isa = PBXGroup;
 			children = (
 				C700214B39DE170860047279 /* Assets.xcassets */,
-				5A1C0DE0A1B2C3D4E5F60001 /* InfoPlist.xcstrings */,
-				5A1C0DE0A1B2C3D4E5F60003 /* PrivacyInfo.xcprivacy */,
 				C1C1C476FAC940C5562D477C /* ChessMultiverse3DApp.swift */,
 				75337D653E97058280302B74 /* ContentView.swift */,
+				0FD4DC2464456A5DA16097FE /* InfoPlist.xcstrings */,
+				58B939880DE5B730AFBEB04E /* PrivacyInfo.xcprivacy */,
 				99AA1BD786C2FC4DF55071AB /* Models */,
 				10811D8BDA79AECE56E96F5D /* Scene3D */,
 				401A9F769068E2E5F074C2A0 /* Sound */,
@@ -159,8 +159,8 @@
 			buildConfigurationList = 477DCABC87C1B1F821B11075 /* Build configuration list for PBXNativeTarget "ChessMultiverse3D" */;
 			buildPhases = (
 				3503A79A40FDE995BD8310FB /* Sources */,
+				CA7E2E9EA7627C384AB61048 /* Copy Web Version */,
 				EF536ACC56A822A367FA83B9 /* Resources */,
-				A1B2C3D4E5F60718293A4B5C /* Copy Web Version */,
 			);
 			buildRules = (
 			);
@@ -183,7 +183,7 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					6AD8D39F1AC0CA482CFF364E = {
-						DevelopmentTeam = 4N9Z9JPM6C;
+						DevelopmentTeam = 646ZQ353UC;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -214,28 +214,32 @@
 			buildActionMask = 2147483647;
 			files = (
 				F2EB6C5BC20DED4B9D477D96 /* Assets.xcassets in Resources */,
-				5A1C0DE0A1B2C3D4E5F60002 /* InfoPlist.xcstrings in Resources */,
-				5A1C0DE0A1B2C3D4E5F60004 /* PrivacyInfo.xcprivacy in Resources */,
+				03B2A39E29ABF1361CED0175 /* InfoPlist.xcstrings in Resources */,
+				C7C54B43EF8756EFB08236B4 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		A1B2C3D4E5F60718293A4B5C /* Copy Web Version */ = {
+		CA7E2E9EA7627C384AB61048 /* Copy Web Version */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
+			inputFileListPaths = (
+			);
 			inputPaths = (
 			);
 			name = "Copy Web Version";
+			outputFileListPaths = (
+			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Веб-версия из корня репозитория (index.html, css, js) кладётся в бандл как есть\nWEB=\"$SRCROOT/../..\"\nDEST=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/Web\"\nrm -rf \"$DEST\"\nmkdir -p \"$DEST\"\ncp \"$WEB/index.html\" \"$DEST/\"\nrsync -a \"$WEB/css\" \"$WEB/js\" \"$DEST/\"\n";
+			shellScript = "WEB=\"$SRCROOT/../..\"\nDEST=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/Web\"\nrm -rf \"$DEST\"\nmkdir -p \"$DEST\"\ncp \"$WEB/index.html\" \"$DEST/\"\nrsync -a \"$WEB/css\" \"$WEB/js\" \"$DEST/\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -276,25 +280,25 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 4N9Z9JPM6C;
+				CURRENT_PROJECT_VERSION = 20261028;
+				DEVELOPMENT_TEAM = 646ZQ353UC;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				CURRENT_PROJECT_VERSION = 20261022;
-				INFOPLIST_KEY_CFBundleDisplayName = "Chess 3D";
+				INFOPLIST_KEY_CFBundleDisplayName = ChessGM;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.board-games";
-				MARKETING_VERSION = 1.0;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
-				INFOPLIST_KEY_UIViewControllerBasedStatusBarAppearance = NO;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				"INFOPLIST_KEY_UISupportedInterfaceOrientations~ipad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIViewControllerBasedStatusBarAppearance = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.chessmultiverse.app;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
@@ -372,25 +376,25 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 4N9Z9JPM6C;
+				CURRENT_PROJECT_VERSION = 20261028;
+				DEVELOPMENT_TEAM = 646ZQ353UC;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				CURRENT_PROJECT_VERSION = 20261022;
-				INFOPLIST_KEY_CFBundleDisplayName = "Chess 3D";
+				INFOPLIST_KEY_CFBundleDisplayName = ChessGM;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.board-games";
-				MARKETING_VERSION = 1.0;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
-				INFOPLIST_KEY_UIViewControllerBasedStatusBarAppearance = NO;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				"INFOPLIST_KEY_UISupportedInterfaceOrientations~ipad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIViewControllerBasedStatusBarAppearance = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.chessmultiverse.app;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
