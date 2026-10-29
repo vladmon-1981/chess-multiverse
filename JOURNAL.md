@@ -1,5 +1,8 @@
 # Журнал
 
+## 29.10.2026 — запись в App Store Connect
+- Создана запись «Шахматы 3D: Мультивселенная» (команда 646ZQ353UC, bundle `com.chessmultiverse.app`, SKU `chessmultiverse3d`, основной язык русский, iOS, полный доступ). Теперь архив можно выгружать (Organizer → Distribute → App Store Connect). Метаданные, снимки и анкеты ещё не заполнены.
+
 ## 28.10.2026 (днём) — первый архив и подпись App Store
 - После перезахода владельца в Xcode консольный `xcodebuild archive` прошёл: `~/Library/Developer/Xcode/Archives/2026-10-28/ChessMultiverse3D.xcarchive`, 1.0 (20261028), имя ChessGM, команда `646ZQ353UC`.
 - Пробный `-exportArchive` (method app-store-connect, destination export, без выгрузки) успешен: «iOS Team Store Provisioning Profile: com.chessmultiverse.app» и облачный сертификат распространения до 28.10.2027. Выгрузку (Organizer → Distribute → App Store Connect) не делал — нет записи приложения в App Store Connect.
