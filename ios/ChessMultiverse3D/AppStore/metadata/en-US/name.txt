@@ -1,1 +1,1 @@
-Chess Multiverse 3D
+ChessGM

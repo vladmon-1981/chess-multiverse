@@ -1,4 +1,4 @@
-Chess Multiverse 3D is a full chess game with real three-dimensional pieces. Pick a universe, take the board and play: against the computer or against a friend on the same device.
+ChessGM is a full chess game with real three-dimensional pieces. Pick a universe, take the board and play: against the computer or against a friend on the same device.
 
 FOUR UNIVERSES, FOUR SETS OF PIECES
 • Classic: Staunton pieces in ivory and ebony on a maple and walnut board.
