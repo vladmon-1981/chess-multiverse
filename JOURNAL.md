@@ -1,7 +1,7 @@
 # Журнал
 
 ## 04.11.2026 — подготовка к публикации (без выгрузки)
-- Сборка поднята до 20261104; launch screen получил тёмный фон (#120F24, `LaunchBackground.colorset`, `INFOPLIST_KEY_UILaunchScreen_BackgroundColor` в `project.yml`, проект перегенерирован xcodegen) — нет белой вспышки перед тёмной игрой.
+- Сборка поднята до 20261104; launch screen получил тёмный фон (#120F24, `LaunchBackground.colorset`, `UILaunchScreen.UIColorName` в `ChessMultiverse3D/Info-extra.plist`; ключ INFOPLIST_KEY_UILaunchScreen_BackgroundColor при генерируемом plist давал пустой словарь, проект перегенерирован xcodegen) — нет белой вспышки перед тёмной игрой.
 - Свежий архив Release: `~/Library/Developer/Xcode/Archives/2026-11-04/ChessMultiverse3D.xcarchive` (1.0, 20261104, команда 646ZQ353UC, Web и PrivacyInfo в бандле). Ничего не выгружено и не отправлено.
 - Блокеры владельца: URL поддержки и политики (заглушки TODO.example), название в магазине vs ChessGM, шрифты Google в бандл (нужно скачать woff2 — ждёт разрешения), анкеты Connect, проверка на устройстве.
 

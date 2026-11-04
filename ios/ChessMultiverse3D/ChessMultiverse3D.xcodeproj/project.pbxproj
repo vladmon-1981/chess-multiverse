@@ -44,6 +44,7 @@
 		90D50370FFB566732E4B5CE6 /* SoundEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundEngine.swift; sourceTree = "<group>"; };
 		9517EE56082EAB074B75271E /* ChessMultiverse3D.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ChessMultiverse3D.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9C05E7E2E9AF77EFE200B5FE /* HospitalModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HospitalModels.swift; sourceTree = "<group>"; };
+		9D7FA2B2DAF8D0D35545841A /* Info-extra.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Info-extra.plist"; sourceTree = "<group>"; };
 		B2543EDD09C202FE423142BB /* PieceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceType.swift; sourceTree = "<group>"; };
 		B57B700F22995663E2282C5C /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
 		C174250E34FBFA83F42025F1 /* CameraJoystick.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraJoystick.swift; sourceTree = "<group>"; };
@@ -122,6 +123,7 @@
 				C700214B39DE170860047279 /* Assets.xcassets */,
 				C1C1C476FAC940C5562D477C /* ChessMultiverse3DApp.swift */,
 				75337D653E97058280302B74 /* ContentView.swift */,
+				9D7FA2B2DAF8D0D35545841A /* Info-extra.plist */,
 				0FD4DC2464456A5DA16097FE /* InfoPlist.xcstrings */,
 				58B939880DE5B730AFBEB04E /* PrivacyInfo.xcprivacy */,
 				99AA1BD786C2FC4DF55071AB /* Models */,
@@ -284,11 +286,10 @@
 				DEVELOPMENT_TEAM = 646ZQ353UC;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "ChessMultiverse3D/Info-extra.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = ChessGM;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.board-games";
-				INFOPLIST_KEY_UILaunchScreen_BackgroundColor = LaunchBackground;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -381,11 +382,10 @@
 				DEVELOPMENT_TEAM = 646ZQ353UC;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "ChessMultiverse3D/Info-extra.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = ChessGM;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.board-games";
-				INFOPLIST_KEY_UILaunchScreen_BackgroundColor = LaunchBackground;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
