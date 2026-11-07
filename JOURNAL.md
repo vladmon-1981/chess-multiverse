@@ -1,5 +1,9 @@
 # Журнал
 
+## 07.11.2026 (вечером) — сборка 20261104 загружена в Connect
+- `xcodebuild -exportArchive` с ExportOptions (app-store-connect, destination upload, команда 646ZQ353UC) сначала падал «Failed to Use Accounts. App Store Connect access … is required»; после перезахода владельца в Xcode → Settings → Apple Accounts загрузка прошла («Upload succeeded»). Перезапуска Xcode одного было мало.
+- Сборка обработана за несколько минут, выбрана на странице версии 1.0 в Connect и сохранена. На проверку не отправлялась, анкета App Privacy не публиковалась.
+
 ## 07.11.2026 (вечером) — подзаголовок «Шахматы: Мультивселенная»
 - Решение владельца: название ChessGM, под ним подзаголовок «Шахматы: Мультивселенная». В Connect (info) ru: «Шахматы: Мультивселенная», en-US: «Chess: Multiverse»; `metadata/{ru,en-US,kk}/subtitle.txt` обновлены (kk: «Шахмат: Мультиәлем»). Проверено перезагрузкой.
 
