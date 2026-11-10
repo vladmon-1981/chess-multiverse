@@ -80,6 +80,7 @@
             <div class="mode-buttons">
                 <button class="btn btn-primary" id="pveBtn" type="button"><span class="btn-icon">🤖</span>Играть с компьютером</button>
                 <button class="btn btn-secondary" id="pvpBtn" type="button"><span class="btn-icon">👥</span>Играть вдвоём</button>
+                <button class="btn btn-secondary" id="onlineBtn" type="button" hidden><span class="btn-icon">🌐</span>Играть онлайн</button>
             </div>
         </section>
 
@@ -136,6 +137,37 @@
             <button class="btn btn-ghost" data-back type="button">← Назад</button>
         </section>
 
+        <!-- Игра онлайн (Game Center) -->
+        <section id="onlineScreen" class="screen" aria-labelledby="onlineTitle">
+            <h2 class="screen-title" id="onlineTitle">Игра онлайн</h2>
+            <div class="gc-status" id="gcStatus">Вход в Game Center…</div>
+            <div class="online-stats" id="onlineStats">
+                <div class="os-item os-rating"><span class="os-val" id="statRating">1200</span><span class="os-lbl">Рейтинг</span></div>
+                <div class="os-item"><span class="os-val" id="statWins">0</span><span class="os-lbl">Победы</span></div>
+                <div class="os-item"><span class="os-val" id="statLosses">0</span><span class="os-lbl">Поражения</span></div>
+                <div class="os-item"><span class="os-val" id="statDraws">0</span><span class="os-lbl">Ничьи</span></div>
+            </div>
+            <div class="setup-block">
+                <div class="setup-label">Время на ход</div>
+                <div class="segmented seg-time" id="moveTime" role="radiogroup" aria-label="Время на ход">
+                    <button type="button" data-sec="30" role="radio" aria-checked="false"><span>30 сек</span></button>
+                    <button type="button" data-sec="60" role="radio" aria-checked="false"><span>1 мин</span></button>
+                    <button type="button" data-sec="120" role="radio" aria-checked="false"><span>2 мин</span></button>
+                    <button type="button" data-sec="300" role="radio" aria-checked="false"><span>5 мин</span></button>
+                </div>
+                <div class="setup-note">Не успел походить — партия проиграна. Соперник подбирается с тем же временем.</div>
+            </div>
+            <div class="mode-buttons">
+                <button class="btn btn-primary" id="findBtn" type="button"><span class="btn-icon">⚔️</span>Найти соперника</button>
+                <button class="btn btn-secondary" id="leaderBtn" type="button"><span class="btn-icon">🏆</span>Доска почёта</button>
+            </div>
+            <div class="search-box" id="searchBox" hidden>
+                <span class="spinner"></span><span>Ищем соперника…</span>
+                <button class="btn btn-ghost btn-small" id="searchCancel" type="button">Отмена</button>
+            </div>
+            <button class="btn btn-ghost" data-back type="button">← Назад</button>
+        </section>
+
         <!-- Партия -->
         <section id="gameScreen" class="screen" aria-label="Партия">
             <div class="game-layout">
@@ -149,6 +181,7 @@
                         </div>
                         <div class="pc-captured" aria-label="Взятые фигуры"></div>
                         <div class="pc-thinking" aria-hidden="true"><i></i><i></i><i></i></div>
+                        <div class="pc-clock" aria-label="Осталось времени на ход"></div>
                     </div>
                     <div class="player-card" id="bottomPlayer">
                         <img class="pc-avatar" alt="">
@@ -158,6 +191,7 @@
                         </div>
                         <div class="pc-captured" aria-label="Взятые фигуры"></div>
                         <div class="pc-thinking" aria-hidden="true"><i></i><i></i><i></i></div>
+                        <div class="pc-clock" aria-label="Осталось времени на ход"></div>
                     </div>
 
                     <div class="board-stage" id="boardStage">
@@ -313,6 +347,7 @@
     <script src="js/themes.js?v=2.8.0"></script>
     <script src="js/sounds.js?v=2.8.0"></script>
     <script src="js/effects.js?v=2.8.0"></script>
-    <script src="js/chess-app.js?v=2.8.0"></script>
+    <script src="js/online.js?v=2.9.0"></script>
+    <script src="js/chess-app.js?v=2.9.0"></script>
 </body>
 </html>

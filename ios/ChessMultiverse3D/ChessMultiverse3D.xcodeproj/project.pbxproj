@@ -29,11 +29,14 @@
 		E0F452A3411AD4C738291227 /* HockeyModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45784ADDCB17767A73B0683A /* HockeyModels.swift */; };
 		F2EB6C5BC20DED4B9D477D96 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C700214B39DE170860047279 /* Assets.xcassets */; };
 		FECFDC7730FBC64BB705F2E4 /* PieceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2543EDD09C202FE423142BB /* PieceType.swift */; };
+		FF505D1E6E9C04C46101A10B /* GameCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077908C21652D637DC7F584A /* GameCenter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		077908C21652D637DC7F584A /* GameCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenter.swift; sourceTree = "<group>"; };
 		0D589040D82F33AD070A2AB0 /* ModelSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelSnapshot.swift; sourceTree = "<group>"; };
 		0FD4DC2464456A5DA16097FE /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+		111D4495AFCFFA8DB3961FB5 /* ChessMultiverse3D.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ChessMultiverse3D.entitlements; sourceTree = "<group>"; };
 		261898F49A86E06DE56BBD20 /* CarsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarsModels.swift; sourceTree = "<group>"; };
 		45784ADDCB17767A73B0683A /* HockeyModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HockeyModels.swift; sourceTree = "<group>"; };
 		499041A70777F47C6D0C8AFC /* ChessGameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessGameViewModel.swift; sourceTree = "<group>"; };
@@ -121,8 +124,10 @@
 			isa = PBXGroup;
 			children = (
 				C700214B39DE170860047279 /* Assets.xcassets */,
+				111D4495AFCFFA8DB3961FB5 /* ChessMultiverse3D.entitlements */,
 				C1C1C476FAC940C5562D477C /* ChessMultiverse3DApp.swift */,
 				75337D653E97058280302B74 /* ContentView.swift */,
+				077908C21652D637DC7F584A /* GameCenter.swift */,
 				9D7FA2B2DAF8D0D35545841A /* Info-extra.plist */,
 				0FD4DC2464456A5DA16097FE /* InfoPlist.xcstrings */,
 				58B939880DE5B730AFBEB04E /* PrivacyInfo.xcprivacy */,
@@ -258,6 +263,7 @@
 				2380CE3DD13302036276EEA6 /* ChessScene.swift in Sources */,
 				72ADA9C30D49510F1DEAEFAD /* ChessSceneView.swift in Sources */,
 				39ADA93366C68BDCE50A16AC /* ContentView.swift in Sources */,
+				FF505D1E6E9C04C46101A10B /* GameCenter.swift in Sources */,
 				8C0F7C1D59FDE389C1F2470F /* GameView.swift in Sources */,
 				E0F452A3411AD4C738291227 /* HockeyModels.swift in Sources */,
 				24E51A398D08FC2FC5A73831 /* HospitalModels.swift in Sources */,
@@ -280,6 +286,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ChessMultiverse3D/ChessMultiverse3D.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20261104;
@@ -376,6 +383,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ChessMultiverse3D/ChessMultiverse3D.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20261104;

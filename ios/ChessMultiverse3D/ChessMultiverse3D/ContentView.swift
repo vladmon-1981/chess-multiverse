@@ -57,6 +57,8 @@ struct WebGameView: UIViewRepresentable {
         #endif
         let tts = NativeSpeech()
         config.userContentController.add(tts, name: "tts")
+        let gc = GameCenterBridge()
+        config.userContentController.add(gc, name: "gc")
 
         let web = WKWebView(frame: .zero, configuration: config)
         web.isOpaque = false
@@ -70,6 +72,7 @@ struct WebGameView: UIViewRepresentable {
         if #available(iOS 16.4, *) { web.isInspectable = true }
         #endif
         tts.webView = web
+        gc.webView = web
 
         if let dir = Bundle.main.url(forResource: "Web", withExtension: nil) {
             web.loadFileURL(dir.appendingPathComponent("index.html"), allowingReadAccessTo: dir)

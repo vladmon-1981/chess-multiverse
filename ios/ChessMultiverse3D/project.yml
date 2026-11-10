@@ -28,6 +28,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.chessmultiverse.app
         CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_ENTITLEMENTS: ChessMultiverse3D/ChessMultiverse3D.entitlements
         DEVELOPMENT_TEAM: 646ZQ353UC
         SWIFT_VERSION: 5.0
         TARGETED_DEVICE_FAMILY: "1,2"

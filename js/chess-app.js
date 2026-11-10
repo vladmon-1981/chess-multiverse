@@ -68,6 +68,13 @@
             this.gameToken = 0;
             this.aiToken = 0;
             this.lastStatus = '';
+            // Сетевая игра
+            this.net = null;              // текущий соперник и партия (см. onNetMatch)
+            this.netQueue = [];           // ходы соперника, пришедшие во время анимации
+            this.moveTime = [30, 60, 120, 300].includes(+store.get('chess-move-time')) ? +store.get('chess-move-time') : 60;
+            this.gcName = '';
+            this.clock = null;            // { color, deadline } — кто ходит и до какого момента
+            this.stats = this.loadStats();
 
             this.fontsReady = this.loadFonts();
             this.bindUI();
@@ -75,6 +82,7 @@
             this.applyTheme(this.theme, { silent: true });
             this.updateToggles();
             this.fontsReady.then(() => this.refreshSprites());
+            this.initOnline();
         }
 
         // ---------- Загрузка ----------
@@ -128,9 +136,21 @@
                 if (!w.value.trim() && typed) w.value = typed;
                 this.showScreen('pvp');
             });
+            $('#onlineBtn').addEventListener('click', () => { this.saveName(); this.openOnline(); });
+            $$('#moveTime button').forEach((b) => b.addEventListener('click', () => {
+                this.moveTime = +b.dataset.sec;
+                store.set('chess-move-time', String(this.moveTime));
+                this.updateToggles();
+            }));
+            $('#findBtn').addEventListener('click', () => this.findOpponent());
+            $('#searchCancel').addEventListener('click', () => CMOnline.cancel());
+            $('#leaderBtn').addEventListener('click', () => this.showLeaderboard());
             $('#playerName').addEventListener('change', () => this.saveName());
             $('#playerName').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#pveBtn').click(); });
-            $$('[data-back]').forEach((b) => b.addEventListener('click', () => this.showScreen('menu')));
+            $$('[data-back]').forEach((b) => b.addEventListener('click', () => {
+                if (document.body.dataset.screen === 'online') this.stopSearch();
+                this.showScreen('menu');
+            }));
 
             // Игра с компьютером
             $$('#colorChoice button').forEach((b) => b.addEventListener('click', () => {
@@ -168,7 +188,10 @@
             });
 
             // Итоги
-            $('#againBtn').addEventListener('click', () => { this.hideResult(); this.startGame(this.mode, this.difficulty, true); });
+            $('#againBtn').addEventListener('click', () => {
+                if (this.mode === 'online') { this.requestRematch(); return; }
+                this.hideResult(); this.startGame(this.mode, this.difficulty, true);
+            });
             $('#reviewBtn').addEventListener('click', () => this.hideResult());
             $('#resultMenuBtn').addEventListener('click', () => { this.hideResult(); this.backToMenu(true); });
 
@@ -273,6 +296,11 @@
             $('#setSound').checked = this.sound.enabled;
             $('#setVoice').checked = this.sound.voice.available && this.sound.voice.enabled;
             $('#setVoice').disabled = !this.sound.voice.available;
+            $$('#moveTime button').forEach((b) => {
+                const on = +b.dataset.sec === this.moveTime;
+                b.classList.toggle('is-active', on);
+                b.setAttribute('aria-checked', String(on));
+            });
         }
 
         openSettings() {
@@ -408,6 +436,17 @@
                 this.names[this.humanColor] = name;
                 this.names[other(this.humanColor)] = tr('Компьютер · {level}', { level: DIFF_NAMES[this.difficulty] });
                 this.orientation = this.humanColor;
+            } else if (mode === 'online') {
+                const n = this.net;
+                this.humanColor = n.color;
+                this.names = {};
+                this.names[n.color] = n.myName;
+                this.names[other(n.color)] = n.oppName;
+                this.orientation = n.color;
+                this.netQueue = [];
+                n.over = false;
+                n.recorded = false;
+                n.rematchMe = n.rematchThem = false;
             } else {
                 if (!again) {
                     const w = $('#whiteName').value.trim() || name, b = $('#blackName').value.trim() || tr('Игрок 2');
@@ -428,10 +467,13 @@
             this.thinking = false;
             this.startedAt = Date.now();
             this.lastStatus = '';
+            this.stopClock();
+            document.body.classList.toggle('is-online', mode === 'online');
             document.body.classList.remove('is-gloom');
             this.fx.clear();
 
             this.showScreen('game');
+            this.busy = true;   // ходы соперника ждут, пока доска не готова
             const loading = $('#boardLoading');
             loading.classList.remove('is-hidden');
             await this.fontsReady;
@@ -446,6 +488,7 @@
             view.showCheck(null);
             loading.classList.add('is-hidden');
             if (token !== this.gameToken) return;
+            this.busy = false;
 
             this.updateAll();
             if (this.hasWebGL && store.get('chess-cam-hint') !== '1') {
@@ -460,6 +503,10 @@
             this.sound.play('start');
             this.speak(T, T.voice.start, 350);
             if (this.isAITurn()) this.scheduleAI(this.theme === 'cars' ? 2300 : 1200);
+            if (mode === 'online') {
+                this.startClock();
+                this.drainNet();
+            }
         }
 
         async newGame() {
@@ -471,19 +518,31 @@
 
         async backToMenu(force = false) {
             if (document.body.dataset.screen !== 'game') { this.showScreen('menu'); return; }
-            if (!force && this.game && this.game.history().length && !this.over &&
+            if (this.mode === 'online' && this.game && !this.over) {
+                if (!force && !(await this.confirm(tr('Выйти из сетевой партии? Это засчитается как поражение.')))) return;
+                if (!this.over) {
+                    this.netSend({ t: 'resign' });
+                    this.over = { type: 'resign', winner: other(this.humanColor) };
+                    this.recordOnline('lose');
+                }
+            } else if (!force && this.game && this.game.history().length && !this.over &&
                 !(await this.confirm(tr('Выйти в меню? Текущая партия будет потеряна.')))) return;
+            if (this.mode === 'online') this.leaveNet();
             this.cancelAI();
             this.gameToken++;
             this.hideResult();
             this.fx.clear();
             document.body.classList.remove('is-gloom');
             this.sound.voice.cancel();
-            this.showScreen('menu');
+            const wasOnline = this.mode === 'online';
+            this.stopClock();
+            document.body.classList.remove('is-online');
+            this.mode = null;
+            if (wasOnline) this.openOnline(); else this.showScreen('menu');
         }
 
         isHumanTurn() {
-            return this.mode === 'pvp' || (this.game && this.game.turn() === this.humanColor);
+            return this.mode === 'pvp' || (!!this.game && this.game.turn() === this.humanColor);
         }
 
         isAITurn() {
@@ -600,6 +659,12 @@
                 return false;
             }
             if (!move) return false;
+            if (this.mode === 'online') {
+                if (move.color === this.humanColor) {
+                    this.netSend({ t: 'move', r: this.net.round, ply: this.game.history().length, from: move.from, to: move.to, promotion: move.promotion || null });
+                }
+                if (!this.game.isGameOver()) this.startClock(); else this.stopClock();
+            }
             const token = this.gameToken;
             this.selected = null;
             this.targets = [];
@@ -687,6 +752,7 @@
             if (this.mode === 'pvp' && this.autoFlip) this.setOrientation(this.game.turn());
             this.updateStatus();
             if (this.isAITurn()) this.scheduleAI(300);
+            if (this.mode === 'online') this.drainNet();
         }
 
         // ---------- Компьютер ----------
@@ -731,7 +797,7 @@
 
         // ---------- Кнопки партии ----------
         canUndo() {
-            if (!this.game || this.pendingPromotion) return false;
+            if (!this.game || this.pendingPromotion || this.mode === 'online') return false;
             const n = this.game.history().length;
             if (!n) return false;
             if (this.mode === 'pve' && this.game.turn() === this.humanColor && n < 2) return false;
@@ -782,11 +848,13 @@
 
         async resign() {
             if (!this.game || this.over) return;
-            const who = this.mode === 'pve' ? this.humanColor : this.game.turn();
-            const q = this.mode === 'pve' ? tr('Сдаться и признать поражение?') : tr('{name} сдаётся?', { name: this.names[who] });
+            const solo = this.mode === 'pve' || this.mode === 'online';
+            const who = solo ? this.humanColor : this.game.turn();
+            const q = solo ? tr('Сдаться и признать поражение?') : tr('{name} сдаётся?', { name: this.names[who] });
             if (!(await this.confirm(q))) return;
             if (this.over) return;
             this.cancelAI();
+            if (this.mode === 'online') this.netSend({ t: 'resign' });
             this.finishGame({ type: 'resign', winner: other(who) });
         }
 
@@ -811,6 +879,8 @@
             else result = { type: 'draw', reason: tr('Правило 50 ходов') };
             this.over = result;
             this.thinking = false;
+            this.stopClock();
+            if (this.pendingPromotion) this.closePromotion(null);
             this.deselect();
             this.updatePlayers();
             this.updateControls();
@@ -819,8 +889,9 @@
             const T = THEMES[this.theme];
             let outcome;
             if (result.type === 'draw') outcome = 'draw';
-            else if (this.mode === 'pve') outcome = result.winner === this.humanColor ? 'win' : 'lose';
+            else if (this.mode === 'pve' || this.mode === 'online') outcome = result.winner === this.humanColor ? 'win' : 'lose';
             else outcome = 'win';
+            if (this.mode === 'online') this.recordOnline(outcome);
 
             if (result.type === 'mate') {
                 const k = this.findKing(g.turn());
@@ -841,7 +912,7 @@
             let line;
             if (outcome === 'draw') line = T.voice.draw;
             else if (this.mode === 'pvp') line = T.voice.pvpWin;
-            else if (result.type === 'resign') line = outcome === 'win' ? T.voice.resignWin : T.voice.resignLose;
+            else if (result.type !== 'mate') line = outcome === 'win' ? T.voice.resignWin : T.voice.resignLose;
             else line = outcome === 'win' ? T.voice.win : T.voice.lose;
             this.speak(T, line, outcome === 'lose' ? 1500 : 1000, winnerName);
 
@@ -871,10 +942,15 @@
                     : T.texts.pvpWin.sub(this.names[result.winner]);
             } else if (outcome === 'win') {
                 title = T.texts.win.title;
-                sub = result.type === 'resign' ? tr('Соперник признал поражение!') : T.texts.win.sub;
+                sub = result.type === 'resign' ? tr('Соперник признал поражение!')
+                    : result.type === 'timeout' ? tr('У соперника вышло время на ход!')
+                    : result.type === 'left' ? tr('Соперник покинул партию.')
+                    : T.texts.win.sub;
             } else {
                 title = T.texts.lose.title;
-                sub = result.type === 'resign' ? tr('Партия сдана — в следующий раз получится!') : T.texts.lose.sub;
+                sub = result.type === 'resign' ? tr('Партия сдана — в следующий раз получится!')
+                    : result.type === 'timeout' ? tr('Время на ход вышло — в следующий раз получится!')
+                    : T.texts.lose.sub;
             }
             // Буквы вылетают по одной; слова не разрываются при переносе строки
             const titleEl = $('#resultTitle');
@@ -900,6 +976,13 @@
             const secs = Math.round((Date.now() - (this.startedAt || Date.now())) / 1000);
             const stats = [`${moves} ${movesWord(moves)}`, `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`];
             if (this.mode === 'pve') stats.push(tr('Уровень: {level}', { level: DIFF_NAMES[this.difficulty] }));
+            if (this.mode === 'online' && this.net && this.net.delta !== undefined) {
+                const d = this.net.delta;
+                stats.push(tr('Рейтинг: {r}', { r: this.stats.rating }) + ` (${d >= 0 ? '+' : ''}${d})`);
+            }
+            const again = $('#againBtn');
+            again.lastChild.textContent = this.mode === 'online' ? tr('Реванш') : tr('Сыграть ещё');
+            again.disabled = this.mode === 'online' && !!this.net && this.net.gone;
             $('#resultStats').replaceChildren(...stats.map((t) => { const s = document.createElement('span'); s.textContent = t; return s; }));
             $('#resultSub').textContent = '';
             modal.hidden = false;
@@ -1017,9 +1100,14 @@
                 if (avatar.getAttribute('src') !== url) avatar.src = url;
                 card.querySelector('.pc-name').textContent = this.names[color];
                 const isAI = this.mode === 'pve' && color !== this.humanColor;
-                card.querySelector('.pc-sub').textContent = `${T.sides[color]}${this.theme === 'classic' ? '' : color === 'w' ? tr(' · белые') : tr(' · чёрные')}${isAI ? '' : this.mode === 'pve' ? tr(' · это ты') : ''}`;
+                const isOpp = this.mode === 'online' && color !== this.humanColor;
+                const solo = this.mode === 'pve' || this.mode === 'online';
+                const sideTxt = `${T.sides[color]}${this.theme === 'classic' ? '' : color === 'w' ? tr(' · белые') : tr(' · чёрные')}`;
+                const oppTxt = isOpp && this.net && this.net.oppRating ? tr(' · рейтинг {r}', { r: this.net.oppRating }) : '';
+                card.querySelector('.pc-sub').textContent = `${sideTxt}${isAI || isOpp ? oppTxt : solo ? tr(' · это ты') : ''}`;
+                card.dataset.color = color;
                 card.classList.toggle('is-turn', !this.over && this.game.turn() === color);
-                card.classList.toggle('is-thinking', this.thinking && isAI);
+                card.classList.toggle('is-thinking', (this.thinking && isAI) || (isOpp && !this.over && this.game.turn() === color));
                 const cap = card.querySelector('.pc-captured');
                 const pieces = this.capturedBy(color);
                 const frag = document.createDocumentFragment();
@@ -1088,12 +1176,17 @@
                 kicker = tr('Партия окончена');
                 if (r.type === 'draw') text = `${T.texts.draw.title}: ${r.reason.toLowerCase()}`;
                 else if (r.type === 'resign') text = tr('{loser} сдаётся', { loser: this.names[other(r.winner)] });
+                else if (r.type === 'timeout') text = tr('{loser}: время на ход вышло', { loser: this.names[other(r.winner)] });
+                else if (r.type === 'left') text = tr('{loser} покидает партию', { loser: this.names[other(r.winner)] });
                 else text = tr('{mate} Победа: {name}', { mate: T.texts.mateBanner, name: this.names[r.winner] });
             } else if (this.thinking) {
                 text = T.texts.thinking + '…';
             } else if (this.mode === 'pve') {
                 if (turn === this.humanColor) text = this.game.isCheck() ? T.texts.check : T.texts.yourMove;
                 else text = T.texts.thinking + '…';
+            } else if (this.mode === 'online') {
+                if (turn === this.humanColor) text = this.game.isCheck() ? T.texts.check : T.texts.yourMove;
+                else text = tr('{name} думает…', { name: this.names[turn] });
             } else {
                 const nm = this.names[turn];
                 text = this.game.isCheck() ? tr('{banner} {name}, спасай короля!', { banner: T.texts.checkBanner, name: nm }) : tr('{name}, твой ход', { name: nm });
@@ -1109,8 +1202,292 @@
             const inGame = !!this.game;
             $('#undoBtn').disabled = !this.canUndo();
             $('#resignBtn').disabled = !inGame || !!this.over || !!this.pendingPromotion;
-            $('#newGameBtn').disabled = !inGame;
+            $('#newGameBtn').disabled = !inGame || this.mode === 'online';
             $('#viewBtn').disabled = !this.view || !this.view.setPreset || !this.hasWebGL;
+        }
+
+        // ---------- Сетевая игра (Game Center) ----------
+        initOnline() {
+            if (!window.CMOnline || !CMOnline.available) return;
+            $('#onlineBtn').hidden = false;
+            CMOnline.on((ev) => this.onNetEvent(ev));
+            this.renderStats();
+            this.updateToggles();
+            CMOnline.auth();
+        }
+
+        loadStats() {
+            let s = null;
+            try { s = JSON.parse(store.get('chess-online', 'null')); } catch (e) { /* */ }
+            return Object.assign({ rating: 1200, wins: 0, losses: 0, draws: 0, games: 0 }, s || {});
+        }
+
+        saveStats() { store.set('chess-online', JSON.stringify(this.stats)); }
+
+        renderStats(delta) {
+            $('#statRating').textContent = this.stats.rating;
+            $('#statWins').textContent = this.stats.wins;
+            $('#statLosses').textContent = this.stats.losses;
+            $('#statDraws').textContent = this.stats.draws;
+            if (delta) {
+                const d = document.createElement('span');
+                d.className = 'os-delta ' + (delta > 0 ? 'up' : 'down');
+                d.textContent = (delta > 0 ? '+' : '') + delta;
+                $('#statRating').appendChild(d);
+            }
+        }
+
+        openOnline() {
+            $('#searchBox').hidden = true;
+            $('#findBtn').disabled = !this.gcName;
+            this.renderStats(this.lastDelta || 0);
+            this.lastDelta = 0;
+            this.showScreen('online');
+        }
+
+        setGcStatus(text, bad = false) {
+            const el = $('#gcStatus');
+            el.textContent = text;
+            el.classList.toggle('is-bad', bad);
+        }
+
+        findOpponent() {
+            if (!this.gcName) { this.toast(tr('Сначала войди в Game Center: Настройки → Game Center')); CMOnline.auth(); return; }
+            this.leaveNet();
+            this.sound.voice.prime();
+            if (CMOnline.mock) $('#searchBox').hidden = false;
+            $('#findBtn').disabled = true;
+            CMOnline.find(this.moveTime);
+        }
+
+        stopSearch() {
+            if (!$('#searchBox').hidden) CMOnline.cancel();
+            $('#searchBox').hidden = true;
+            $('#findBtn').disabled = !this.gcName;
+        }
+
+        showLeaderboard() {
+            if (CMOnline.native) { CMOnline.leaderboard(); return; }
+            this.toast(tr('Доска почёта открывается в приложении (Game Center)'), 2600);
+        }
+
+        netSend(msg) { if (this.net && !this.net.gone) CMOnline.send(msg); }
+
+        leaveNet() {
+            if (this.net) { this.net.gone = true; CMOnline.leave(); }
+            this.net = null;
+            this.netQueue = [];
+        }
+
+        onNetEvent(ev) {
+            switch (ev.type) {
+                case 'auth':
+                    if (ev.ok) {
+                        this.gcName = ev.name || this.playerName();
+                        this.setGcStatus(tr('Game Center: {name}', { name: this.gcName }));
+                    } else {
+                        this.gcName = '';
+                        this.setGcStatus(tr('Нет входа в Game Center — войди в Настройках iPhone, раздел Game Center'), true);
+                    }
+                    $('#findBtn').disabled = !this.gcName;
+                    break;
+                case 'scores':
+                    // Новое устройство: локальной истории нет, а в Game Center результаты есть
+                    if ((ev.wins || 0) > this.stats.wins) {
+                        this.stats.wins = ev.wins;
+                        if (ev.rating) this.stats.rating = ev.rating;
+                        this.saveStats();
+                        this.renderStats();
+                    }
+                    break;
+                case 'match': this.onNetMatch(ev); break;
+                case 'data': this.onNetData(ev.msg); break;
+                case 'left': this.onNetLeft(); break;
+                case 'cancelled':
+                    $('#searchBox').hidden = true;
+                    $('#findBtn').disabled = !this.gcName;
+                    break;
+                case 'error':
+                    $('#searchBox').hidden = true;
+                    $('#findBtn').disabled = !this.gcName;
+                    if (ev.text) this.toast(ev.text, 3500);
+                    break;
+            }
+        }
+
+        /** Соперник найден: обмениваемся приветствием, цвет решает жребий (у кого число больше — белые). */
+        onNetMatch(ev) {
+            $('#searchBox').hidden = true;
+            this.net = {
+                oppName: ev.opponent || tr('Соперник'),
+                myName: this.gcName || this.playerName(),
+                nonce: Math.floor(Math.random() * 2 ** 31),
+                round: 0, hello: null, color: null, gone: false
+            };
+            this.netSend({ t: 'hello', v: 1, nonce: this.net.nonce, tc: this.moveTime, name: this.net.myName, rating: this.stats.rating });
+            const early = this.pendingHello;
+            this.pendingHello = null;
+            if (early) this.onNetData(early);
+        }
+
+        onNetData(m) {
+            const n = this.net;
+            if (!m || typeof m !== 'object') return;
+            if (!n) { if (m.t === 'hello') this.pendingHello = m; return; }
+            if (m.t === 'hello') {
+                if (n.hello) return;
+                n.hello = m;
+                if (m.name) n.oppName = String(m.name).slice(0, 24);
+                n.oppRating = Math.round(+m.rating) || 1200;
+                if (m.nonce === n.nonce) {   // ничья в жребии — перебросить
+                    n.hello = null;
+                    n.nonce = Math.floor(Math.random() * 2 ** 31);
+                    this.netSend({ t: 'hello', v: 1, nonce: n.nonce, tc: this.moveTime, name: n.myName, rating: this.stats.rating });
+                    return;
+                }
+                n.color = n.nonce > m.nonce ? 'w' : 'b';
+                // Лимит времени берётся у белых (при автоподборе он и так одинаковый)
+                n.tc = n.color === 'w' ? this.moveTime : ([30, 60, 120, 300].includes(+m.tc) ? +m.tc : 60);
+                this.toast(tr('Соперник: {name}', { name: n.oppName }), 2200);
+                this.startGame('online');
+                return;
+            }
+            if (this.mode !== 'online' || !this.game) return;
+            if (m.r !== undefined && m.r !== n.round) return;
+            if (m.t === 'move') {
+                this.netQueue.push(m);
+                this.drainNet();
+            } else if (m.t === 'resign') {
+                if (!this.over) this.finishGame({ type: 'resign', winner: this.humanColor });
+            } else if (m.t === 'timeout') {
+                if (!this.over) this.finishGame({ type: 'timeout', winner: this.humanColor, ...this.timeoutResult(this.humanColor) });
+            } else if (m.t === 'flag') {
+                // Соперник фиксирует, что моё время вышло (его часы — решающие при задержке сети)
+                if (!this.over) this.finishGame({ type: 'timeout', winner: other(this.humanColor), ...this.timeoutResult(other(this.humanColor)) });
+            } else if (m.t === 'rematch') {
+                n.rematchThem = true;
+                if (n.rematchMe) this.startRematch();
+                else this.toast(tr('{name} предлагает реванш', { name: n.oppName }), 3000);
+            }
+        }
+
+        /** Применить ходы соперника по очереди, когда доска свободна. */
+        drainNet() {
+            if (this.mode !== 'online' || !this.game || this.busy || this.over) return;
+            const m = this.netQueue.shift();
+            if (!m) return;
+            const ply = this.game.history().length;
+            if (m.ply !== ply + 1 || this.game.turn() === this.humanColor) {
+                if (m.ply > ply + 1) this.netQueue.unshift(m);   // пришёл раньше времени — подождать
+                return;
+            }
+            this.deselect();
+            this.commitMove({ from: m.from, to: m.to, promotion: m.promotion || undefined }, false);
+        }
+
+        onNetLeft() {
+            const n = this.net;
+            if (!n) return;
+            n.gone = true;
+            if (this.mode === 'online' && this.game && !this.over) {
+                this.finishGame({ type: 'left', winner: this.humanColor });
+            } else if (this.mode === 'online') {
+                this.toast(tr('{name} вышел из игры', { name: n.oppName }), 2600);
+                $('#againBtn').disabled = true;
+                $('#findBtn').disabled = !this.gcName;
+            }
+        }
+
+        requestRematch() {
+            const n = this.net;
+            if (!n || n.gone) { this.hideResult(); this.backToMenu(true); return; }
+            n.rematchMe = true;
+            this.netSend({ t: 'rematch', r: n.round });
+            $('#againBtn').disabled = true;
+            if (n.rematchThem) this.startRematch();
+            else this.toast(tr('Ждём ответа соперника…'), 3000);
+        }
+
+        startRematch() {
+            const n = this.net;
+            n.round++;
+            n.color = other(n.color);
+            $('#againBtn').disabled = false;
+            this.hideResult();
+            this.startGame('online');
+        }
+
+        /** Время вышло, но у победителя нечем ставить мат — ничья (как в настоящих шахматах). */
+        timeoutResult(winner) {
+            let minors = 0, heavy = false;
+            for (const row of this.game.board()) for (const p of row) {
+                if (!p || p.color !== winner || p.type === 'k') continue;
+                if (p.type === 'b' || p.type === 'n') minors++; else heavy = true;
+            }
+            return heavy || minors >= 2 ? {} : { type: 'draw', winner: undefined, reason: tr('Время вышло, но матовать нечем') };
+        }
+
+        startClock() {
+            if (this.mode !== 'online' || !this.net || this.over) return;
+            this.clock = { color: this.game.turn(), deadline: Date.now() + this.net.tc * 1000, flagged: false };
+            if (!this.clockTimer) this.clockTimer = setInterval(() => this.tickClock(), 200);
+            this.tickClock();
+        }
+
+        stopClock() {
+            clearInterval(this.clockTimer);
+            this.clockTimer = null;
+            this.clock = null;
+            $$('.pc-clock').forEach((el) => { el.textContent = ''; el.classList.remove('is-low'); });
+        }
+
+        tickClock() {
+            const c = this.clock;
+            if (!c || this.over || this.mode !== 'online') return;
+            const left = c.deadline - Date.now();
+            const secs = Math.max(0, Math.ceil(left / 1000));
+            for (const card of $$('.player-card')) {
+                const el = card.querySelector('.pc-clock');
+                if (card.dataset.color !== c.color) { el.textContent = ''; continue; }
+                el.textContent = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+                el.classList.toggle('is-low', secs <= 10);
+            }
+            if (c.color === this.humanColor && secs <= 5 && secs > 0 && c.warned !== secs) {
+                c.warned = secs;
+                this.sound.play('uiClick');
+            }
+            if (left > 0) return;
+            if (c.color === this.humanColor) {
+                // Своё время вышло: признаём сразу
+                this.netSend({ t: 'timeout', r: this.net.round });
+                this.finishGame({ type: 'timeout', winner: other(this.humanColor), ...this.timeoutResult(other(this.humanColor)) });
+            } else if (left < -5000 && !c.flagged) {
+                // У соперника вышло время, и 5 секунд запаса на задержку сети тоже
+                c.flagged = true;
+                this.netSend({ t: 'flag', r: this.net.round });
+                this.finishGame({ type: 'timeout', winner: this.humanColor, ...this.timeoutResult(this.humanColor) });
+            }
+        }
+
+        /** Итог сетевой партии: рейтинг Эло, счёт, отправка в таблицы Game Center. */
+        recordOnline(outcome) {
+            const n = this.net;
+            if (!n || n.recorded) return;
+            n.recorded = true;
+            const s = this.stats;
+            const score = outcome === 'win' ? 1 : outcome === 'draw' ? 0.5 : 0;
+            const opp = n.oppRating || 1200;
+            const expected = 1 / (1 + Math.pow(10, (opp - s.rating) / 400));
+            const k = s.games < 20 ? 40 : 24;
+            const delta = Math.round(k * (score - expected));
+            s.rating = Math.max(100, s.rating + delta);
+            s.games++;
+            if (outcome === 'win') s.wins++; else if (outcome === 'lose') s.losses++; else s.draws++;
+            n.delta = delta;
+            this.lastDelta = delta;
+            this.saveStats();
+            this.renderStats(delta);
+            CMOnline.report({ rating: s.rating, wins: s.wins });
         }
     }
 
