@@ -917,3 +917,7 @@ body.is-gloom .board-stage { filter: saturate(0.45) brightness(0.8); transition:
 .pc-clock { display: none; font-family: var(--font-logo); font-weight: 900; font-size: 14px; min-width: 38px; text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
 body.is-online .player-card.is-turn .pc-clock { display: block; }
 .pc-clock.is-low { color: var(--bad); animation: blink 0.8s steps(1) infinite; }
+@media (max-width: 760px) {
+    .segmented.seg-time { grid-template-columns: repeat(4, 1fr); }
+    .seg-time button { padding: 10px 2px; }
+}

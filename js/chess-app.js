@@ -1239,7 +1239,7 @@
 
         openOnline() {
             $('#searchBox').hidden = true;
-            $('#findBtn').disabled = !this.gcName;
+            $('#findBtn').disabled = false;
             this.renderStats(this.lastDelta || 0);
             this.lastDelta = 0;
             this.showScreen('online');
@@ -1263,7 +1263,7 @@
         stopSearch() {
             if (!$('#searchBox').hidden) CMOnline.cancel();
             $('#searchBox').hidden = true;
-            $('#findBtn').disabled = !this.gcName;
+            $('#findBtn').disabled = false;
         }
 
         showLeaderboard() {
@@ -1289,7 +1289,7 @@
                         this.gcName = '';
                         this.setGcStatus(tr('Нет входа в Game Center — войди в Настройках iPhone, раздел Game Center'), true);
                     }
-                    $('#findBtn').disabled = !this.gcName;
+                    $('#findBtn').disabled = false;
                     break;
                 case 'scores':
                     // Новое устройство: локальной истории нет, а в Game Center результаты есть
@@ -1305,11 +1305,11 @@
                 case 'left': this.onNetLeft(); break;
                 case 'cancelled':
                     $('#searchBox').hidden = true;
-                    $('#findBtn').disabled = !this.gcName;
+                    $('#findBtn').disabled = false;
                     break;
                 case 'error':
                     $('#searchBox').hidden = true;
-                    $('#findBtn').disabled = !this.gcName;
+                    $('#findBtn').disabled = false;
                     if (ev.text) this.toast(ev.text, 3500);
                     break;
             }
@@ -1394,7 +1394,7 @@
             } else if (this.mode === 'online') {
                 this.toast(tr('{name} вышел из игры', { name: n.oppName }), 2600);
                 $('#againBtn').disabled = true;
-                $('#findBtn').disabled = !this.gcName;
+                $('#findBtn').disabled = false;
             }
         }
 
