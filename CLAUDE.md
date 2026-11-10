@@ -37,7 +37,15 @@
   устройствах с разными Apple ID (Sandbox).
 
 ## Открытые хвосты
-- Онлайн (10.11.2026) сделан в коде, проверен в браузере и в симуляторе (экран, мост). Game Center в Connect включён,
-  таблицы `chessgm.rating` и `chessgm.wins` заведены (ru/en). **Партия на двух устройствах не проверена.**
-  При создании версии 1.1 в Connect: на странице версии в разделе Game Center отметить обе таблицы, перепроверить
-  анкету конфиденциальности. Версия не поднята (1.0/20261104), ничего не выгружено.
+- Версия 1.1 (20261110) с онлайном загружена и привязана в Connect, статус «Подготовка к отправке», выпуск вручную.
+  **На проверку не отправлена.** Партия на двух устройствах не проверена. Перед отправкой: на странице версии
+  в разделе Game Center убедиться, что обе таблицы отмечены (через API это не проверено). Обновлённая
+  политика (`privacy/index.html`, абзац про Game Center) лежит в рабочей ветке, на сайт (`main`) не выложена.
+  Анкета App Privacy остаётся «Data Not Collected»: данные онлайна обрабатывает Apple.
+
+## Подпись и выгрузка (грабли)
+- Xcode часто теряет вход («No Accounts»). Архив без владельца: `xcodebuild archive -allowProvisioningUpdates`
+  с `-authenticationKeyPath/-authenticationKeyID/-authenticationKeyIssuerID` (ключ из `.secrets.local/asc.env`).
+- Выгрузка ключом API: облачная подпись недоступна (роль App Manager → «Cloud signing permission error»).
+  Работает ручная подпись: локальный «Apple Distribution (646ZQ353UC)» + профиль App Store
+  «ChessGM AppStore GameCenter» (создан через API 10.11.2026, до 31.10.2027), ExportOptions `signingStyle manual`.

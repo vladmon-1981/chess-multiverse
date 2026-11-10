@@ -1,5 +1,16 @@
 # Журнал
 
+## 10.11.2026 (ночью) — версия 1.1 загружена в Connect (без отправки на проверку)
+- Версия 1.1, сборка 20261110 (project.yml, xcodegen). Архив: `~/Library/Developer/Xcode/Archives/2026-11-10/ChessMultiverse3D-1.1.xcarchive`.
+- Xcode снова «No Accounts», плюс профиль без Game Center. Архив собран подписью через ключ ASC API; выгрузка облачной подписью
+  ключом App Manager запрещена → создан профиль App Store «ChessGM AppStore GameCenter» (API, с Game Center), экспорт ручной подписью,
+  «Upload succeeded», сборка VALID.
+- В Connect создана версия 1.1 (MANUAL), привязана сборка, включён Game Center у версии; «Что нового», описание и рекламный текст ru/en-US
+  обновлены (упомянут онлайн; «без интернета» уточнено). kk — только в файлах, такой локали в Connect нет.
+- Политика конфиденциальности: добавлен абзац про Game Center (ru/en), редакция 10.11.2026 — в рабочей ветке, на сайт не выложено.
+  Анкету App Privacy не меняли: «Data Not Collected» остаётся верной.
+- Не сделано: проверка на двух устройствах, отметка таблиц в разделе Game Center версии (через UI), отправка на проверку.
+
 ## 10.11.2026 (вечером) — Game Center в App Store Connect
 - По «Да» владельца: через ASC API (ключ мониторинга, роль App Manager) включён Game Center у ChessGM (gameCenterDetail 8dba0187-…).
 - Заведены таблицы Classic, «Most Recent Score», по убыванию: `chessgm.rating` (100–4000; «Рейтинг онлайн» / «Online rating»)
