@@ -1,7 +1,7 @@
-First release on the App Store.
+Online play is here!
 
-• Four 3D universes: Classic, Racing, Vet Clinic and Hockey.
-• Play the computer on three levels or a friend on one device.
-• Free camera and cinematic moves with capture effects.
-• Sound effects and an announcer voice.
-• English and Russian interface. Works offline.
+• Online games via Game Center: invite a friend or get matched with a random opponent.
+• Time per move: 30 seconds, 1, 2 or 5 minutes. Run out of time and you lose.
+• Rating plus your wins, losses and draws.
+• Game Center leaderboards for rating and wins.
+• One-tap rematch with colors swapped.

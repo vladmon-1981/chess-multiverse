@@ -11,6 +11,7 @@ Every universe has its own board, its own sounds, its own announcer lines and it
 PLAY YOUR WAY
 • Computer opponent with three levels: Easy, Medium and Hard. The engine runs on your device and thinks as long as it needs to.
 • Two players on one device, with optional board turning after each move.
+• Online via Game Center: a friend or a random opponent, 30 seconds to 5 minutes per move, rating and leaderboards.
 • Choose White, Black or a random side.
 • Undo a move, flip the board, resign or start over at any moment.
 
@@ -24,6 +25,6 @@ SOUND AND VOICE
 All sounds are synthesized on the device. The announcer calls the game in English: check, victory, defeat and, in the hockey universe, a live commentary on the moves. Sound and voice can be turned off in one tap.
 
 OFFLINE AND PRIVATE
-The game works without an internet connection. No accounts, no ads, no tracking and no purchases.
+Playing the computer or a friend on one device works without an internet connection; only online games need one. No accounts of our own, no ads, no tracking and no purchases.
 
 The interface is available in English and Russian and follows your device language.
