@@ -852,11 +852,19 @@
             if (!ctx) return;
             const fn = (SFX[this.theme] && SFX[this.theme][name]) || COMMON[name];
             if (!fn) return;
-            try {
-                fn(this.S, ctx.currentTime + 0.015 + delay);
-            } catch (e) {
-                /* звук не критичен для игры */
-            }
+            const fire = () => {
+                try {
+                    fn(this.S, ctx.currentTime + 0.015 + delay);
+                } catch (e) {
+                    /* звук не критичен для игры */
+                }
+            };
+            if (ctx.state === 'running') { fire(); return; }
+            // Контекст на паузе (iOS после Game Center, звонка, сворачивания). Звук, поставленный
+            // в очередь «замёрзших» часов, прозвучал бы только при следующем касании — с опозданием.
+            // Поэтому будим контекст и играем, только если он проснулся почти сразу.
+            const t0 = Date.now();
+            ctx.resume().then(() => { if (Date.now() - t0 < 350) fire(); }).catch(() => {});
         }
 
         say(text, o) { this.voice.say(text, o); }

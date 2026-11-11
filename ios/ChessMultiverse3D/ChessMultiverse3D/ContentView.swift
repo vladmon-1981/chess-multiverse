@@ -18,9 +18,7 @@ struct ContentView: View {
 
 struct WebGameView: UIViewRepresentable {
     func makeUIView(context: Context) -> WKWebView {
-        // Звук игры слышен и при беззвучном режиме, но не глушит чужую музыку
-        try? AVAudioSession.sharedInstance().setCategory(.playback, options: [.mixWithOthers])
-        try? AVAudioSession.sharedInstance().setActive(true)
+        AudioKeeper.shared.start()
 
         let config = WKWebViewConfiguration()
         config.allowsInlineMediaPlayback = true
@@ -73,6 +71,7 @@ struct WebGameView: UIViewRepresentable {
         #endif
         tts.webView = web
         gc.webView = web
+        AudioKeeper.shared.webView = web
 
         if let dir = Bundle.main.url(forResource: "Web", withExtension: nil) {
             web.loadFileURL(dir.appendingPathComponent("index.html"), allowingReadAccessTo: dir)
@@ -83,6 +82,62 @@ struct WebGameView: UIViewRepresentable {
     func updateUIView(_ web: WKWebView, context: Context) {}
 }
 
+
+/// Звук приложения: категория «playback» (слышно и в беззвучном режиме, чужая музыка не глохнет).
+/// Game Center при начале сетевой партии переводит сессию под голосовой чат (playAndRecord):
+/// звук уходит в разговорный динамик, Web Audio встаёт на паузу — эффекты пропадали или
+/// звучали только при следующем касании, диктор молчал. Поэтому категорию возвращаем
+/// после каждой такой смены, после прерываний и при возврате в приложение, а игре шлём
+/// событие «audio», чтобы она разбудила Web Audio.
+final class AudioKeeper {
+    static let shared = AudioKeeper()
+    weak var webView: WKWebView?
+    private var started = false
+
+    func start() {
+        apply()
+        guard !started else { return }
+        started = true
+        let nc = NotificationCenter.default
+        let s = AVAudioSession.sharedInstance()
+        nc.addObserver(forName: AVAudioSession.interruptionNotification, object: s, queue: .main) { [weak self] n in
+            let raw = n.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt
+            if raw == AVAudioSession.InterruptionType.ended.rawValue { self?.restore() }
+        }
+        nc.addObserver(forName: AVAudioSession.routeChangeNotification, object: s, queue: .main) { [weak self] _ in
+            if s.category != .playback { self?.restore() }
+        }
+        nc.addObserver(forName: AVAudioSession.mediaServicesWereResetNotification, object: s, queue: .main) { [weak self] _ in
+            self?.restore()
+        }
+        nc.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
+            self?.restore()
+        }
+    }
+
+    private func apply() {
+        let s = AVAudioSession.sharedInstance()
+        if s.category != .playback || !s.categoryOptions.contains(.mixWithOthers) {
+            try? s.setCategory(.playback, options: [.mixWithOthers])
+        }
+        try? s.setActive(true)
+    }
+
+    /// Вернуть звук и разбудить Web Audio в игре. Повторяем с задержкой: Game Center
+    /// иногда меняет сессию ещё раз уже после того, как партия началась.
+    func restore() {
+        apply()
+        wakeWeb()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
+            self?.apply()
+            self?.wakeWeb()
+        }
+    }
+
+    private func wakeWeb() {
+        webView?.evaluateJavaScript("window.CMOnline && CMOnline._event({type: 'audio'})")
+    }
+}
 
 #if DEBUG
 /// Отладка (запуск с аргументом -webLog): раз в 3 с пишет в системный лог состояние Web Audio —

@@ -1300,7 +1300,9 @@
                         this.renderStats();
                     }
                     break;
-                case 'match': this.onNetMatch(ev); break;
+                case 'match': this.sound.ensure(); this.onNetMatch(ev); break;
+                // Натив вернул звук приложению (Game Center перенастраивает его при начале партии)
+                case 'audio': this.sound.ensure(); break;
                 case 'data': this.onNetData(ev.msg); break;
                 case 'left': this.onNetLeft(); break;
                 case 'cancelled':

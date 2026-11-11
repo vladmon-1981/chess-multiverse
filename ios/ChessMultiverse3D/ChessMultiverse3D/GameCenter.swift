@@ -91,6 +91,7 @@ final class GameCenterBridge: NSObject, WKScriptMessageHandler {
         match = m
         announced = false
         m.delegate = self
+        AudioKeeper.shared.restore()
         announceIfReady(m)
     }
 
@@ -163,7 +164,7 @@ final class GameCenterBridge: NSObject, WKScriptMessageHandler {
 
 extension GameCenterBridge: GKMatchmakerViewControllerDelegate {
     func matchmakerViewControllerWasCancelled(_ vc: GKMatchmakerViewController) {
-        vc.dismiss(animated: true)
+        vc.dismiss(animated: true) { AudioKeeper.shared.restore() }
         emit(["type": "cancelled"])
     }
 
@@ -173,7 +174,7 @@ extension GameCenterBridge: GKMatchmakerViewControllerDelegate {
     }
 
     func matchmakerViewController(_ vc: GKMatchmakerViewController, didFind match: GKMatch) {
-        vc.dismiss(animated: true)
+        vc.dismiss(animated: true) { AudioKeeper.shared.restore() }
         start(match)
     }
 }
@@ -187,6 +188,7 @@ extension GameCenterBridge: GKMatchDelegate {
     func match(_ match: GKMatch, player: GKPlayer, didChange state: GKPlayerConnectionState) {
         switch state {
         case .connected:
+            AudioKeeper.shared.restore()
             announceIfReady(match)
         case .disconnected:
             if self.match === match { emit(["type": "left"]) }
@@ -209,6 +211,6 @@ extension GameCenterBridge: GKLocalPlayerListener {
 
 extension GameCenterBridge: GKGameCenterControllerDelegate {
     func gameCenterViewControllerDidFinish(_ vc: GKGameCenterViewController) {
-        vc.dismiss(animated: true)
+        vc.dismiss(animated: true) { AudioKeeper.shared.restore() }
     }
 }
