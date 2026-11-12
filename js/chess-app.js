@@ -213,8 +213,6 @@
             $('#fullscreenBtn').addEventListener('click', () => this.toggleFullscreen());
 
             // Камера
-            $$('#camControls [data-cam]').forEach((b) => b.addEventListener('click', () => this.cameraAction(b.dataset.cam)));
-            $('#cineBtn').addEventListener('click', () => this.setCinematic(!this.cinematic, true));
             document.addEventListener('keydown', (e) => {
                 if (document.body.dataset.screen !== 'game' || !this.hasWebGL || !this.view || e.ctrlKey || e.metaKey || e.altKey) return;
                 if (e.target.closest && e.target.closest('input, textarea, select') || $$('.modal').some((m) => !m.hidden)) return;
@@ -291,11 +289,13 @@
                 b.classList.toggle('is-active', on);
                 b.setAttribute('aria-checked', String(on));
             });
-            $('#cineBtn').setAttribute('aria-pressed', String(this.cinematic));
             $('#setCinema').checked = this.cinematic;
             $('#setFx').checked = this.captureFx;
             $('#setSound').checked = this.sound.enabled;
             $('#setVoice').checked = this.sound.voice.available && this.sound.voice.enabled;
+            // Стоит простой системный голос — подсказать, где скачать улучшенный
+            const vi = this.sound.voice.info;
+            $('#voiceHint').hidden = !(vi && vi.quality < 2);
             $('#setVoice').disabled = !this.sound.voice.available;
             $$('#moveTime button').forEach((b) => {
                 const on = +b.dataset.sec === this.moveTime;
@@ -422,7 +422,6 @@
             if (!this.view) {
                 this.view = new Board2D(host, handlers);
                 $('#viewBtn').disabled = true;
-                $('#camControls').hidden = true;
                 this.toast(tr('3D-режим недоступен в этом браузере — включена плоская доска'), 4000);
             }
             return this.view;
@@ -1130,6 +1129,40 @@
                 }
                 cap.replaceChildren(frag);
             }
+            this.renderTray(bottom);
+        }
+
+        /** Под доской — крупно фигуры соперника, срубленные игроком снизу, и перевес по материалу. */
+        renderTray(color) {
+            const tray = $('#capturedTray');
+            if (!tray) return;
+            const T = THEMES[this.theme];
+            const pieces = this.capturedBy(color);
+            const key = this.theme + color + pieces.join('');
+            if (tray.dataset.key === key) return;
+            tray.dataset.key = key;
+            const frag = document.createDocumentFragment();
+            if (!pieces.length) {
+                const s = document.createElement('span');
+                s.className = 'tray-empty';
+                s.textContent = tr('Срубленных фигур пока нет');
+                frag.appendChild(s);
+            }
+            for (const t of pieces) {
+                const img = document.createElement('img');
+                img.src = this.sprite(other(color), t);
+                img.alt = T.pieceNames[other(color)][t];
+                img.title = img.alt;
+                frag.appendChild(img);
+            }
+            const adv = this.material(color) - this.material(other(color));
+            if (adv > 0) {
+                const s = document.createElement('span');
+                s.className = 'adv';
+                s.textContent = '+' + adv;
+                frag.appendChild(s);
+            }
+            tray.replaceChildren(frag);
         }
 
         updateHistory() {

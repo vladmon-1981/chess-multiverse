@@ -45,5 +45,5 @@ targets:
         INFOPLIST_KEY_UIViewControllerBasedStatusBarAppearance: NO
         INFOPLIST_KEY_UIRequiresFullScreen: YES
         INFOPLIST_FILE: ChessMultiverse3D/Info-extra.plist
-        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         INFOPLIST_KEY_UISupportedInterfaceOrientations~ipad: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"

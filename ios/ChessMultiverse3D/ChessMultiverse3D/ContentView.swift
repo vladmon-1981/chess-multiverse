@@ -189,16 +189,65 @@ final class NativeSpeech: NSObject, WKScriptMessageHandler, AVSpeechSynthesizerD
     func userContentController(_ c: WKUserContentController, didReceive message: WKScriptMessage) {
         guard let body = message.body as? [String: Any], let cmd = body["cmd"] as? String else { return }
         if cmd == "cancel" { synth.stopSpeaking(at: .immediate); return }
+        if cmd == "info" { sendInfo(); return }
         guard cmd == "say", let text = body["text"] as? String, !text.isEmpty else { return }
         synth.stopSpeaking(at: .immediate)
-        let u = AVSpeechUtterance(string: text)
         let lang = (body["lang"] as? String) == "en" ? "en" : "ru"
-        u.voice = Self.voice(gender: body["gender"] as? String, lang: lang)
+        let voice = Self.voice(gender: body["gender"] as? String, lang: lang)
         // rate из веба: 1 — обычная речь; у AVSpeech обычная речь — 0.5
         let rate = (body["rate"] as? Double) ?? 1
-        u.rate = Float(min(max(Double(AVSpeechUtteranceDefaultSpeechRate) * rate, Double(AVSpeechUtteranceMinimumSpeechRate)), Double(AVSpeechUtteranceMaximumSpeechRate)))
-        u.pitchMultiplier = Float(min(max((body["pitch"] as? Double) ?? 1, 0.5), 2))
-        synth.speak(u)
+        let pitch = min(max((body["pitch"] as? Double) ?? 1, 0.5), 2)
+        // Живее, чем одной ровной фразой: каждое предложение — своё высказывание со своей
+        // интонацией. Восклицание — быстрее и выше, вопрос — чуть выше, многоточие — пауза
+        // и спад; между предложениями — короткий вдох.
+        let parts = Self.sentences(text)
+        for (i, part) in parts.enumerated() {
+            let u = AVSpeechUtterance(string: part)
+            u.voice = voice
+            var r = rate, p = pitch
+            if part.hasSuffix("!") { r *= 1.07; p *= 1.07 }
+            else if part.hasSuffix("?") { p *= 1.05 }
+            else if part.hasSuffix("...") || part.hasSuffix("…") { r *= 0.92; p *= 0.95 }
+            // Лёгкий разброс, чтобы одинаковые реплики не звучали как запись
+            r *= Double.random(in: 0.97...1.03)
+            p *= Double.random(in: 0.97...1.03)
+            u.rate = Float(min(max(Double(AVSpeechUtteranceDefaultSpeechRate) * r, Double(AVSpeechUtteranceMinimumSpeechRate)), Double(AVSpeechUtteranceMaximumSpeechRate)))
+            u.pitchMultiplier = Float(min(max(p, 0.5), 2))
+            u.postUtteranceDelay = i == parts.count - 1 ? 0 : (part.hasSuffix("...") || part.hasSuffix("…") ? 0.35 : 0.12)
+            synth.speak(u)
+        }
+    }
+
+    /// Деление на предложения с сохранением знаков (!, ?, ., …).
+    static func sentences(_ text: String) -> [String] {
+        var out: [String] = [], cur = ""
+        let chars = Array(text)
+        var i = 0
+        while i < chars.count {
+            let c = chars[i]
+            cur.append(c)
+            if "!?.…".contains(c) {
+                // забрать подряд идущие знаки («!!», «?!», «...»)
+                while i + 1 < chars.count, "!?.…".contains(chars[i + 1]) { i += 1; cur.append(chars[i]) }
+                let t = cur.trimmingCharacters(in: .whitespaces)
+                if !t.isEmpty { out.append(t) }
+                cur = ""
+            }
+            i += 1
+        }
+        let t = cur.trimmingCharacters(in: .whitespaces)
+        if !t.isEmpty { out.append(t) }
+        return out.isEmpty ? [text] : out
+    }
+
+    /// Какой голос будет говорить: игре — чтобы подсказать скачать «улучшенный», если стоит простой.
+    private func sendInfo() {
+        let v = Self.voice(gender: nil, lang: Locale.preferredLanguages.first?.hasPrefix("ru") == false ? "en" : "ru")
+        let q = v?.quality.rawValue ?? 0
+        let name = (v?.name ?? "").replacingOccurrences(of: "'", with: "")
+        DispatchQueue.main.async { [weak self] in
+            self?.webView?.evaluateJavaScript("window.__ttsInfo && __ttsInfo({quality: \(q), name: '\(name)'})")
+        }
     }
 
     /// Лучший по качеству голос языка интерфейса ("ru" или "en") нужного пола; без пола — лучший из языка.
@@ -230,6 +279,11 @@ final class NativeSpeech: NSObject, WKScriptMessageHandler, AVSpeechSynthesizerD
         DispatchQueue.main.async { [weak self] in self?.webView?.evaluateJavaScript("window.__ttsEvent && __ttsEvent('\(kind)')") }
     }
     func speechSynthesizer(_ s: AVSpeechSynthesizer, didStart u: AVSpeechUtterance) { notify("start") }
-    func speechSynthesizer(_ s: AVSpeechSynthesizer, didFinish u: AVSpeechUtterance) { notify("end") }
+    // Реплика разбита на предложения: «конец» — только когда договорено последнее
+    func speechSynthesizer(_ s: AVSpeechSynthesizer, didFinish u: AVSpeechUtterance) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+            if !s.isSpeaking { self?.notify("end") }
+        }
+    }
     func speechSynthesizer(_ s: AVSpeechSynthesizer, didCancel u: AVSpeechUtterance) { notify("end") }
 }

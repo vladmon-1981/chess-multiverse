@@ -54,6 +54,9 @@
         'Осталось времени на ход': 'Time left for this move',
         'Выйти из сетевой партии? Это засчитается как поражение.': 'Leave the online game? It will count as a loss.',
         'ChessGM Pro': 'ChessGM Pro',
+        'Голос живее с улучшенной версией: Настройки iPhone → Универсальный доступ → Устный контент → Голоса → Русский → Милена или Юрий (улучшенный)': 'For a livelier voice, download an Enhanced voice: iPhone Settings → Accessibility → Spoken Content → Voices → English',
+        'Срубленных фигур пока нет': 'No captures yet',
+        'Срубленные фигуры соперника': 'Captured opponent pieces',
         'Партии без ограничений: с компьютером, вдвоём и онлайн': 'Unlimited games: vs computer, two players and online',
         'Одна покупка навсегда — без подписки': 'One purchase, forever — no subscription',
         'Работает на всех устройствах с вашим Apple ID': 'Works on all devices with your Apple ID',
@@ -253,7 +256,41 @@
                 pvpWin: (name) => `Checkmate! ${name} wins!`,
                 draw: 'Draw.',
                 resignWin: 'Your opponent resigned. Victory!',
-                resignLose: 'You resigned.'
+                resignLose: 'You resigned.',
+                comments: {
+                    move: [
+                        (c) => `${c.side} develop their game.`,
+                        (c) => `A quiet move. The ${c.actor} takes up a new post.`,
+                        () => 'Interesting... the position is getting sharper.',
+                        (c) => `${c.side} are preparing a plan. Let us see how ${c.opp} respond.`,
+                        () => 'The fight for the centre goes on.',
+                        () => 'Hmm, a curious choice!'
+                    ],
+                    capture: [
+                        (c) => `An exchange! The ${c.actor} captures, and the ${c.victim} leaves the board.`,
+                        (c) => `The ${c.victim} is gone. ${c.side} win material.`,
+                        () => 'A capture! The balance shifts.',
+                        (c) => `A precise blow! ${c.side} win a piece.`
+                    ],
+                    bigCapture: [
+                        (c) => `Wow! The ${c.victim} is lost! A serious blow for ${c.opp}!`,
+                        (c) => `A big loss: the ${c.victim} leaves the board!`,
+                        () => 'Oh! You do not give that piece away for free!'
+                    ],
+                    check: [
+                        (c) => `Check! ${c.side} go after the king!`,
+                        () => 'Check! The king must find shelter, fast.',
+                        (c) => `Check! ${c.opp} are under pressure!`
+                    ],
+                    castle: [
+                        (c) => `${c.side} castle. The king is safe.`,
+                        () => 'Castling! The king tucks away.'
+                    ],
+                    promote: [
+                        () => 'The pawn has reached the last rank and becomes a new piece!',
+                        () => 'Promotion! A strong new piece joins the game!'
+                    ]
+                }
             }
         },
         cars: {
@@ -285,7 +322,42 @@
                 pvpWin: (name) => `Finish! ${name} wins!`,
                 draw: 'Photo finish! It is a draw!',
                 resignWin: 'Your rival is out of the race. Victory!',
-                resignLose: 'You are out of the race.'
+                resignLose: 'You are out of the race.',
+                comments: {
+                    move: [
+                        (c) => `${c.actor} moves into position!`,
+                        (c) => `${c.side} step on the gas!`,
+                        () => 'A sharp turn! Tyres screeching!',
+                        (c) => `${c.actor} changes lanes. A sneaky move!`,
+                        (c) => `${c.side} push hard, ${c.opp} hold the line.`,
+                        () => 'The track is roaring, the speed is rising!',
+                        () => 'A tight battle in the middle of the pack!'
+                    ],
+                    capture: [
+                        (c) => `Bang! ${c.victim} flies off the track!`,
+                        (c) => `${c.actor} rams through! ${c.victim} heads to the pits!`,
+                        (c) => `Overtake with contact! ${c.victim} is out of the race!`,
+                        () => 'A crash on the track! One car is out!'
+                    ],
+                    bigCapture: [
+                        (c) => `Unbelievable! ${c.victim} is wrecked! A huge loss for ${c.opp}!`,
+                        (c) => `What a crash! ${c.victim} will not drive again!`,
+                        () => 'What a hit! The rival leader is out of the race!'
+                    ],
+                    check: [
+                        (c) => `Check! ${c.side} are right on the leader's tail!`,
+                        () => 'Check! The king needs a pit stop, now!',
+                        (c) => `Check! ${c.opp} under attack, a dangerous moment!`
+                    ],
+                    castle: [
+                        () => 'Pit stop! The king pulls into the pits, the rook covers.',
+                        (c) => `${c.side} reshuffle in the pit lane!`
+                    ],
+                    promote: [
+                        () => 'Tuning! A little car turns into a race machine!',
+                        (c) => `${c.side} get a powerful new engine!`
+                    ]
+                }
             }
         },
         hospital: {
@@ -317,7 +389,41 @@
                 pvpWin: (name) => `Checkmate! ${name} wins!`,
                 draw: 'A draw. Everyone is alive!',
                 resignWin: 'The anomalies retreated. Victory!',
-                resignLose: 'You left the shift.'
+                resignLose: 'You left the shift.',
+                comments: {
+                    move: [
+                        (c) => `${c.actor} moves down the corridor.`,
+                        () => 'Attention: the corridors are restless.',
+                        (c) => `${c.side} take over a new ward.`,
+                        () => 'The lights are flickering... something is happening.',
+                        (c) => `${c.side} are on their rounds. ${c.opp}, be careful.`,
+                        () => 'All stations: stay calm.'
+                    ],
+                    capture: [
+                        (c) => `${c.victim} is out of action!`,
+                        (c) => `${c.actor} handles it! ${c.victim} leaves the ward.`,
+                        (c) => `Urgent! ${c.victim} is out of the game!`,
+                        () => 'One down! The situation is changing.'
+                    ],
+                    bigCapture: [
+                        (c) => `Attention everyone! ${c.victim} is out! A huge loss for ${c.opp}!`,
+                        (c) => `What a twist! ${c.victim} has been neutralised!`,
+                        () => 'Incredible! A key figure leaves the hospital!'
+                    ],
+                    check: [
+                        () => 'Check! Code blue! Code blue!',
+                        (c) => `Check! ${c.side} break through to the boss!`,
+                        () => 'Alarm! Check! Everyone to your posts!'
+                    ],
+                    castle: [
+                        () => 'Moving to a safe ward! Castling.',
+                        (c) => `${c.side} change the guard posts.`
+                    ],
+                    promote: [
+                        () => 'A medical miracle! The newcomer gets a promotion!',
+                        (c) => `${c.side} get a strong new team member!`
+                    ]
+                }
             }
         },
         hockey: {

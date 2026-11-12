@@ -662,7 +662,10 @@
             // скачанные голоса вроде «Юрия», а нативный AVSpeechSynthesizer знает их и их пол.
             this.native = typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers &&
                 window.webkit.messageHandlers.tts ? window.webkit.messageHandlers.tts : null;
+            this.info = null;   // {quality, name} голоса iOS: 1 — обычный, 2 — улучшенный, 3 — премиум
             if (this.native) {
+                window.__ttsInfo = (info) => { this.info = info; if (this.oninfo) this.oninfo(info); };
+                setTimeout(() => { try { this.native.postMessage({ cmd: 'info' }); } catch (e) { /* */ } }, 0);
                 window.__ttsEvent = (kind) => {
                     if (kind === 'start' && this.onstart) this.onstart();
                     if (kind === 'end' && this.onend) this.onend();
@@ -731,8 +734,15 @@
             } catch (e) { /* не критично */ }
         }
 
+        /** Только то, что надо произнести: кавычки, слеши и прочие значки синтезатор читает вслух. */
+        static clean(text) {
+            return String(text).replace(/[\\/«»"“”„*_#<>|~^]/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+
         say(text, o = {}) {
             if (!this.enabled || !text) return;
+            text = Voice.clean(text);
+            if (!text) return;
             if (this.native) {
                 const go = () => {
                     try { this.native.postMessage({ cmd: 'say', text, rate: o.rate || 1, pitch: o.pitch || 1, gender: o.gender || '', lang: (window.I18N && I18N.lang) || 'ru' }); } catch (e) { /* молчим */ }
