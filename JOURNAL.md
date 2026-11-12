@@ -1,5 +1,12 @@
 # Журнал
 
+## 13.11.2026 — 1.1 на проверке, автовыпуск после одобрения
+- Заявка (1.1 + ChessGM Pro + 2 таблицы Game Center) отправлена владельцем 13.11 в 00:43 (Омск), статус WAITING_FOR_REVIEW.
+- `tools/asc_release.py <версия>` — смотрит статус и выпускает версию после одобрения (PENDING_DEVELOPER_RELEASE →
+  appStoreVersionReleaseRequests). Запуск — launchd-агент `com.chessgm.release` (`tools/asc_release_job.sh --install 1.1`),
+  каждые 20 мин, уведомление macOS о выпуске или отказе, после этого агент снимает себя. Журнал — `.state/release.log`.
+- Выпуск разрешён владельцем («выпусти версию»).
+
 ## 13.11.2026 — видео App Preview для 1.1
 - Записано с iPhone Vlad по Wi‑Fi (ReplayKit в DEBUG-сборке, хук `CM_RECORD` в ContentView.swift; скрипты
   `AppStore/record_preview.sh`, `AppStore/cut_preview.sh`). Сценарий: меню → гонки (шах) → хоккей → ветклиника →
