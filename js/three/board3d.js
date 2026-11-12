@@ -59,25 +59,38 @@
         const tex = new T.CanvasTexture(cv);
         tex.colorSpace = T.SRGBColorSpace;
         tex.anisotropy = 4;
-        const m = new T.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false });
+        // Поверх всего: значок лежит на самой фигуре и не должен в ней тонуть
+        const m = new T.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: false, toneMapped: false });
         return (badgeMats[key] = m);
     }
     const BADGE_SIZE = 0.36;
     let badgeGeo = null;
-    const _pq = new T.Quaternion();
-    /** Плоский значок, повёрнутый к камере (в нашей сборке three.js нет Sprite). */
+    const _bp = new T.Vector3(), _bq = new T.Quaternion(), _bs = new T.Vector3(), _bu = new T.Vector3();
+    /**
+     * Плоский значок, повёрнутый к камере (в нашей сборке three.js нет Sprite).
+     * Ставится от проекции верхушки фигуры (userData.top) вверх по ЭКРАНУ, а не вверх в 3D:
+     * при взгляде сверху точка над фигурой уезжала на её заднюю часть, и значок казался сдвинутым.
+     */
     function makeBadge(color, type) {
         if (!badgeGeo) badgeGeo = new T.PlaneGeometry(BADGE_SIZE, BADGE_SIZE);
         const b = new T.Mesh(badgeGeo, badgeMaterial(color, type));
         b.name = 'badge';
-        b.renderOrder = 5;
+        b.renderOrder = 20;
         b.castShadow = b.receiveShadow = false;
         b.onBeforeRender = (r, sc, cam) => {
-            // Ориентация = поворот камеры за вычетом поворота родителя
-            b.parent.getWorldQuaternion(_pq).invert();
-            b.quaternion.copy(_pq.multiply(cam.quaternion));
-            b.updateMatrix();
-            b.matrixWorld.multiplyMatrices(b.parent.matrixWorld, b.matrix);
+            const parent = b.parent;
+            parent.matrixWorld.decompose(_bp, _bq, _bs);
+            const k = (Math.abs(_bs.x) + Math.abs(_bs.z)) / 2;          // масштаб доски, без «сплющивания» фигуры по высоте
+            _bp.set(0, b.userData.top, 0);
+            parent.localToWorld(_bp);
+            // Обычные ракурсы (сверху, как на телефоне) — значок ровно в центре фигуры; чем ниже камера, тем выше значок
+            // над верхушкой (иначе он закрывал бы «лицо» фигуры). sinTilt: 0 — взгляд сверху, 1 — сбоку.
+            _bu.set(0, 0, -1).applyQuaternion(cam.quaternion);          // направление взгляда
+            const sinTilt = Math.sqrt(Math.max(0, 1 - _bu.y * _bu.y));
+            _bu.set(0, 1, 0).applyQuaternion(cam.quaternion);           // «вверх» на экране
+            _bp.addScaledVector(_bu, BADGE_SIZE * 0.72 * k * Math.min(1, Math.max(0, (sinTilt - 0.45) / 0.4)));
+            _bs.set(k, k, k);
+            b.matrixWorld.compose(_bp, cam.quaternion, _bs);
         };
         return b;
     }
@@ -827,7 +840,8 @@
             holder.add(model);
             if (this.theme && this.theme !== 'classic' && this.badges !== false) {
                 const badge = makeBadge(color, type);
-                badge.position.y = (tpl.userData.height || 1) + BADGE_SIZE * 0.75;
+                badge.userData.top = tpl.userData.height || 1;
+                badge.position.y = badge.userData.top + BADGE_SIZE * 0.72;   // для попадания касанием
                 model.add(badge);
             }
             const wheels = [], reels = [];
