@@ -93,3 +93,13 @@
 - Выгрузка ключом API: облачная подпись недоступна (роль App Manager → «Cloud signing permission error»).
   Работает ручная подпись: локальный «Apple Distribution (646ZQ353UC)» + профиль App Store
   «ChessGM AppStore GameCenter» (создан через API 10.11.2026, до 31.10.2027), ExportOptions `signingStyle manual`.
+
+## Видео для App Store (App Preview, с 13.11.2026)
+- Симулятор для видео не годится: 3D идёт ~1,7 к/с, нагрузка Mac до 90. Пишем с iPhone Vlad по Wi‑Fi:
+  `AppStore/record_preview.sh <UDID> <ru|en> <сырое.mov> 125` (DEBUG-хуки `CM_SCRIPT` + `CM_RECORD`: приложение само
+  пишет экран через ReplayKit, iOS один раз спрашивает «Записать экран» на телефоне), монтаж — `AppStore/cut_preview.sh`.
+- Звука в записи нет: ReplayKit пишет звук процесса приложения, а WKWebView играет звук в отдельном процессе WebKit.
+  Эффекты синтезируются Web Audio, файлов нет — дорожку при монтаже не собрать. Со звуком — только запись экрана iOS
+  из Пункта управления (руками владельца). Владелец согласился на превью без звука (13.11.2026).
+- ReplayKit `stopRecording(withOutput:)` в Documents → ошибка −5835 (права): писать во временную папку и переносить.
+- В кадре меню видно поле «Как тебя зовут?» с именем на телефоне.

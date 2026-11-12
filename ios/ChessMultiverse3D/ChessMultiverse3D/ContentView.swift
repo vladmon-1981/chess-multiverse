@@ -1,6 +1,9 @@
 import SwiftUI
 import WebKit
 import AVFoundation
+#if DEBUG
+import ReplayKit
+#endif
 
 /// Приложение показывает веб-версию игры (index.html, css, js из корня репозитория),
 /// которую шаг сборки «Copy Web Version» кладёт в бандл в папку Web. Фигуры, интерфейс,
@@ -79,6 +82,32 @@ struct WebGameView: UIViewRepresentable {
         if let dir = Bundle.main.url(forResource: "Web", withExtension: nil) {
             web.loadFileURL(dir.appendingPathComponent("index.html"), allowingReadAccessTo: dir)
         }
+        #if DEBUG
+        // Видео для App Store (AppStore/record_preview.sh): CM_RECORD=<секунды> — приложение пишет свой экран
+        // со звуком через ReplayKit в Documents/preview.mov, файл забирается devicectl по Wi‑Fi.
+        // iOS один раз спрашивает разрешение на запись. В Release этого кода нет.
+        if let s = ProcessInfo.processInfo.environment["CM_RECORD"], let secs = Double(s) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                let r = RPScreenRecorder.shared()
+                r.isMicrophoneEnabled = false
+                r.startRecording { err in
+                    if let err { NSLog("CM_RECORD start: \(err)"); return }
+                    DispatchQueue.main.async { web.evaluateJavaScript("window.CM_REC = Date.now()") }   // сценарий ждёт начала записи
+                    DispatchQueue.main.asyncAfter(deadline: .now() + secs) {
+                        // В Documents ReplayKit писать не даёт (RPRecordingError -5835) — пишем во временную папку и переносим
+                        let fm = FileManager.default
+                        let tmp = fm.temporaryDirectory.appendingPathComponent("preview-\(Int(Date().timeIntervalSince1970)).mov")
+                        let url = fm.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("preview.mov")
+                        r.stopRecording(withOutput: tmp) { e in
+                            try? fm.removeItem(at: url)
+                            do { try fm.moveItem(at: tmp, to: url) } catch { NSLog("CM_RECORD move: \(error)") }
+                            NSLog("CM_RECORD saved: \(url.path) \(String(describing: e))")
+                        }
+                    }
+                }
+            }
+        }
+        #endif
         return web
     }
 
