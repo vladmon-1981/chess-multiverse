@@ -26,6 +26,62 @@
         if (f < 0 || f > 7 || r < 0 || r > 7) return null;
         return FILES[f] + (r + 1);
     }
+    /**
+     * Значок над фигурой в нешахматных вселенных (машинки, больница, хоккей): кружок с шахматным
+     * символом, всегда повёрнут к камере — сразу видно, кто конь, а кто ладья.
+     * Он не Mesh-часть модели для эффектов: осколки и подсветка взятия обходят только isMesh
+     * с геометрией фигуры, поэтому значок помечен name='badge' и пропускается там, где важно.
+     * Материал один на цвет и фигуру (общий для всех копий).
+     */
+    const BADGE_GLYPHS = { k: '\u265A', q: '\u265B', r: '\u265C', b: '\u265D', n: '\u265E', p: '\u265F' };
+    const badgeMats = {};
+    function badgeMaterial(color, type) {
+        const key = color + type;
+        if (badgeMats[key]) return badgeMats[key];
+        const S = 128;
+        const cv = document.createElement('canvas');
+        cv.width = cv.height = S;
+        const g = cv.getContext('2d');
+        const white = color === 'w';
+        g.beginPath();
+        g.arc(S / 2, S / 2, S / 2 - 6, 0, Math.PI * 2);
+        g.fillStyle = white ? '#fbf6e9' : '#1c1a26';
+        g.fill();
+        g.lineWidth = 8;
+        g.strokeStyle = white ? '#d9a531' : '#d84a4a';
+        g.stroke();
+        g.fillStyle = white ? '#1c1a26' : '#fbf6e9';
+        g.textAlign = 'center';
+        g.textBaseline = 'middle';
+        // \uFE0E — текстовый вариант символа: иначе iOS рисует пешку цветным эмодзи
+        g.font = "90px 'Apple Symbols', 'Segoe UI Symbol', 'DejaVu Sans', 'Noto Sans Symbols 2', serif";
+        g.fillText(BADGE_GLYPHS[type] + '\uFE0E', S / 2, S / 2 + 6);
+        const tex = new T.CanvasTexture(cv);
+        tex.colorSpace = T.SRGBColorSpace;
+        tex.anisotropy = 4;
+        const m = new T.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false });
+        return (badgeMats[key] = m);
+    }
+    const BADGE_SIZE = 0.36;
+    let badgeGeo = null;
+    const _pq = new T.Quaternion();
+    /** Плоский значок, повёрнутый к камере (в нашей сборке three.js нет Sprite). */
+    function makeBadge(color, type) {
+        if (!badgeGeo) badgeGeo = new T.PlaneGeometry(BADGE_SIZE, BADGE_SIZE);
+        const b = new T.Mesh(badgeGeo, badgeMaterial(color, type));
+        b.name = 'badge';
+        b.renderOrder = 5;
+        b.castShadow = b.receiveShadow = false;
+        b.onBeforeRender = (r, sc, cam) => {
+            // Ориентация = поворот камеры за вычетом поворота родителя
+            b.parent.getWorldQuaternion(_pq).invert();
+            b.quaternion.copy(_pq.multiply(cam.quaternion));
+            b.updateMatrix();
+            b.matrixWorld.multiplyMatrices(b.parent.matrixWorld, b.matrix);
+        };
+        return b;
+    }
+
     const lerp = (a, b, t) => a + (b - a) * t;
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
     /** Кратчайшая разница углов b − a в диапазоне (−π, π]. */
@@ -769,6 +825,11 @@
             const model = tpl.clone(true);
             const holder = new T.Group();
             holder.add(model);
+            if (this.theme && this.theme !== 'classic' && this.badges !== false) {
+                const badge = makeBadge(color, type);
+                badge.position.y = (tpl.userData.height || 1) + BADGE_SIZE * 0.75;
+                model.add(badge);
+            }
             const wheels = [], reels = [];
             model.traverse((o) => {
                 if (o.name === 'wheel') wheels.push(o);
@@ -1298,7 +1359,7 @@
             // Материалы общие для всех одинаковых фигур — светится только копия у жертвы
             const mats = [];
             victim.model.traverse((ob) => {
-                if (!ob.isMesh || !ob.material || Array.isArray(ob.material)) return;
+                if (!ob.isMesh || ob.name === 'badge' || !ob.material || Array.isArray(ob.material)) return;
                 const m = ob.material.clone();
                 if (m.emissive) m.emissive.set('#58d6ff');
                 ob.material = m;
@@ -1584,7 +1645,7 @@
             const minY = p.holder.position.y + Math.max(0.16, (p.height || 1) * 0.2);
             p.holder.updateMatrixWorld(true);
             p.model.traverse((o) => {
-                if (!o.isMesh || !o.geometry || Array.isArray(o.material)) return;
+                if (!o.isMesh || o.name === 'badge' || !o.geometry || Array.isArray(o.material)) return;
                 const pos = o.geometry.attributes.position, col = o.geometry.attributes.color;
                 if (!pos) return;
                 const mc = o.material && o.material.color;
