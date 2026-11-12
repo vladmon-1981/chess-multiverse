@@ -23,6 +23,7 @@
 		8C0F7C1D59FDE389C1F2470F /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3A77C57F4551D272B340CCD /* GameView.swift */; };
 		9CFDB1A1A4884AEDF22D794D /* CameraJoystick.swift in Sources */ = {isa = PBXBuildFile; fileRef = C174250E34FBFA83F42025F1 /* CameraJoystick.swift */; };
 		9EE7FCFC69112686EF8B9E5A /* SettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C8B68DA17BAA4855765827 /* SettingsSheet.swift */; };
+		B11FFA1523687C144DDBD11F /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4590DE292685999BB32F55A5 /* Store.swift */; };
 		C26B828354598D8D74D7ADE8 /* ChessMultiverse3DApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C1C476FAC940C5562D477C /* ChessMultiverse3DApp.swift */; };
 		C7C54B43EF8756EFB08236B4 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 58B939880DE5B730AFBEB04E /* PrivacyInfo.xcprivacy */; };
 		D271285A84F8D8E762DE156F /* ChessEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D11FAB864D3E625B5F77FB79 /* ChessEngine.swift */; };
@@ -39,6 +40,7 @@
 		111D4495AFCFFA8DB3961FB5 /* ChessMultiverse3D.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ChessMultiverse3D.entitlements; sourceTree = "<group>"; };
 		261898F49A86E06DE56BBD20 /* CarsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarsModels.swift; sourceTree = "<group>"; };
 		45784ADDCB17767A73B0683A /* HockeyModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HockeyModels.swift; sourceTree = "<group>"; };
+		4590DE292685999BB32F55A5 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
 		499041A70777F47C6D0C8AFC /* ChessGameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessGameViewModel.swift; sourceTree = "<group>"; };
 		54C8B68DA17BAA4855765827 /* SettingsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSheet.swift; sourceTree = "<group>"; };
 		58B939880DE5B730AFBEB04E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -131,6 +133,7 @@
 				9D7FA2B2DAF8D0D35545841A /* Info-extra.plist */,
 				0FD4DC2464456A5DA16097FE /* InfoPlist.xcstrings */,
 				58B939880DE5B730AFBEB04E /* PrivacyInfo.xcprivacy */,
+				4590DE292685999BB32F55A5 /* Store.swift */,
 				99AA1BD786C2FC4DF55071AB /* Models */,
 				10811D8BDA79AECE56E96F5D /* Scene3D */,
 				401A9F769068E2E5F074C2A0 /* Sound */,
@@ -274,6 +277,7 @@
 				9EE7FCFC69112686EF8B9E5A /* SettingsSheet.swift in Sources */,
 				6A591C33D85BB1C22CE9A7D7 /* SetupViews.swift in Sources */,
 				69B291EF61E017A74EFFA391 /* SoundEngine.swift in Sources */,
+				B11FFA1523687C144DDBD11F /* Store.swift in Sources */,
 				426060D6B73F0F2353FA2AD6 /* ThemeData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

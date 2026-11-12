@@ -57,6 +57,8 @@ struct WebGameView: UIViewRepresentable {
         config.userContentController.add(tts, name: "tts")
         let gc = GameCenterBridge()
         config.userContentController.add(gc, name: "gc")
+        let store = StoreBridge()
+        config.userContentController.add(store, name: "store")
 
         let web = WKWebView(frame: .zero, configuration: config)
         web.isOpaque = false
@@ -71,6 +73,7 @@ struct WebGameView: UIViewRepresentable {
         #endif
         tts.webView = web
         gc.webView = web
+        store.webView = web
         AudioKeeper.shared.webView = web
 
         if let dir = Bundle.main.url(forResource: "Web", withExtension: nil) {

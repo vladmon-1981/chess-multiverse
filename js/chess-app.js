@@ -83,6 +83,7 @@
             this.updateToggles();
             this.fontsReady.then(() => this.refreshSprites());
             this.initOnline();
+            this.initPro();
         }
 
         // ---------- Загрузка ----------
@@ -340,6 +341,7 @@
 
         showScreen(name) {
             document.body.dataset.screen = name;
+            if (name === 'menu' && this.renderPro && $('#freeLeft')) this.renderPro();   // счётчик мог смениться (новый день)
             $$('.screen').forEach((s) => s.classList.toggle('is-active', s.id === name + 'Screen'));
             window.scrollTo(0, 0);
         }
@@ -427,6 +429,7 @@
         }
 
         async startGame(mode, difficulty, again = false) {
+            if (!this.allowGame(mode)) return;
             this.mode = mode;
             if (difficulty) this.difficulty = difficulty;
             const name = this.playerName();
@@ -1206,6 +1209,77 @@
             $('#viewBtn').disabled = !this.view || !this.view.setPreset || !this.hasWebGL;
         }
 
+        // ---------- ChessGM Pro: 5 бесплатных партий в день ----------
+        initPro() {
+            if (!window.CMPro) return;
+            $('#proBuy').addEventListener('click', () => {
+                if (CMPro.active) { this.hidePro(); return; }
+                $('#proBuy').disabled = true;
+                CMPro.buy();
+            });
+            $('#proRestore').addEventListener('click', () => {
+                $('#proRestore').disabled = true;
+                this.proRestoring = true;
+                CMPro.restore();
+            });
+            $('#proClose').addEventListener('click', () => this.hidePro());
+            $('#proModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) this.hidePro(); });
+            $('#freeLeftPro').addEventListener('click', () => this.showPro(false));
+            $('#settingsPro').addEventListener('click', () => { this.closeSettings(); this.showPro(false); });
+            CMPro.on((ev) => {
+                if (ev.type === 'purchase') {
+                    $('#proBuy').disabled = false;
+                    if (ev.ok) { this.hidePro(); this.toast(tr('👑 Pro открыт: играй сколько хочешь!'), 3000); this.sound.play('promote'); }
+                    else if (ev.text) this.toast(tr(ev.text), 3500);
+                } else if (ev.type === 'restored') {
+                    $('#proRestore').disabled = false;
+                    if (this.proRestoring) this.toast(CMPro.active ? tr('Покупка восстановлена: Pro активен') : tr('Покупок Pro на этом Apple ID не найдено'), 3500);
+                    this.proRestoring = false;
+                    if (CMPro.active) this.hidePro();
+                }
+                this.renderPro();
+            });
+            this.renderPro();
+            CMPro.init();
+        }
+
+        /** Можно ли начать партию: в бесплатной версии — не больше 5 в день. */
+        allowGame(mode) {
+            if (!window.CMPro) return true;
+            // Соперник онлайн уже найден — партию не обрываем, лимит проверен до поиска и реванша
+            if (mode !== 'online' && !CMPro.canStart()) { this.showPro(true); return false; }
+            CMPro.countGame();
+            return true;
+        }
+
+        renderPro() {
+            const P = window.CMPro;
+            const limited = !!(P && P.limited);
+            const left = limited ? P.remaining() : 0;
+            $('#freeLeft').hidden = !limited;
+            if (limited) {
+                $('#freeLeftText').textContent = left > 0
+                    ? tr('Бесплатно сегодня: {n} из {max}', { n: left, max: P.LIMIT })
+                    : tr('Бесплатные партии на сегодня закончились');
+            }
+            $('#settingsPro').hidden = !(P && P.available);
+            $('#settingsProText').textContent = P && P.active ? tr('👑 Pro активен') : tr('👑 ChessGM Pro');
+            $('#proPrice').textContent = (P && P.price) || '199 ₽';
+            $('#proBuyText').textContent = P && P.active ? tr('Pro уже активен') : tr('Купить Pro за');
+            $('#proPrice').hidden = !!(P && P.active);
+        }
+
+        showPro(limit) {
+            this.renderPro();
+            $('#proLead').textContent = limit
+                ? tr('Бесплатно можно сыграть {max} партий в день — на сегодня они закончились. Новые появятся завтра, а с Pro — прямо сейчас.', { max: CMPro.LIMIT })
+                : tr('В бесплатной версии — {max} партий в день. Pro снимает ограничение навсегда.', { max: CMPro.LIMIT });
+            $('#proModal').hidden = false;
+            setTimeout(() => $('#proBuy').focus({ preventScroll: true }), 50);
+        }
+
+        hidePro() { $('#proModal').hidden = true; }
+
         // ---------- Сетевая игра (Game Center) ----------
         initOnline() {
             if (!window.CMOnline || !CMOnline.available) return;
@@ -1252,6 +1326,7 @@
         }
 
         findOpponent() {
+            if (!CMPro.canStart()) { this.showPro(true); return; }
             if (!this.gcName) { this.toast(tr('Сначала войди в Game Center: Настройки → Game Center')); CMOnline.auth(); return; }
             this.leaveNet();
             this.sound.voice.prime();
@@ -1403,6 +1478,7 @@
         requestRematch() {
             const n = this.net;
             if (!n || n.gone) { this.hideResult(); this.backToMenu(true); return; }
+            if (!CMPro.canStart()) { this.showPro(true); return; }
             n.rematchMe = true;
             this.netSend({ t: 'rematch', r: n.round });
             $('#againBtn').disabled = true;

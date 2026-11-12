@@ -82,6 +82,10 @@
                 <button class="btn btn-secondary" id="pvpBtn" type="button"><span class="btn-icon">👥</span>Играть вдвоём</button>
                 <button class="btn btn-secondary" id="onlineBtn" type="button" hidden><span class="btn-icon">🌐</span>Играть онлайн</button>
             </div>
+            <div class="free-left" id="freeLeft" hidden>
+                <span id="freeLeftText"></span>
+                <button class="free-left-pro" id="freeLeftPro" type="button">👑 Pro</button>
+            </div>
         </section>
 
         <!-- Игра с компьютером -->
@@ -283,6 +287,7 @@
                     <span class="setting-text"><b>🎙️ Голос диктора</b></span>
                 </label>
             </div>
+            <button class="btn btn-secondary btn-small settings-pro" id="settingsPro" type="button" hidden><span id="settingsProText">👑 ChessGM Pro</span></button>
             <div class="settings-help">
                 <h4>Камера</h4>
                 <ul>
@@ -293,6 +298,25 @@
                 </ul>
             </div>
             <button class="btn btn-primary btn-small" id="settingsClose" type="button">Готово</button>
+        </div>
+    </div>
+
+    <!-- ChessGM Pro -->
+    <div class="modal" id="proModal" role="dialog" aria-modal="true" aria-labelledby="proTitle" hidden>
+        <div class="modal-card pro-card">
+            <div class="pro-crown" aria-hidden="true">👑</div>
+            <h3 id="proTitle">ChessGM Pro</h3>
+            <p class="pro-lead" id="proLead"></p>
+            <ul class="pro-list">
+                <li><span aria-hidden="true">♾️</span>Партии без ограничений: с компьютером, вдвоём и онлайн</li>
+                <li><span aria-hidden="true">💎</span>Одна покупка навсегда — без подписки</li>
+                <li><span aria-hidden="true">📱</span>Работает на всех устройствах с вашим Apple ID</li>
+            </ul>
+            <button class="btn btn-primary pro-buy" id="proBuy" type="button"><span id="proBuyText">Купить Pro за</span> <span id="proPrice">199 ₽</span></button>
+            <div class="pro-actions">
+                <button class="btn btn-ghost btn-small" id="proRestore" type="button">Восстановить покупку</button>
+                <button class="btn btn-ghost btn-small" id="proClose" type="button">Не сейчас</button>
+            </div>
         </div>
     </div>
 
@@ -348,6 +372,7 @@
     <script src="js/sounds.js?v=2.9.1"></script>
     <script src="js/effects.js?v=2.8.0"></script>
     <script src="js/online.js?v=2.9.1"></script>
-    <script src="js/chess-app.js?v=2.9.1"></script>
+    <script src="js/pro.js?v=2.10.0"></script>
+    <script src="js/chess-app.js?v=2.10.0"></script>
 </body>
 </html>
