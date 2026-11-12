@@ -51,11 +51,23 @@
         g.strokeStyle = white ? '#d9a531' : '#d84a4a';
         g.stroke();
         g.fillStyle = white ? '#1c1a26' : '#fbf6e9';
-        g.textAlign = 'center';
-        g.textBaseline = 'middle';
-        // \uFE0E — текстовый вариант символа: иначе iOS рисует пешку цветным эмодзи
-        g.font = "90px 'Apple Symbols', 'Segoe UI Symbol', 'DejaVu Sans', 'Noto Sans Symbols 2', serif";
-        g.fillText(BADGE_GLYPHS[type] + '\uFE0E', S / 2, S / 2 + 6);
+        // \uFE0E — текстовый вариант символа: иначе iOS рисует пешку цветным эмодзи.
+        // У шахматных глифов в разных шрифтах свои отступы (в Apple Symbols фигура сидит ниже и правее),
+        // поэтому центрируем по реальным границам рисунка и вписываем его в круг.
+        const glyph = BADGE_GLYPHS[type] + '\uFE0E';
+        const font = (px) => px + "px 'Apple Symbols', 'Segoe UI Symbol', 'DejaVu Sans', 'Noto Sans Symbols 2', serif";
+        g.textAlign = 'left';
+        g.textBaseline = 'alphabetic';
+        g.font = font(100);
+        let mt = g.measureText(glyph);
+        let w = (mt.actualBoundingBoxLeft || 0) + (mt.actualBoundingBoxRight || mt.width);
+        let h = (mt.actualBoundingBoxAscent || 70) + (mt.actualBoundingBoxDescent || 0);
+        const k = Math.min(1.2, (S * 0.56) / Math.max(w, h, 1));
+        g.font = font(Math.round(100 * k));
+        mt = g.measureText(glyph);
+        const L = mt.actualBoundingBoxLeft || 0, R = mt.actualBoundingBoxRight || mt.width;
+        const A = mt.actualBoundingBoxAscent || 70 * k, D = mt.actualBoundingBoxDescent || 0;
+        g.fillText(glyph, S / 2 - (R - L) / 2, S / 2 + (A - D) / 2);
         const tex = new T.CanvasTexture(cv);
         tex.colorSpace = T.SRGBColorSpace;
         tex.anisotropy = 4;
@@ -489,7 +501,10 @@
             this.camera.updateProjectionMatrix();
             // Сцена стала другой формы (поворот телефона, новая раскладка) — наклон по пресету,
             // если зритель не наклонял камеру сам
-            if (!this.elevUser && !this.viewGoal && this.theme) this.elevation = this.presetElevation();
+            if (!this.elevUser && !this.viewGoal && this.theme) {
+                this.elevation = this.presetElevation();
+                if (!this.zoomUser) this.zoom = this.presetZoom();
+            }
             this.updateCamera();
             this.requestRender();
         }
@@ -498,7 +513,13 @@
             const base = (this.theme && CM.Themes3D[this.theme].elevation) || 54;
             // Обычный ракурс — низкий, «как за столом», одинаковый в вертикальной и горизонтальной
             // ориентации (так выбрал владелец 12.11.2026); крутой взгляд — пресет «сверху»
-            return ({ normal: base - 16, top: 80, low: Math.max(20, base - 26) }[name] || base) * Math.PI / 180;
+            // 12.11.2026 владелец прислал фото нужного ракурса (гонки, альбом): наклон ≈28° при базе 50°
+            return ({ normal: base - 22, top: 80, low: Math.max(18, base - 30) }[name] || base) * Math.PI / 180;
+        }
+
+        /** Приближение пресета: в альбоме обычный вид чуть ближе — доска во всю ширину, как на фото владельца. */
+        presetZoom(name = this.preset || 'normal') {
+            return name === 'normal' && this.camera.aspect > 1.3 ? 0.93 : 1;
         }
 
         /** Азимут своей стороны: белые внизу — 0, чёрные — π. */
@@ -645,7 +666,8 @@
         setPreset(name, animate = true) {
             this.preset = name;
             this.elevUser = false;
-            return this.animateView({ elevation: this.presetElevation(name), zoom: 1, pan: new T.Vector3() }, animate ? 0.6 : 0);
+            this.zoomUser = false;
+            return this.animateView({ elevation: this.presetElevation(name), zoom: this.presetZoom(name), pan: new T.Vector3() }, animate ? 0.6 : 0);
         }
 
         /** Повернуть доску к стороне color ('w' — белые внизу) без приближения. */
@@ -654,7 +676,7 @@
             const side = this.sideAzimuth(color);
             return this.animateView({
                 azimuth: this.azimuth + angleDiff(this.azimuth, side),
-                zoom: 1,
+                zoom: this.zoomUser ? 1 : this.presetZoom(),
                 pan: new T.Vector3(),
                 light: this.lightAzimuth + angleDiff(this.lightAzimuth, side)
             }, animate ? 1.1 : 0);
@@ -664,11 +686,12 @@
         resetView(animate = true) {
             if (this.cineLock) return Promise.resolve();
             this.elevUser = false;
+            this.zoomUser = false;
             const side = this.sideAzimuth();
             return this.animateView({
                 azimuth: this.azimuth + angleDiff(this.azimuth, side),
                 elevation: this.presetElevation(),
-                zoom: 1,
+                zoom: this.presetZoom(),
                 pan: new T.Vector3(),
                 light: this.lightAzimuth + angleDiff(this.lightAzimuth, side)
             }, animate ? 0.8 : 0);
@@ -700,6 +723,7 @@
                 pan.copy(hit).add(tgt.sub(hit).multiplyScalar(z1 / z0)).sub(f.target);
             }
             this.clampPanVec(pan, z1);
+            this.zoomUser = true;
             if (animate) return this.animateView({ zoom: z1, pan }, 0.3);
             this.zoom = z1;
             this.pan.copy(pan);
@@ -762,8 +786,9 @@
             this.cineReset();
             this.stopViewAnim();
             this.elevUser = false;
+            this.zoomUser = false;
             this.elevation = this.presetElevation();
-            this.zoom = 1;
+            this.zoom = this.presetZoom();
             this.pan.set(0, 0, 0);
             this.updateCamera();
             if (this.lastBoard) this.setPosition(this.lastBoard);
