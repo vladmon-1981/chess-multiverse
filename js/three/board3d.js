@@ -75,7 +75,7 @@
         const m = new T.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: false, toneMapped: false });
         return (badgeMats[key] = m);
     }
-    const BADGE_SIZE = 0.36;
+    const BADGE_SIZE = 0.3;
     let badgeGeo = null;
     const _bp = new T.Vector3(), _bq = new T.Quaternion(), _bs = new T.Vector3(), _bu = new T.Vector3();
     /**
@@ -93,15 +93,15 @@
             const parent = b.parent;
             parent.matrixWorld.decompose(_bp, _bq, _bs);
             const k = (Math.abs(_bs.x) + Math.abs(_bs.z)) / 2;          // масштаб доски, без «сплющивания» фигуры по высоте
-            _bp.set(0, b.userData.top * 0.72, 0);
+            _bp.set(0, b.userData.top, 0);
             parent.localToWorld(_bp);
-            // Значок — на самом корпусе фигуры (на ~3/4 высоты), по её центру. Над фигурой не поднимать:
-            // при низкой камере «висящий» значок ложится на соседнюю фигуру сзади, и владелец
-            // (12.11.2026) видел его сдвинутым. sinTilt: 0 — взгляд сверху, 1 — сбоку.
+            // Значок — над верхушкой фигуры: нижний край кружка чуть выше головы игрока или крыши машинки
+            // (владелец 12.11.2026: на корпусе он закрывал голову). Подъём — вверх по ЭКРАНУ, на полразмера
+            // значка с зазором; при взгляде сверху (sinTilt → 0) значок ложится на центр фигуры.
             _bu.set(0, 0, -1).applyQuaternion(cam.quaternion);          // направление взгляда
             const sinTilt = Math.sqrt(Math.max(0, 1 - _bu.y * _bu.y));
             _bu.set(0, 1, 0).applyQuaternion(cam.quaternion);           // «вверх» на экране
-            _bp.addScaledVector(_bu, BADGE_SIZE * 0.1 * k * sinTilt);
+            _bp.addScaledVector(_bu, BADGE_SIZE * 0.72 * k * sinTilt);
             _bs.set(k, k, k);
             b.matrixWorld.compose(_bp, cam.quaternion, _bs);
         };
