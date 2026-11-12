@@ -39,11 +39,16 @@ shot(){ n=$1; w=$2; js=$3
 W=${SLEEP:-60}
 # Прогрев: первый запуск WebKit на свежем симуляторе рисует страницу по полминуты
 xcrun simctl launch $U $B -AppleLanguages "($LANGC)" -AppleLocale $LOC >/dev/null; sleep 45
+if [ "$LANGC" = ru ]; then HN="['Алекс','Саша','Маша','Дима','Катя','Игорь']"; else HN="['Alex','Sam','Maya','Dan','Kate','Ivan']"; fi
+HONOR="const hn=$HN;const hh={};[[41,13,2,3,6,4],[33,11,1,4,4,2],[27,9,3,3,3,1],[18,6,1,5,2,0],[11,4,0,3,1,0],[6,2,2,4,1,0]].forEach((v,i)=>{hh[hn[i].toLowerCase()]={name:hn[i],pts:v[0],w:v[1],d:v[2],l:v[3],streak:0,best:v[4],hard:v[5],t:Date.now()-i*1000};});localStorage.setItem('chess-honor',JSON.stringify(hh));"
+# 1.1: кадры показывают новое — низкий ракурс, значки фигур, лоток срубленных, «‹ Меню», доску почёта, ChessGM Pro
 shot 01-menu    ${MENU_SLEEP:-35} ""
 shot 02-classic $W "$PRE play('classic','$OPEN');"
 shot 03-cars    $W "$PRE play('cars','$OPEN');"
 shot 04-hospital $W "$PRE play('hospital','$OPEN');"
 shot 05-hockey  $W "$PRE play('hockey','$OPEN');"
-shot 06-goal    $((W+20)) "$PRE a.cinematic=false;play('hockey','$MATE');"
+shot 06-honor   ${MENU_SLEEP:-35} "$HONOR chessApp.playerName=()=>'$N1';chessApp.showHonor();"
+shot 07-pro     ${MENU_SLEEP:-35} "chessApp.showPro(false);"
+# 08-landscape (iPhone): партия в хоккее, затем поворот устройства — вручную (control rotate), см. README
 xcrun simctl terminate $U $B >/dev/null 2>&1 || true
 xcrun simctl status_bar $U clear >/dev/null 2>&1 || true

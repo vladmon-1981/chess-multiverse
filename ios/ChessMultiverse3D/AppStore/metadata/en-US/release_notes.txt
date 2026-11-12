@@ -1,7 +1,10 @@
-Online play is here!
+Online play, announcer voices and ChessGM Pro!
 
-• Online games via Game Center: invite a friend or get matched with a random opponent.
-• Time per move: 30 seconds, 1, 2 or 5 minutes. Run out of time and you lose.
-• Rating plus your wins, losses and draws.
-• Game Center leaderboards for rating and wins.
-• One-tap rematch with colors swapped.
+• Online games via Game Center: invite a friend or get matched with a random opponent. 30 seconds to 5 minutes per move, rating, one-tap rematch.
+• A neural-voice announcer, female or male, commentates the game in every universe.
+• Chess piece badges above the pieces in Racing, Vet Clinic and Hockey.
+• Captured pieces are shown under the board.
+• Landscape mode on iPhone.
+• A camera button on the board cycles the angles; the default angle is now lower.
+• Hall of Fame: points and winning streaks on this device.
+• ChessGM Pro: 5 free games a day, a one-time purchase removes the limit for good.

@@ -9,6 +9,8 @@ FOUR UNIVERSES, FOUR SETS OF PIECES
 Every universe has its own board, its own sounds, its own announcer lines and its own capture effects: shards, a crash and fireball, a defibrillator zap or a body check into the boards.
 
 PLAY YOUR WAY
+• Piece badges: in Racing, Vet Clinic and Hockey a small chess symbol floats above every piece, so you always know who is who.
+• Captured pieces of your opponent are shown under the board.
 • Computer opponent with three levels: Easy, Medium and Hard. The engine runs on your device and thinks as long as it needs to.
 • Two players on one device, with optional board turning after each move.
 • Online via Game Center: a friend or a random opponent, 30 seconds to 5 minutes per move, rating and leaderboards.
@@ -18,13 +20,19 @@ PLAY YOUR WAY
 FULL CHESS RULES
 Castling, en passant, promotion with a choice of piece, check, checkmate, stalemate, threefold repetition, the fifty-move rule and insufficient material. Legal moves and the last move are highlighted. Move the pieces by tapping or by dragging.
 
+HALL OF FAME
+Wins against the computer and friends earn points, and the best players on your device are ranked with their winning streaks. Online games count towards your Game Center rating.
+
 A CAMERA THAT FOLLOWS YOU
-Rotate the board a full 360 degrees, tilt it, zoom with a pinch and pan with two fingers. Switch on cinematic mode and the camera swoops in on the piece, follows the move and shows captures in slow motion.
+Rotate the board a full 360 degrees, tilt it, zoom with a pinch and pan with two fingers. A camera button on the board cycles through ready-made angles in one tap, and on iPhone the board rotates to landscape too. Switch on cinematic mode and the camera swoops in on the piece, follows the move and shows captures in slow motion.
 
 SOUND AND VOICE
-All sounds are synthesized on the device. The announcer calls the game in English: check, victory, defeat and, in the hockey universe, a live commentary on the moves. Sound and voice can be turned off in one tap.
+A neural-voice announcer, female or male as you prefer, commentates the game in every universe: check, captures, victory and defeat. Sound effects are synthesized on the device. Sound and voice can be turned off in one tap.
+
+CHESSGM PRO
+You can play 5 games a day for free. A one-time ChessGM Pro purchase removes that limit for good: no subscription, no ads.
 
 OFFLINE AND PRIVATE
-Playing the computer or a friend on one device works without an internet connection; only online games need one. No accounts of our own, no ads, no tracking and no purchases.
+Playing the computer or a friend on one device works without an internet connection; only online games need one. No accounts of our own, no ads and no tracking.
 
 The interface is available in English and Russian and follows your device language.
