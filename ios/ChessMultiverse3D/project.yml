@@ -23,7 +23,7 @@ targets:
           rm -rf "$DEST"
           mkdir -p "$DEST"
           cp "$WEB/index.html" "$DEST/"
-          rsync -a "$WEB/css" "$WEB/js" "$DEST/"
+          rsync -a "$WEB/css" "$WEB/js" "$WEB/voice" "$DEST/"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.chessmultiverse.app

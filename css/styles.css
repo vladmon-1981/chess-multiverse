@@ -661,6 +661,14 @@ body.is-cine[data-theme="hockey"] .board-stage::after {
 .settings-card h3 { text-align: center; }
 .settings-block { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 12px; margin-bottom: 6px; }
 .theme-switch { display: flex; align-items: center; gap: 6px; }
+/* Выбор диктора: женский / мужской */
+.voice-kind-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.voice-kind { display: flex; gap: 4px; padding: 3px; border-radius: 12px; background: rgba(255, 255, 255, 0.08); }
+.voice-kind button {
+    border: 0; border-radius: 9px; padding: 7px 14px; font: inherit; font-size: 13px; font-weight: 700;
+    color: inherit; background: transparent; cursor: pointer; opacity: 0.7;
+}
+.voice-kind button[aria-checked="true"] { background: var(--accent); color: #fff; opacity: 1; }
 .theme-switch button {
     width: 36px; height: 36px; border-radius: 10px; font-size: 19px;
     background: rgba(255, 255, 255, 0.06); transition: transform 0.2s var(--ease-pop), background 0.2s, box-shadow 0.2s;

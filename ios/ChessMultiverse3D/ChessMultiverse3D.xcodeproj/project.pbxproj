@@ -249,7 +249,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "WEB=\"$SRCROOT/../..\"\nDEST=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/Web\"\nrm -rf \"$DEST\"\nmkdir -p \"$DEST\"\ncp \"$WEB/index.html\" \"$DEST/\"\nrsync -a \"$WEB/css\" \"$WEB/js\" \"$DEST/\"\n";
+			shellScript = "WEB=\"$SRCROOT/../..\"\nDEST=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/Web\"\nrm -rf \"$DEST\"\nmkdir -p \"$DEST\"\ncp \"$WEB/index.html\" \"$DEST/\"\nrsync -a \"$WEB/css\" \"$WEB/js\" \"$WEB/voice\" \"$DEST/\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

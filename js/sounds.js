@@ -673,6 +673,11 @@
             }
             this.voice = null;
             this.enabled = store.get('chess-voice', true);
+            // Записанный нейроголос (Piper: Ирина — женский, Руслан — мужской), файлы voice/<язык>-<f|m>/<ключ>.m4a.
+            // Системный синтезатор остаётся запасным — для фраз, которых нет в записи.
+            this.kind = store.get('chess-voice-kind', 'male');
+            this.audio = null;
+            this.clips = null;
             this.onstart = null;
             this.onend = null;
             if (this.synth) {
@@ -685,7 +690,57 @@
             }
         }
 
-        get available() { return !!(this.native || this.synth); }
+        get available() { return !!(this.native || this.synth || this.hasClips()); }
+
+        /** Ключ записи фразы: 32-битный хеш очищенного текста (тот же считает tools/voice_phrases.js). */
+        static key(text) {
+            let h = 5381;
+            for (let i = 0; i < text.length; i++) h = ((h * 33) ^ text.charCodeAt(i)) >>> 0;
+            return h.toString(36);
+        }
+
+        lang() { return (window.I18N && I18N.lang === 'en') ? 'en' : 'ru'; }
+
+        hasClips() {
+            if (!this.clips) {
+                const m = window.CM_VOICE_CLIPS && window.CM_VOICE_CLIPS[this.lang()];
+                this.clips = new Set(m ? m.split(',') : []);
+            }
+            return this.clips.size > 0;
+        }
+
+        /** Говорит ли диктор записанным голосом */
+        get neural() { return this.kind !== 'system' && this.hasClips(); }
+
+        /** Есть ли запись этой фразы */
+        has(text) { return this.neural && this.clips.has(Voice.key(Voice.clean(text))); }
+
+        setKind(kind) {
+            this.kind = kind;
+            store.set('chess-voice-kind', kind);
+        }
+
+        playClip(text, o) {
+            const url = 'voice/' + this.lang() + '-' + (this.kind === 'female' ? 'f' : 'm') + '/' + Voice.key(text) + '.m4a';
+            const go = () => {
+                this.stopClip();
+                const a = new Audio(url);
+                this.audio = a;
+                a.volume = 1;
+                a.onplaying = () => this.onstart && this.onstart();
+                a.onended = a.onerror = () => { if (this.audio === a) this.audio = null; if (this.onend) this.onend(); };
+                const p = a.play();
+                if (p && p.catch) p.catch(() => { if (this.audio === a) this.audio = null; });
+            };
+            if (o.delay) setTimeout(go, o.delay); else go();
+        }
+
+        stopClip() {
+            if (!this.audio) return;
+            try { this.audio.pause(); } catch (e) { /* ничего */ }
+            this.audio = null;
+            if (this.onend) this.onend();
+        }
 
         pick() {
             try {
@@ -743,6 +798,7 @@
             if (!this.enabled || !text) return;
             text = Voice.clean(text);
             if (!text) return;
+            if (this.neural && this.clips.has(Voice.key(text))) { this.playClip(text, o); return; }
             if (this.native) {
                 const go = () => {
                     try { this.native.postMessage({ cmd: 'say', text, rate: o.rate || 1, pitch: o.pitch || 1, gender: o.gender || '', lang: (window.I18N && I18N.lang) || 'ru' }); } catch (e) { /* молчим */ }
@@ -770,6 +826,7 @@
         }
 
         cancel() {
+            this.stopClip();
             try { if (this.native) this.native.postMessage({ cmd: 'cancel' }); } catch (e) { /* ничего */ }
             try { if (this.synth) this.synth.cancel(); } catch (e) { /* ничего */ }
         }

@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Шрифты не блокируют первую отрисовку: без интернета страница сразу показывается системными шрифтами -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Nunito:wght@600;700;800;900&family=Oswald:wght@500;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Russo+One&family=Unbounded:wght@700;900&display=swap" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/styles.css?v=2.8.0">
+    <link rel="stylesheet" href="css/styles.css?v=2.12.0">
 </head>
 <body data-theme="classic" data-screen="menu">
     <!-- Фоны вселенных -->
@@ -280,6 +280,13 @@
                     <span class="toggle-track" aria-hidden="true"></span>
                     <span class="setting-text"><b>🎙️ Голос диктора</b><small id="voiceHint" hidden>Голос живее с улучшенной версией: Настройки iPhone → Универсальный доступ → Устный контент → Голоса → Русский → Милена или Юрий (улучшенный)</small></span>
                 </label>
+                <div class="setting voice-kind-row" id="voiceKindRow" hidden>
+                    <span class="setting-text"><b>Диктор</b></span>
+                    <div class="voice-kind" id="voiceKind" role="radiogroup" aria-label="Диктор">
+                        <button type="button" data-kind="female" role="radio">Женский</button>
+                        <button type="button" data-kind="male" role="radio">Мужской</button>
+                    </div>
+                </div>
             </div>
             <button class="btn btn-secondary btn-small settings-pro" id="settingsPro" type="button" hidden><span id="settingsProText">👑 ChessGM Pro</span></button>
             <div class="settings-help">
@@ -363,10 +370,11 @@
     <script src="js/three/board3d.js?v=2.11.3"></script>
     <script src="js/board2d.js?v=2.8.0"></script>
     <script src="js/themes.js?v=2.8.0"></script>
-    <script src="js/sounds.js?v=2.11.3"></script>
+    <script src="voice/manifest.js?v=1"></script>
+    <script src="js/sounds.js?v=2.12.0"></script>
     <script src="js/effects.js?v=2.8.0"></script>
     <script src="js/online.js?v=2.9.1"></script>
     <script src="js/pro.js?v=2.10.0"></script>
-    <script src="js/chess-app.js?v=2.11.3"></script>
+    <script src="js/chess-app.js?v=2.12.0"></script>
 </body>
 </html>

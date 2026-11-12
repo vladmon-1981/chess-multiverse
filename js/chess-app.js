@@ -240,6 +240,12 @@
                 this.updateToggles();
                 if (this.sound.voice.enabled) this.sound.say(tr('Диктор на месте!'), { rate: 1.05 });
             });
+            $$('#voiceKind button').forEach((b) => b.addEventListener('click', () => {
+                this.sound.voice.setKind(b.dataset.kind);
+                if (!this.sound.voice.enabled) this.sound.voice.setEnabled(true);
+                this.updateToggles();
+                this.sound.say(tr('Диктор на месте!'), { rate: 1.05 });
+            }));
 
             // Модальные окна
             $('#promoCancel').addEventListener('click', () => this.closePromotion(null));
@@ -296,7 +302,9 @@
             $('#setVoice').checked = this.sound.voice.available && this.sound.voice.enabled;
             // Стоит простой системный голос — подсказать, где скачать улучшенный
             const vi = this.sound.voice.info;
-            $('#voiceHint').hidden = !(vi && vi.quality < 2);
+            $('#voiceHint').hidden = this.sound.voice.neural || !(vi && vi.quality < 2);
+            $('#voiceKindRow').hidden = !this.sound.voice.hasClips();
+            $$('#voiceKind button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.kind === this.sound.voice.kind)));
             $('#setVoice').disabled = !this.sound.voice.available;
             $$('#moveTime button').forEach((b) => {
                 const on = +b.dataset.sec === this.moveTime;
@@ -706,8 +714,15 @@
 
         /** Реплика диктора темы: строка, массив вариантов (берётся случайный) или функция. */
         speak(T, line, delay = 0, ...args) {
-            if (Array.isArray(line)) line = line[Math.floor(Math.random() * line.length)];
-            if (typeof line === 'function') line = line(...args);
+            let list = (Array.isArray(line) ? line : [line])
+                .map((l) => (typeof l === 'function' ? l(...args) : l)).filter(Boolean);
+            // Записанным голосом — только фразы, для которых есть запись (остальные прозвучали бы чужим голосом)
+            const v = this.sound.voice;
+            if (v.neural) {
+                const rec = list.filter((l) => v.has(l));
+                if (rec.length) list = rec;
+            }
+            line = list[Math.floor(Math.random() * list.length)];
             if (!line) return false;
             this.sound.say(line, { rate: T.voice.rate, pitch: T.voice.pitch, gender: T.voice.gender, delay });
             return true;
@@ -915,7 +930,8 @@
             const winnerName = result.winner ? this.names[result.winner] : '';
             let line;
             if (outcome === 'draw') line = T.voice.draw;
-            else if (this.mode === 'pvp') line = T.voice.pvpWin;
+            // Имени игрока в записи нет — записанный диктор объявляет победу без имени
+            else if (this.mode === 'pvp') line = this.sound.voice.neural ? T.voice.win : T.voice.pvpWin;
             else if (result.type !== 'mate') line = outcome === 'win' ? T.voice.resignWin : T.voice.resignLose;
             else line = outcome === 'win' ? T.voice.win : T.voice.lose;
             this.speak(T, line, outcome === 'lose' ? 1500 : 1000, winnerName);
