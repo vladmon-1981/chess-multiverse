@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Шрифты не блокируют первую отрисовку: без интернета страница сразу показывается системными шрифтами -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Nunito:wght@600;700;800;900&family=Oswald:wght@500;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Russo+One&family=Unbounded:wght@700;900&display=swap" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/styles.css?v=2.12.0">
+    <link rel="stylesheet" href="css/styles.css?v=2.13.0">
 </head>
 <body data-theme="classic" data-screen="menu">
     <!-- Фоны вселенных -->
@@ -82,6 +82,7 @@
                 <button class="btn btn-secondary" id="pvpBtn" type="button"><span class="btn-icon">👥</span>Играть вдвоём</button>
                 <button class="btn btn-secondary" id="onlineBtn" type="button" hidden><span class="btn-icon">🌐</span>Играть онлайн</button>
             </div>
+            <button class="btn btn-ghost btn-small honor-open" id="honorBtn" type="button">🏆 Доска почёта</button>
             <div class="free-left" id="freeLeft" hidden>
                 <span id="freeLeftText"></span>
                 <button class="free-left-pro" id="freeLeftPro" type="button">👑 Pro</button>
@@ -321,6 +322,21 @@
         </div>
     </div>
 
+    <!-- Доска почёта: партии на этом устройстве (с компьютером и вдвоём) -->
+    <div class="modal" id="honorModal" role="dialog" aria-modal="true" aria-labelledby="honorTitle" hidden>
+        <div class="modal-card honor-card">
+            <div class="honor-cup" aria-hidden="true">🏆</div>
+            <h3 id="honorTitle">Доска почёта</h3>
+            <p class="honor-lead">Партии на этом устройстве. Очки: победа над компьютером — 1, 2 или 3 по уровню, победа в игре вдвоём — 2, ничья — 1.</p>
+            <ol class="honor-list" id="honorList"></ol>
+            <p class="honor-empty" id="honorEmpty" hidden>Пока пусто. Сыграй партию — и твоё имя появится здесь!</p>
+            <div class="pro-actions">
+                <button class="btn btn-ghost btn-small" id="honorReset" type="button">Очистить</button>
+                <button class="btn btn-primary btn-small" id="honorClose" type="button">Готово</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Подтверждение -->
     <div class="modal" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmText" hidden>
         <div class="modal-card confirm-card">
@@ -355,7 +371,7 @@
     <noscript><div class="noscript">Для игры нужен JavaScript.</div></noscript>
 
     <script src="js/i18n.js?v=2.8.0"></script>
-    <script src="js/i18n-en.js?v=2.8.0"></script>
+    <script src="js/i18n-en.js?v=2.13.0"></script>
     <script>I18N.applyDom();</script>
     <script src="js/vendor/chess.js?v=2.8.0"></script>
     <script src="js/vendor/three.min.js?v=2.8.0"></script>
@@ -369,12 +385,12 @@
     <script src="js/three/boards.js?v=2.8.0"></script>
     <script src="js/three/board3d.js?v=2.12.2"></script>
     <script src="js/board2d.js?v=2.8.0"></script>
-    <script src="js/themes.js?v=2.8.0"></script>
-    <script src="voice/manifest.js?v=1"></script>
+    <script src="js/themes.js?v=2.13.0"></script>
+    <script src="voice/manifest.js?v=2"></script>
     <script src="js/sounds.js?v=2.12.0"></script>
     <script src="js/effects.js?v=2.8.0"></script>
     <script src="js/online.js?v=2.9.1"></script>
     <script src="js/pro.js?v=2.10.0"></script>
-    <script src="js/chess-app.js?v=2.12.0"></script>
+    <script src="js/chess-app.js?v=2.13.0"></script>
 </body>
 </html>

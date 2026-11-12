@@ -254,6 +254,7 @@
             document.addEventListener('keydown', (e) => {
                 if (e.key !== 'Escape') return;
                 if (!$('#settingsModal').hidden) this.closeSettings();
+                else if (!$('#honorModal').hidden && !this.confirmResolve) $('#honorModal').hidden = true;
                 else if (this.pendingPromotion) this.closePromotion(null);
                 else if (this.confirmResolve) this.closeConfirm(false);
                 else if (!$('#resultModal').hidden) this.hideResult();
@@ -911,6 +912,7 @@
             else if (this.mode === 'pve' || this.mode === 'online') outcome = result.winner === this.humanColor ? 'win' : 'lose';
             else outcome = 'win';
             if (this.mode === 'online') this.recordOnline(outcome);
+            else this.honorPoints = this.recordHonor(result);
 
             if (result.type === 'mate') {
                 const k = this.findKing(g.turn());
@@ -996,6 +998,7 @@
             const secs = Math.round((Date.now() - (this.startedAt || Date.now())) / 1000);
             const stats = [`${moves} ${movesWord(moves)}`, `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`];
             if (this.mode === 'pve') stats.push(tr('Уровень: {level}', { level: DIFF_NAMES[this.difficulty] }));
+            if (this.mode !== 'online' && this.honorPoints) stats.push(tr('🏆 +{n} очк.', { n: this.honorPoints }));
             if (this.mode === 'online' && this.net && this.net.delta !== undefined) {
                 const d = this.net.delta;
                 stats.push(tr('Рейтинг: {r}', { r: this.stats.rating }) + ` (${d >= 0 ? '+' : ''}${d})`);
@@ -1274,6 +1277,13 @@
                 CMPro.restore();
             });
             $('#proClose').addEventListener('click', () => this.hidePro());
+            $('#honorBtn').addEventListener('click', () => this.showHonor());
+            $('#honorClose').addEventListener('click', () => { $('#honorModal').hidden = true; });
+            $('#honorReset').addEventListener('click', async () => {
+                if (!(await this.confirm(tr('Очистить доску почёта? Все результаты на этом устройстве будут удалены.')))) return;
+                store.set('chess-honor', '{}');
+                this.showHonor();
+            });
             $('#proModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) this.hidePro(); });
             $('#freeLeftPro').addEventListener('click', () => this.showPro(false));
             $('#settingsPro').addEventListener('click', () => { this.closeSettings(); this.showPro(false); });
@@ -1330,6 +1340,89 @@
         }
 
         hidePro() { $('#proModal').hidden = true; }
+
+        // ---------- Доска почёта (локально, без сети) ----------
+        loadHonor() {
+            let h = null;
+            try { h = JSON.parse(store.get('chess-honor', '{}')); } catch (e) { /* испорчено — заново */ }
+            return h && typeof h === 'object' ? h : {};
+        }
+
+        /**
+         * Записать итог партии с компьютером или вдвоём. Игрок — по имени (без учёта регистра).
+         * Очки: победа над компьютером — 1/2/3 по уровню, победа вдвоём — 2, ничья — 1.
+         * Возвращает очки, которые получил игрок снизу (для строки итогов).
+         */
+        recordHonor(result) {
+            const h = this.loadHonor();
+            const entry = (name) => {
+                const k = String(name).trim().toLowerCase();
+                if (!h[k]) h[k] = { name: String(name).trim(), pts: 0, w: 0, d: 0, l: 0, streak: 0, best: 0, hard: 0 };
+                h[k].name = String(name).trim();
+                h[k].t = Date.now();
+                return h[k];
+            };
+            const apply = (e, res, pts) => {
+                e[res] += 1;
+                e.pts += pts;
+                e.streak = res === 'w' ? e.streak + 1 : 0;
+                e.best = Math.max(e.best, e.streak);
+                return pts;
+            };
+            let gained = 0;
+            if (this.mode === 'pve') {
+                const e = entry(this.names[this.humanColor]);
+                const lvl = { easy: 1, medium: 2, hard: 3 }[this.difficulty] || 1;
+                if (result.type === 'draw') gained = apply(e, 'd', 1);
+                else if (result.winner === this.humanColor) {
+                    gained = apply(e, 'w', lvl);
+                    if (this.difficulty === 'hard') e.hard += 1;
+                } else apply(e, 'l', 0);
+            } else if (this.mode === 'pvp') {
+                const w = entry(this.names.w), b = this.names.b.trim().toLowerCase() === this.names.w.trim().toLowerCase() ? null : entry(this.names.b);
+                if (result.type === 'draw') { gained = apply(w, 'd', 1); if (b) apply(b, 'd', 1); }
+                else {
+                    const win = result.winner === 'w' ? w : b, lose = result.winner === 'w' ? b : w;
+                    if (win) gained = apply(win, 'w', 2);
+                    if (lose) apply(lose, 'l', 0);
+                }
+            }
+            store.set('chess-honor', JSON.stringify(h));
+            return gained;
+        }
+
+        showHonor() {
+            const list = Object.values(this.loadHonor())
+                .sort((a, b) => b.pts - a.pts || b.w - a.w || a.l - b.l || (b.t || 0) - (a.t || 0))
+                .slice(0, 20);
+            const ol = $('#honorList');
+            const me = this.playerName().toLowerCase();
+            ol.replaceChildren(...list.map((e, i) => {
+                const li = document.createElement('li');
+                if (e.name.toLowerCase() === me) li.classList.add('is-me');
+                const place = document.createElement('span');
+                place.className = 'hp-place';
+                place.textContent = ['🥇', '🥈', '🥉'][i] || String(i + 1);
+                const nm = document.createElement('span');
+                nm.className = 'hp-name';
+                nm.textContent = e.name;
+                const sub = document.createElement('small');
+                const games = e.w + e.d + e.l;
+                const bits = [tr('{w}–{d}–{l}', { w: e.w, d: e.d, l: e.l }), tr('партий: {n}', { n: games })];
+                if (e.best > 1) bits.push(tr('серия {n} 🔥', { n: e.best }));
+                if (e.hard) bits.push(tr('побед на «Тяжёлом»: {n}', { n: e.hard }));
+                sub.textContent = bits.join(' · ');
+                nm.appendChild(sub);
+                const pts = document.createElement('span');
+                pts.className = 'hp-pts';
+                pts.textContent = e.pts;
+                li.append(place, nm, pts);
+                return li;
+            }));
+            $('#honorEmpty').hidden = list.length > 0;
+            $('#honorReset').hidden = list.length === 0;
+            $('#honorModal').hidden = false;
+        }
 
         // ---------- Сетевая игра (Game Center) ----------
         initOnline() {

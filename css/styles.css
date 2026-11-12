@@ -954,6 +954,25 @@ body.is-online .player-card.is-turn .pc-clock { display: block; }
 .settings-pro { display: block; margin: 0 auto 16px; min-width: 200px; }
 .settings-pro[hidden] { display: none; }
 .pro-card { max-width: 420px; text-align: center; }
+/* Доска почёта */
+.honor-open { display: block; margin: 14px auto 0; }
+.honor-card { max-width: 440px; max-height: calc(100dvh - 32px); display: flex; flex-direction: column; }
+.honor-cup { font-size: 46px; line-height: 1; filter: drop-shadow(0 6px 14px rgba(255, 196, 64, 0.45)); }
+.honor-lead { margin: -6px 0 12px; font-size: 12px; opacity: 0.7; line-height: 1.4; }
+.honor-list { list-style: none; margin: 0 0 14px; padding: 0; overflow-y: auto; min-height: 0; text-align: left; }
+.honor-list li {
+    display: flex; align-items: center; gap: 10px; padding: 9px 12px; margin-bottom: 6px; border-radius: 14px;
+    background: rgba(255, 255, 255, 0.06);
+}
+.honor-list li:nth-child(1) { background: linear-gradient(90deg, rgba(255, 196, 64, 0.28), rgba(255, 255, 255, 0.06)); }
+.honor-list li:nth-child(2) { background: linear-gradient(90deg, rgba(200, 210, 230, 0.22), rgba(255, 255, 255, 0.06)); }
+.honor-list li:nth-child(3) { background: linear-gradient(90deg, rgba(205, 127, 50, 0.24), rgba(255, 255, 255, 0.06)); }
+.honor-list li.is-me { box-shadow: inset 0 0 0 2px var(--accent); }
+.hp-place { width: 30px; flex: none; text-align: center; font-size: 20px; font-weight: 900; }
+.hp-name { flex: 1; min-width: 0; font-weight: 800; overflow: hidden; text-overflow: ellipsis; }
+.hp-name small { display: block; font-weight: 500; font-size: 11px; opacity: 0.65; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hp-pts { flex: none; font-family: var(--font-display); font-size: 20px; font-weight: 900; color: #ffcf4d; }
+.honor-empty { margin: 8px 0 16px; opacity: 0.75; }
 .pro-crown { font-size: 46px; line-height: 1; margin-bottom: 6px; filter: drop-shadow(0 4px 14px rgba(242, 182, 50, 0.55)); }
 .pro-lead { margin: 0 0 14px; line-height: 1.45; opacity: 0.9; }
 .pro-list { list-style: none; margin: 0 0 18px; padding: 0; text-align: left; display: grid; gap: 8px; }
