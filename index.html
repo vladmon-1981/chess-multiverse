@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Шрифты не блокируют первую отрисовку: без интернета страница сразу показывается системными шрифтами -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Nunito:wght@600;700;800;900&family=Oswald:wght@500;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Russo+One&family=Unbounded:wght@700;900&display=swap" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/styles.css?v=2.13.1">
+    <link rel="stylesheet" href="css/styles.css?v=2.14.0">
 </head>
 <body data-theme="classic" data-screen="menu">
     <!-- Фоны вселенных -->
@@ -26,6 +26,12 @@
         <button class="brand" id="brandBtn" type="button" title="В главное меню">
             <span class="brand-mark" aria-hidden="true">‹</span><span class="brand-text">Меню</span>
         </button>
+        <!-- Чей ход и номер хода — в верхней строке, между «Меню» и кнопками (с 12.11.2026) -->
+        <div class="status-card">
+            <div class="status-kicker" id="statusKicker">Партия</div>
+            <div class="status-text" id="statusText" aria-live="polite"></div>
+            <div class="piece-hint" id="pieceHint"></div>
+        </div>
         <div class="topbar-actions">
             <button class="icon-btn" id="settingsBtn" type="button" title="Настройки" aria-label="Настройки">⚙️</button>
             <button class="icon-btn" id="soundBtn" type="button" aria-pressed="true" title="Все звуки" aria-label="Все звуки">
@@ -206,13 +212,6 @@
                         <div class="board-loading" id="boardLoading"><span class="spinner"></span><span>Открываем портал во вселенную…</span></div>
                     </div>
 
-                    <!-- Чей ход и номер хода — по центру над доской -->
-                    <div class="status-card">
-                        <div class="status-kicker" id="statusKicker">Партия</div>
-                        <div class="status-text" id="statusText" aria-live="polite"></div>
-                        <div class="piece-hint" id="pieceHint"></div>
-                    </div>
-
                     <!-- Срубленные фигуры соперника — по центру под доской -->
                     <div class="captured-tray" id="capturedTray" aria-label="Срубленные фигуры соперника"></div>
 
@@ -391,6 +390,6 @@
     <script src="js/effects.js?v=2.8.0"></script>
     <script src="js/online.js?v=2.9.1"></script>
     <script src="js/pro.js?v=2.10.0"></script>
-    <script src="js/chess-app.js?v=2.13.1"></script>
+    <script src="js/chess-app.js?v=2.14.0"></script>
 </body>
 </html>

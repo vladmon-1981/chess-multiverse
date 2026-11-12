@@ -215,6 +215,8 @@
                 if (this.sound.voice.enabled) this.sound.say(tr('Диктор на месте!'), { rate: 1.05 });
             });
             $('#fullscreenBtn').addEventListener('click', () => this.toggleFullscreen());
+            // На iPhone полноэкранного режима нет — кнопка только отнимала место у плашки «Ход …»
+            if (!(document.fullscreenEnabled || document.webkitFullscreenEnabled)) $('#fullscreenBtn').hidden = true;
 
             // Камера
             document.addEventListener('keydown', (e) => {
