@@ -24,14 +24,14 @@
 
     <header class="topbar">
         <button class="brand" id="brandBtn" type="button" title="В главное меню">
-            <span class="brand-mark">♞</span><span class="brand-text">Мультивселенная</span>
+            <span class="brand-mark" aria-hidden="true">‹</span><span class="brand-text">Меню</span>
         </button>
         <div class="topbar-actions">
             <button class="icon-btn" id="settingsBtn" type="button" title="Настройки" aria-label="Настройки">⚙️</button>
-            <button class="icon-btn" id="soundBtn" type="button" aria-pressed="true" title="Звуковые эффекты">
+            <button class="icon-btn" id="soundBtn" type="button" aria-pressed="true" title="Звуковые эффекты" hidden>
                 <span class="on">🔊</span><span class="off">🔇</span>
             </button>
-            <button class="icon-btn" id="voiceBtn" type="button" aria-pressed="true" title="Голос диктора">
+            <button class="icon-btn" id="voiceBtn" type="button" aria-pressed="true" title="Голос диктора" hidden>
                 <span class="on">🎙️</span><span class="off">🤐</span>
             </button>
             <button class="icon-btn" id="fullscreenBtn" type="button" title="Во весь экран">⛶</button>
@@ -201,6 +201,7 @@
                     <div class="board-stage" id="boardStage">
                         <div id="board3d" class="board3d"></div>
                         <div class="banner" id="banner" aria-live="assertive"></div>
+                        <button class="board-cam" id="boardCamBtn" type="button" title="Сменить вид" aria-label="Сменить вид камеры">🎥</button>
                         <div class="board-loading" id="boardLoading"><span class="spinner"></span><span>Открываем портал во вселенную…</span></div>
                     </div>
 
@@ -359,13 +360,13 @@
     <script src="js/three/hospital.js?v=2.8.0"></script>
     <script src="js/three/hockey.js?v=2.8.0"></script>
     <script src="js/three/boards.js?v=2.8.0"></script>
-    <script src="js/three/board3d.js?v=2.10.3"></script>
+    <script src="js/three/board3d.js?v=2.11.3"></script>
     <script src="js/board2d.js?v=2.8.0"></script>
     <script src="js/themes.js?v=2.8.0"></script>
-    <script src="js/sounds.js?v=2.11.0"></script>
+    <script src="js/sounds.js?v=2.11.3"></script>
     <script src="js/effects.js?v=2.8.0"></script>
     <script src="js/online.js?v=2.9.1"></script>
     <script src="js/pro.js?v=2.10.0"></script>
-    <script src="js/chess-app.js?v=2.11.0"></script>
+    <script src="js/chess-app.js?v=2.11.3"></script>
 </body>
 </html>

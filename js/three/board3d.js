@@ -81,14 +81,15 @@
             const parent = b.parent;
             parent.matrixWorld.decompose(_bp, _bq, _bs);
             const k = (Math.abs(_bs.x) + Math.abs(_bs.z)) / 2;          // масштаб доски, без «сплющивания» фигуры по высоте
-            _bp.set(0, b.userData.top, 0);
+            _bp.set(0, b.userData.top * 0.72, 0);
             parent.localToWorld(_bp);
-            // Обычные ракурсы (сверху, как на телефоне) — значок ровно в центре фигуры; чем ниже камера, тем выше значок
-            // над верхушкой (иначе он закрывал бы «лицо» фигуры). sinTilt: 0 — взгляд сверху, 1 — сбоку.
+            // Значок — на самом корпусе фигуры (на ~3/4 высоты), по её центру. Над фигурой не поднимать:
+            // при низкой камере «висящий» значок ложится на соседнюю фигуру сзади, и владелец
+            // (12.11.2026) видел его сдвинутым. sinTilt: 0 — взгляд сверху, 1 — сбоку.
             _bu.set(0, 0, -1).applyQuaternion(cam.quaternion);          // направление взгляда
             const sinTilt = Math.sqrt(Math.max(0, 1 - _bu.y * _bu.y));
             _bu.set(0, 1, 0).applyQuaternion(cam.quaternion);           // «вверх» на экране
-            _bp.addScaledVector(_bu, BADGE_SIZE * 0.72 * k * Math.min(1, Math.max(0, (sinTilt - 0.45) / 0.4)));
+            _bp.addScaledVector(_bu, BADGE_SIZE * 0.1 * k * sinTilt);
             _bs.set(k, k, k);
             b.matrixWorld.compose(_bp, cam.quaternion, _bs);
         };
@@ -495,12 +496,9 @@
 
         presetElevation(name = this.preset || 'normal') {
             const base = (this.theme && CM.Themes3D[this.theme].elevation) || 54;
-            // На квадратной или вытянутой вверх сцене (телефон) смотрим круче: доска почти квадратом
-            // заполняет ширину экрана и получается крупнее. Чем уже экран, тем круче взгляд —
-            // иначе перспектива растягивает доску «в глубину» и сверху/снизу остаются пустые поля
-            const asp = this.camera ? this.camera.aspect : 1;
-            const steep = asp < 1.12 ? Math.min(28, 12 + (1.12 - asp) * 14) : 0;
-            return ({ normal: base + steep, top: 80, low: base - 16 + steep / 2 }[name] || base) * Math.PI / 180;
+            // Обычный ракурс — низкий, «как за столом», одинаковый в вертикальной и горизонтальной
+            // ориентации (так выбрал владелец 12.11.2026); крутой взгляд — пресет «сверху»
+            return ({ normal: base - 16, top: 80, low: Math.max(20, base - 26) }[name] || base) * Math.PI / 180;
         }
 
         /** Азимут своей стороны: белые внизу — 0, чёрные — π. */

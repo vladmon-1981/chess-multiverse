@@ -175,6 +175,7 @@
             $('#undoBtn').addEventListener('click', () => this.undo());
             $('#flipBtn').addEventListener('click', () => this.flip());
             $('#viewBtn').addEventListener('click', () => this.cycleCamera());
+            $('#boardCamBtn').addEventListener('click', () => this.cycleCamera());
             $('#newGameBtn').addEventListener('click', () => this.newGame());
             $('#resignBtn').addEventListener('click', () => this.resign());
             $('#menuBtn').addEventListener('click', () => this.backToMenu());
@@ -422,6 +423,7 @@
             if (!this.view) {
                 this.view = new Board2D(host, handlers);
                 $('#viewBtn').disabled = true;
+                $('#boardCamBtn').hidden = true;
                 this.toast(tr('3D-режим недоступен в этом браузере — включена плоская доска'), 4000);
             }
             return this.view;

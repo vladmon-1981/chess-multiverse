@@ -782,8 +782,9 @@
             this.theme = 'classic';
             this.ctx = null;
             this.voice = new Voice();
-            this.voice.onstart = () => this.duck(true);
-            this.voice.onend = () => this.duck(false);
+            // Речь диктора на iOS может поставить Web Audio на паузу — будим сразу и после реплики
+            this.voice.onstart = () => { this.ensure(); this.duck(true); };
+            this.voice.onend = () => { this.ensure(); this.duck(false); };
             const unlock = () => this.ensure();
             // iOS (Safari и WKWebView) разрешает запуск звука только из touchend/click, не из pointerdown
             window.addEventListener('pointerdown', unlock, { passive: true });
@@ -872,9 +873,9 @@
             if (ctx.state === 'running') { fire(); return; }
             // Контекст на паузе (iOS после Game Center, звонка, сворачивания). Звук, поставленный
             // в очередь «замёрзших» часов, прозвучал бы только при следующем касании — с опозданием.
-            // Поэтому будим контекст и играем, только если он проснулся почти сразу.
+            // Поэтому будим контекст и играем, только если он проснулся за секунду.
             const t0 = Date.now();
-            ctx.resume().then(() => { if (Date.now() - t0 < 350) fire(); }).catch(() => {});
+            ctx.resume().then(() => { if (Date.now() - t0 < 1000) fire(); }).catch(() => {});
         }
 
         say(text, o) { this.voice.say(text, o); }
