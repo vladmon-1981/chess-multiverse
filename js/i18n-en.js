@@ -57,6 +57,9 @@
         'Голос живее с улучшенной версией: Настройки iPhone → Универсальный доступ → Устный контент → Голоса → Русский → Милена или Юрий (улучшенный)': 'For a livelier voice, download an Enhanced voice: iPhone Settings → Accessibility → Spoken Content → Voices → English',
         'Срубленных фигур пока нет': 'No captures yet',
         'Диктор': 'Announcer',
+        'Звук включён': 'Sound on',
+        'Звук выключен': 'Sound off',
+        'Все звуки': 'All sounds',
         '🏆 Доска почёта': '🏆 Hall of Fame',
         'Доска почёта': 'Hall of Fame',
         'Партии на этом устройстве. Очки: победа над компьютером — 1, 2 или 3 по уровню, победа в игре вдвоём — 2, ничья — 1.':

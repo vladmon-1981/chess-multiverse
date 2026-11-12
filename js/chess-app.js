@@ -198,11 +198,14 @@
             $('#resultMenuBtn').addEventListener('click', () => { this.hideResult(); this.backToMenu(true); });
 
             // Звук, голос, полный экран
+            // Динамик рядом с настройками: выключает и включает все звуки сразу — эффекты и диктора
             $('#soundBtn').addEventListener('click', () => {
-                this.sound.setEnabled(!this.sound.enabled);
+                const on = !(this.sound.enabled || this.sound.voice.enabled);
+                this.sound.setEnabled(on);
+                this.sound.voice.setEnabled(on);
                 this.updateToggles();
-                this.toast(this.sound.enabled ? tr('Звуковые эффекты включены') : tr('Звуковые эффекты выключены'));
-                if (this.sound.enabled) this.sound.play('uiClick');
+                this.toast(on ? tr('Звук включён') : tr('Звук выключен'));
+                if (on) this.sound.play('uiClick');
             });
             $('#voiceBtn').addEventListener('click', () => {
                 if (!this.sound.voice.available) { this.toast(tr('В этом браузере нет синтеза речи')); return; }
@@ -288,7 +291,7 @@
         saveName() { store.set('chess-player-name', $('#playerName').value.trim()); }
 
         updateToggles() {
-            $('#soundBtn').setAttribute('aria-pressed', String(this.sound.enabled));
+            $('#soundBtn').setAttribute('aria-pressed', String(this.sound.enabled || this.sound.voice.enabled));
             const v = $('#voiceBtn');
             v.setAttribute('aria-pressed', String(this.sound.voice.available && this.sound.voice.enabled));
             if (!this.sound.voice.available) v.title = tr('Голос диктора недоступен в этом браузере');
