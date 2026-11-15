@@ -27,12 +27,12 @@ META = {
         promo="Chess for the whole family: real 3D pieces, four fun universes, a friend on one device, the computer or online. Move hints help beginners and kids."),
     "en-GB": dict(
         name="ChessGM: 3D Chess Game",
-        subtitle="Kids & family, vs computer",
+        subtitle="Family fun, play vs computer",
         keywords="board,strategy,friends,beginner,learn,brain,puzzle,training,cartoon,hockey,racing,vet,multiplayer",
         promo="Chess for the whole family: real 3D pieces, four fun universes, a friend on one device, the computer or online. Move hints help beginners and kids."),
     "es-MX": dict(
         name="ChessGM: Juego de Ajedrez 3D",
-        subtitle="Para niños y toda la familia",
+        subtitle="Diversión para toda la familia",
         keywords="estrategia,tablero,computadora,amigos,aprender,principiante,hockey,carritos,multijugador,mental",
         promo="Ajedrez para toda la familia: piezas 3D, cuatro universos divertidos, juega con un amigo, contra la computadora o en línea. Las jugadas resaltadas ayudan a los novatos."),
     "es-ES": dict(
@@ -42,7 +42,7 @@ META = {
         promo="Ajedrez para toda la familia: piezas 3D, cuatro universos divertidos, juega con un amigo, contra el ordenador o en línea. Las jugadas resaltadas ayudan a los novatos."),
     "de-DE": dict(
         name="ChessGM: 3D Schach",
-        subtitle="Für Kinder, Familie & zu zweit",
+        subtitle="Familienspiel, solo & zu zweit",
         keywords="Spiel,Brettspiel,Strategie,Rätsel,Offline,Online,Computer,Freunde,lernen,Anfänger,Eishockey,Autos",
         promo="Schach für die ganze Familie: 3D-Figuren, vier lustige Welten, zu zweit auf einem Gerät, gegen den Computer oder online. Zug-Hinweise helfen Anfängern und Kindern."),
     "fr-FR": dict(
@@ -52,17 +52,17 @@ META = {
         promo="Les échecs pour toute la famille : pièces 3D, quatre univers amusants, à deux sur un appareil, contre l’ordinateur ou en ligne. Les coups surlignés aident les débutants."),
     "it": dict(
         name="ChessGM: Scacchi 3D",
-        subtitle="Gioco per bambini e famiglia",
+        subtitle="Gioco per tutta la famiglia",
         keywords="online,offline,strategia,scacchiera,due,giocatori,computer,amici,imparare,principiante,hockey,auto",
         promo="Scacchi per tutta la famiglia: pezzi 3D, quattro universi divertenti, in due sullo stesso schermo, contro il computer o online. Le mosse evidenziate aiutano chi inizia."),
     "pt-BR": dict(
         name="ChessGM: Xadrez 3D",
-        subtitle="Jogo para crianças e família",
+        subtitle="Jogo para toda a família",
         keywords="online,offline,estratégia,tabuleiro,dois,jogadores,computador,amigos,aprender,iniciante,hóquei",
         promo="Xadrez para toda a família: peças em 3D, quatro universos divertidos, em dois no mesmo aparelho, contra o computador ou online. Jogadas destacadas ajudam os iniciantes."),
     "pl": dict(
         name="ChessGM: Szachy 3D",
-        subtitle="Gra dla dzieci i rodziny",
+        subtitle="Gra dla całej rodziny",
         keywords="online,offline,strategia,plansza,dwóch,graczy,komputer,znajomi,nauka,początkujący,hokej,auta",
         promo="Szachy dla całej rodziny: figury 3D, cztery wesołe światy, we dwoje na jednym urządzeniu, z komputerem lub online. Podświetlane ruchy pomagają początkującym i dzieciom."),
     "uk": dict(
@@ -74,15 +74,15 @@ META = {
 
 # ---- описание: первый абзац для ru/en-US (остальное берётся из уже лежащего файла) ---------------
 INTRO = {
-    "ru": "ChessGM — 3D-шахматы для детей и всей семьи: объёмные фигуры, четыре весёлые вселенные и подсветка ходов, которая помогает новичкам. Играйте вдвоём на одном экране, с компьютером на трёх уровнях или онлайн через Game Center. Работает и без интернета.",
-    "en-US": "ChessGM is 3D chess for kids and the whole family: real three-dimensional pieces, four fun universes and move hints that help beginners. Play a friend on one screen, the computer on three levels or online via Game Center. It works offline too.",
+    "ru": "ChessGM — 3D-шахматы для всей семьи: объёмные фигуры, четыре весёлые вселенные и подсветка ходов, которая помогает новичкам. Играйте вдвоём на одном экране, с компьютером на трёх уровнях или онлайн через Game Center. Работает и без интернета.",
+    "en-US": "ChessGM is 3D chess for the whole family: real three-dimensional pieces, four fun universes and move hints that help beginners. Play a friend on one screen, the computer on three levels or online via Game Center. It works offline too.",
 }
 
 # ---- описание для остальных локалей (сокращённое; факты те же, что в ru/en-US) -------------------
 # ключи: intro, h1, u1..u4, h2, p1..p4, h3, rules, h4, cam, h5, pro, h6, priv, iface
 D = {
  "en-GB": dict(
-  intro="ChessGM is 3D chess for kids and the whole family: real three-dimensional pieces, four fun universes and move hints that help beginners. Play a friend on one screen, the computer on three levels or online via Game Center. It works offline too.",
+  intro="ChessGM is 3D chess for the whole family: real three-dimensional pieces, four fun universes and move hints that help beginners. Play a friend on one screen, the computer on three levels or online via Game Center. It works offline too.",
   h1="FOUR UNIVERSES, FOUR SETS OF PIECES",
   u1="Classic: Staunton pieces in ivory and ebony on a maple and walnut board.",
   u2="Racing: cartoon cars with eyes on the windshield. Pieces drive, turn and crash.",
@@ -105,7 +105,7 @@ D = {
   priv="Playing the computer or a friend on one device needs no internet; only online games do. No accounts of our own, no ads and no tracking.",
   iface="The interface is available in English and Russian and follows your device language."),
  "es-MX": dict(
-  intro="ChessGM es ajedrez 3D para niños y toda la familia: piezas tridimensionales, cuatro universos divertidos y jugadas resaltadas que ayudan a los principiantes. Juega con un amigo en la misma pantalla, contra la computadora en tres niveles o en línea con Game Center. También funciona sin internet.",
+  intro="ChessGM es ajedrez 3D para toda la familia: piezas tridimensionales, cuatro universos divertidos y jugadas resaltadas que ayudan a los principiantes. Juega con un amigo en la misma pantalla, contra la computadora en tres niveles o en línea con Game Center. También funciona sin internet.",
   h1="CUATRO UNIVERSOS, CUATRO JUEGOS DE PIEZAS",
   u1="Clásico: piezas Staunton de marfil y ébano sobre un tablero de arce y nogal.",
   u2="Carreras: carritos de caricatura con ojos en el parabrisas. Las piezas avanzan, giran y chocan.",
@@ -128,7 +128,7 @@ D = {
   priv="Jugar contra la computadora o con un amigo en el mismo dispositivo no requiere internet; solo las partidas en línea. Sin cuentas propias, sin anuncios y sin rastreo.",
   iface="La interfaz está en inglés y ruso, según el idioma de tu dispositivo."),
  "es-ES": dict(
-  intro="ChessGM es ajedrez 3D para niños y toda la familia: piezas tridimensionales, cuatro universos divertidos y jugadas resaltadas que ayudan a los principiantes. Juega con un amigo en la misma pantalla, contra el ordenador en tres niveles o en línea con Game Center. También funciona sin conexión.",
+  intro="ChessGM es ajedrez 3D para toda la familia: piezas tridimensionales, cuatro universos divertidos y jugadas resaltadas que ayudan a los principiantes. Juega con un amigo en la misma pantalla, contra el ordenador en tres niveles o en línea con Game Center. También funciona sin conexión.",
   h1="CUATRO UNIVERSOS, CUATRO JUEGOS DE PIEZAS",
   u1="Clásico: piezas Staunton de marfil y ébano sobre un tablero de arce y nogal.",
   u2="Carreras: coches de dibujos con ojos en el parabrisas. Las piezas avanzan, giran y embisten.",
@@ -151,7 +151,7 @@ D = {
   priv="Jugar contra el ordenador o con un amigo en el mismo dispositivo no necesita internet; solo las partidas en línea. Sin cuentas propias, sin anuncios y sin rastreo.",
   iface="La interfaz está en inglés y ruso, según el idioma de tu dispositivo."),
  "de-DE": dict(
-  intro="ChessGM ist 3D-Schach für Kinder und die ganze Familie: echte dreidimensionale Figuren, vier lustige Welten und Zug-Hinweise, die Anfängern helfen. Spiele zu zweit auf einem Bildschirm, gegen den Computer in drei Stufen oder online über Game Center. Auch ohne Internet spielbar.",
+  intro="ChessGM ist 3D-Schach für die ganze Familie: echte dreidimensionale Figuren, vier lustige Welten und Zug-Hinweise, die Anfängern helfen. Spiele zu zweit auf einem Bildschirm, gegen den Computer in drei Stufen oder online über Game Center. Auch ohne Internet spielbar.",
   h1="VIER WELTEN, VIER FIGURENSÄTZE",
   u1="Klassik: Staunton-Figuren aus Elfenbein und Ebenholz auf einem Brett aus Ahorn und Nussbaum.",
   u2="Rennen: Comic-Autos mit Augen auf der Windschutzscheibe. Die Figuren fahren, wenden und rammen.",
@@ -174,7 +174,7 @@ D = {
   priv="Gegen den Computer oder zu zweit an einem Gerät brauchst du kein Internet; nur Online-Partien. Keine eigenen Konten, keine Werbung, kein Tracking.",
   iface="Die Oberfläche gibt es auf Englisch und Russisch, je nach Gerätesprache."),
  "fr-FR": dict(
-  intro="ChessGM, ce sont les échecs en 3D pour les enfants et toute la famille : de vraies pièces en trois dimensions, quatre univers amusants et des coups surlignés qui aident les débutants. Jouez à deux sur le même écran, contre l’ordinateur en trois niveaux ou en ligne via Game Center. Fonctionne aussi hors ligne.",
+  intro="ChessGM, ce sont les échecs en 3D pour toute la famille : de vraies pièces en trois dimensions, quatre univers amusants et des coups surlignés qui aident les débutants. Jouez à deux sur le même écran, contre l’ordinateur en trois niveaux ou en ligne via Game Center. Fonctionne aussi hors ligne.",
   h1="QUATRE UNIVERS, QUATRE JEUX DE PIÈCES",
   u1="Classique : pièces Staunton en ivoire et ébène sur un plateau en érable et noyer.",
   u2="Course : voitures de dessin animé avec des yeux sur le pare-brise. Les pièces roulent, tournent et percutent.",
@@ -197,7 +197,7 @@ D = {
   priv="Jouer contre l’ordinateur ou à deux sur un appareil ne demande pas d’internet ; seules les parties en ligne en ont besoin. Pas de compte propre, pas de publicité, pas de suivi.",
   iface="L’interface est en anglais et en russe, selon la langue de l’appareil."),
  "it": dict(
-  intro="ChessGM è la scacchiera 3D per bambini e per tutta la famiglia: pezzi tridimensionali, quattro universi divertenti e mosse evidenziate che aiutano i principianti. Gioca in due sullo stesso schermo, contro il computer su tre livelli o online con Game Center. Funziona anche senza internet.",
+  intro="ChessGM è la scacchiera 3D per tutta la famiglia: pezzi tridimensionali, quattro universi divertenti e mosse evidenziate che aiutano i principianti. Gioca in due sullo stesso schermo, contro il computer su tre livelli o online con Game Center. Funziona anche senza internet.",
   h1="QUATTRO UNIVERSI, QUATTRO SET DI PEZZI",
   u1="Classico: pezzi Staunton in avorio ed ebano su una scacchiera di acero e noce.",
   u2="Corse: auto da cartone animato con gli occhi sul parabrezza. I pezzi corrono, girano e speronano.",
@@ -220,7 +220,7 @@ D = {
   priv="Giocare contro il computer o in due su un dispositivo non richiede internet; solo le partite online. Nessun account nostro, nessuna pubblicità, nessun tracciamento.",
   iface="L’interfaccia è in inglese e russo, secondo la lingua del dispositivo."),
  "pt-BR": dict(
-  intro="ChessGM é xadrez 3D para crianças e toda a família: peças tridimensionais, quatro universos divertidos e jogadas destacadas que ajudam os iniciantes. Jogue em dois na mesma tela, contra o computador em três níveis ou online pelo Game Center. Também funciona sem internet.",
+  intro="ChessGM é xadrez 3D para toda a família: peças tridimensionais, quatro universos divertidos e jogadas destacadas que ajudam os iniciantes. Jogue em dois na mesma tela, contra o computador em três níveis ou online pelo Game Center. Também funciona sem internet.",
   h1="QUATRO UNIVERSOS, QUATRO CONJUNTOS DE PEÇAS",
   u1="Clássico: peças Staunton de marfim e ébano em um tabuleiro de bordo e nogueira.",
   u2="Corrida: carrinhos de desenho com olhos no para-brisa. As peças andam, viram e batem.",
@@ -243,7 +243,7 @@ D = {
   priv="Jogar contra o computador ou em dois no mesmo aparelho não exige internet; só as partidas online. Sem contas próprias, sem anúncios e sem rastreamento.",
   iface="A interface está em inglês e russo, conforme o idioma do aparelho."),
  "pl": dict(
-  intro="ChessGM to szachy 3D dla dzieci i całej rodziny: prawdziwe trójwymiarowe figury, cztery wesołe światy i podświetlane ruchy, które pomagają początkującym. Graj we dwoje na jednym ekranie, z komputerem na trzech poziomach lub online przez Game Center. Działa też bez internetu.",
+  intro="ChessGM to szachy 3D dla całej rodziny: prawdziwe trójwymiarowe figury, cztery wesołe światy i podświetlane ruchy, które pomagają początkującym. Graj we dwoje na jednym ekranie, z komputerem na trzech poziomach lub online przez Game Center. Działa też bez internetu.",
   h1="CZTERY ŚWIATY, CZTERY ZESTAWY FIGUR",
   u1="Klasyka: figury Staunton z kości słoniowej i hebanu na szachownicy z klonu i orzecha.",
   u2="Wyścigi: kreskówkowe autka z oczami na szybie. Figury jeżdżą, skręcają i taranują.",
@@ -266,7 +266,7 @@ D = {
   priv="Gra z komputerem lub we dwoje na jednym urządzeniu nie wymaga internetu; tylko partie online. Bez własnych kont, reklam i śledzenia.",
   iface="Interfejs jest po angielsku i rosyjsku, zależnie od języka urządzenia."),
  "uk": dict(
-  intro="ChessGM — 3D-шахи для дітей і всієї родини: об’ємні фігури, чотири веселі всесвіти та підсвітка ходів, яка допомагає новачкам. Грайте вдвох на одному екрані, з комп’ютером на трьох рівнях або онлайн через Game Center. Працює й без інтернету.",
+  intro="ChessGM — 3D-шахи для всієї родини: об’ємні фігури, чотири веселі всесвіти та підсвітка ходів, яка допомагає новачкам. Грайте вдвох на одному екрані, з комп’ютером на трьох рівнях або онлайн через Game Center. Працює й без інтернету.",
   h1="ЧОТИРИ ВСЕСВІТИ — ЧОТИРИ НАБОРИ ФІГУР",
   u1="Класика: фігури Стаунтона зі слонової кістки та ебенового дерева, дошка з клена й горіха.",
   u2="Перегони: мультяшні машинки з очима на лобовому склі. Фігури їдуть, повертають і таранять.",

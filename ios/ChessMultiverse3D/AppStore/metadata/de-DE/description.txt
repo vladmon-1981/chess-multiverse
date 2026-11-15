@@ -1,4 +1,4 @@
-ChessGM ist 3D-Schach für Kinder und die ganze Familie: echte dreidimensionale Figuren, vier lustige Welten und Zug-Hinweise, die Anfängern helfen. Spiele zu zweit auf einem Bildschirm, gegen den Computer in drei Stufen oder online über Game Center. Auch ohne Internet spielbar.
+ChessGM ist 3D-Schach für die ganze Familie: echte dreidimensionale Figuren, vier lustige Welten und Zug-Hinweise, die Anfängern helfen. Spiele zu zweit auf einem Bildschirm, gegen den Computer in drei Stufen oder online über Game Center. Auch ohne Internet spielbar.
 
 VIER WELTEN, VIER FIGURENSÄTZE
 • Klassik: Staunton-Figuren aus Elfenbein und Ebenholz auf einem Brett aus Ahorn und Nussbaum.

@@ -1,4 +1,4 @@
-ChessGM es ajedrez 3D para niños y toda la familia: piezas tridimensionales, cuatro universos divertidos y jugadas resaltadas que ayudan a los principiantes. Juega con un amigo en la misma pantalla, contra la computadora en tres niveles o en línea con Game Center. También funciona sin internet.
+ChessGM es ajedrez 3D para toda la familia: piezas tridimensionales, cuatro universos divertidos y jugadas resaltadas que ayudan a los principiantes. Juega con un amigo en la misma pantalla, contra la computadora en tres niveles o en línea con Game Center. También funciona sin internet.
 
 CUATRO UNIVERSOS, CUATRO JUEGOS DE PIEZAS
 • Clásico: piezas Staunton de marfil y ébano sobre un tablero de arce y nogal.

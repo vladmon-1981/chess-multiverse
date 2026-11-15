@@ -1,4 +1,4 @@
-ChessGM is 3D chess for kids and the whole family: real three-dimensional pieces, four fun universes and move hints that help beginners. Play a friend on one screen, the computer on three levels or online via Game Center. It works offline too.
+ChessGM is 3D chess for the whole family: real three-dimensional pieces, four fun universes and move hints that help beginners. Play a friend on one screen, the computer on three levels or online via Game Center. It works offline too.
 
 FOUR UNIVERSES, FOUR SETS OF PIECES
 • Classic: Staunton pieces in ivory and ebony on a maple and walnut board.

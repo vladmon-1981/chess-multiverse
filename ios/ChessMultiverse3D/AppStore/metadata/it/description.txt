@@ -1,4 +1,4 @@
-ChessGM è la scacchiera 3D per bambini e per tutta la famiglia: pezzi tridimensionali, quattro universi divertenti e mosse evidenziate che aiutano i principianti. Gioca in due sullo stesso schermo, contro il computer su tre livelli o online con Game Center. Funziona anche senza internet.
+ChessGM è la scacchiera 3D per tutta la famiglia: pezzi tridimensionali, quattro universi divertenti e mosse evidenziate che aiutano i principianti. Gioca in due sullo stesso schermo, contro il computer su tre livelli o online con Game Center. Funziona anche senza internet.
 
 QUATTRO UNIVERSI, QUATTRO SET DI PEZZI
 • Classico: pezzi Staunton in avorio ed ebano su una scacchiera di acero e noce.

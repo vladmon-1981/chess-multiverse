@@ -1,4 +1,4 @@
-ChessGM, ce sont les échecs en 3D pour les enfants et toute la famille : de vraies pièces en trois dimensions, quatre univers amusants et des coups surlignés qui aident les débutants. Jouez à deux sur le même écran, contre l’ordinateur en trois niveaux ou en ligne via Game Center. Fonctionne aussi hors ligne.
+ChessGM, ce sont les échecs en 3D pour toute la famille : de vraies pièces en trois dimensions, quatre univers amusants et des coups surlignés qui aident les débutants. Jouez à deux sur le même écran, contre l’ordinateur en trois niveaux ou en ligne via Game Center. Fonctionne aussi hors ligne.
 
 QUATRE UNIVERS, QUATRE JEUX DE PIÈCES
 • Classique : pièces Staunton en ivoire et ébène sur un plateau en érable et noyer.
