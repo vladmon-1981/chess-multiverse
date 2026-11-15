@@ -1,0 +1,1 @@
+online,offline,estratégia,tabuleiro,dois,jogadores,computador,amigos,aprender,iniciante,hóquei

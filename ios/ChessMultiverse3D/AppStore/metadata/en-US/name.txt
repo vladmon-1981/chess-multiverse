@@ -1,1 +1,1 @@
-ChessGM
+ChessGM: 3D Chess Game

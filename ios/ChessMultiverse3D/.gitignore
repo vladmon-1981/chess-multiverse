@@ -1,3 +1,5 @@
 build/
 *.xcuserstate
 xcuserdata/
+AppStore/screenshots/framed/
+AppStore/screenshots/framed-ipad/

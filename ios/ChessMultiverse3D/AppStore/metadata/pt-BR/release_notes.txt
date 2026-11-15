@@ -1,0 +1,9 @@
+Jogo online, voz de locutor e ChessGM Pro!
+
+• Partidas online pelo Game Center: convide um amigo ou ache um adversário aleatório. De 30 segundos a 5 minutos por jogada, ranking, revanche com um toque.
+• Locutor com voz neural, feminina ou masculina, em cada universo.
+• Símbolos das peças sobre as figuras em Corrida, Clínica veterinária e Hóquei.
+• As peças capturadas ficam sob o tabuleiro.
+• Modo paisagem no iPhone e botão de câmera com ângulos prontos.
+• Quadro de honra: pontos e sequências de vitórias neste aparelho.
+• ChessGM Pro: 5 partidas grátis por dia, uma compra única tira o limite para sempre.

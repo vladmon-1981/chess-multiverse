@@ -1,0 +1,9 @@
+Jeu en ligne, voix de commentateur et ChessGM Pro !
+
+• Parties en ligne via Game Center : invitez un ami ou affrontez un inconnu. De 30 secondes à 5 minutes par coup, classement, revanche en un toucher.
+• Commentateur à voix neuronale, féminine ou masculine, dans chaque univers.
+• Symboles des pièces au-dessus des figures dans Course, Clinique vétérinaire et Hockey.
+• Les pièces prises sont posées sous le plateau.
+• Mode paysage sur iPhone et bouton caméra pour des angles prêts.
+• Tableau d’honneur : points et séries de victoires sur cet appareil.
+• ChessGM Pro : 5 parties gratuites par jour, un achat unique supprime la limite pour toujours.

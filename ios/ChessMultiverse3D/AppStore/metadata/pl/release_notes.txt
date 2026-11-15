@@ -1,0 +1,9 @@
+Gra online, głos lektora i ChessGM Pro!
+
+• Partie online przez Game Center: zaproś znajomego lub trafisz na losowego rywala. Od 30 sekund do 5 minut na ruch, ranking, rewanż jednym dotknięciem.
+• Lektor z neuronowym głosem, żeńskim lub męskim, w każdym świecie.
+• Symbole figur nad figurami w Wyścigach, Lecznicy i Hokeju.
+• Zbite figury leżą pod szachownicą.
+• Tryb poziomy na iPhonie i przycisk kamery z gotowymi ujęciami.
+• Tablica honorowa: punkty i serie zwycięstw na tym urządzeniu.
+• ChessGM Pro: 5 darmowych partii dziennie, jednorazowy zakup znosi limit na zawsze.

@@ -1,1 +1,1 @@
-board game,strategy,puzzle,brain,two player,offline,ai,hockey,cartoon,classic,camera,sound,voice
+board,strategy,kids,family,multiplayer,friends,computer,ai,puzzle,brain,beginner,learn,hockey,racing
