@@ -21,17 +21,26 @@
 ## Мониторинг App Store
 `python3 tools/asc_monitor.py [--notify]` — новые отзывы/краши по ключу ASC API (секреты в `.secrets.local/`, состояние в `.state/`). Ключ не перевыпускать и не коммитить; `.p8` скачивается один раз.
 
-## Сетевая игра (Game Center, с 10.11.2026)
-- Решение владельца: онлайн через Game Center, без своего сервера. Режим `online` в `js/chess-app.js`,
-  транспорт `js/online.js`, натив `ios/.../GameCenter.swift` (мост WKWebView `gc`), право
-  `com.apple.developer.game-center` в `ChessMultiverse3D.entitlements`.
-- Партия — GKMatch на двоих; ходы/сдача/время/реванш — JSON (`hello`, `move`, `resign`, `timeout`, `flag`, `rematch`).
+## Сетевая игра (с 17.11.2026 — свой сервер-ретранслятор; Game Center — только вход и доска почёта)
+- Решение владельца 17.11.2026: Game Center не соединяет телефоны напрямую (зависание на «Подключение»,
+  `FastSyncTransportError`, у Vlad/Гера/Алена/iPad), поэтому подбор и ходы идут через свой сервер на AEZA.
+  Режим `online` в `js/chess-app.js`, транспорт `js/online.js` (объект `Relay`, WebSocket `wss://cdn-se.birdhot.ru/chessgm-ws`).
+  Game Center остаётся для входа/имени/доски почёта (`ios/.../GameCenter.swift`, мост WKWebView `gc`, право
+  `com.apple.developer.game-center`); его `find/send/leave` из JS больше не вызываются.
+- Сервер: `server/relay.py` (Python, `websockets==12.0`) на AEZA 213.165.34.60 в `/opt/chessgm-relay`, юнит
+  `chessgm-relay.service` (127.0.0.1:8787, пользователь `chessgm`, MemoryMax 300M), nginx `/etc/nginx/sites-available/cdn-se.birdhot.ru`
+  (443, только Cloudflare, Origin-сертификат от cdn, CF в режиме Full), путь `/chessgm-ws`. Протокол — в шапке `relay.py`
+  (`find{group,name,id}`, `room`/`join` по коду, `data{msg}`, `leave`, `cancel`; в ответ `match`, `data`, `left`, `cancelled`, `error`).
+  Нет вызова из приложения для комнат по коду — сервер умеет, интерфейса пока нет. Обновить: `scp relay.py` + `systemctl restart chessgm-relay`.
+  **AEZA — резерв до 30.11.2026 (см. память equhost-new-vps): к этой дате перенести сервис на EQUHost или продлить AEZA.**
+- Партия на двоих: ходы/сдача/время/реванш — JSON (`hello`, `move`, `resign`, `timeout`, `flag`, `rematch`) поверх ретранслятора.
   Цвет — жребий в `hello`. Подбор только с тем же временем на ход (`playerGroup` = 30/60/120/300).
 - Время на ход: своё вышло — сам признаёт поражение (`timeout`); у соперника вышло + 5 с запаса — `flag`.
   Если у победителя нечем матовать — ничья.
 - Доска почёта: таблицы Game Center `chessgm.rating` и `chessgm.wins` (Classic, «Most Recent Score»).
   Рейтинг Эло считается на устройстве (`localStorage` `chess-online`), на новом устройстве подтягивается из таблиц.
-- Проверка без Game Center: `index.html?gcmock=1&gcname=A` и вторая вкладка `...&gcname=B` в том же браузере —
+- Проверка с настоящим сервером в браузере: `index.html?relay=1&cid=aaa` и вторая вкладка `...&cid=bbb` (разные `cid` обязательны —
+  сервер не сводит клиентов с одним id). Проверка без сети: `index.html?gcmock=1&gcname=A` и вторая вкладка `...&gcname=B` в том же браузере —
   вкладки играют друг с другом через BroadcastChannel. В обычном браузере кнопка «Играть онлайн» скрыта.
 - Симулятор на этой машине годится только для «собирается и не падает»; партию вдвоём проверять на двух
   устройствах с разными Apple ID (Sandbox).

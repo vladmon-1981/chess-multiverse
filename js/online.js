@@ -67,28 +67,103 @@
         leave() { if (this.peer) this.post({ k: 'bye', to: this.peer }); this.peer = null; this.searching = null; }
     };
 
+    // ---------- Свой сервер-ретранслятор (WebSocket) ----------
+    // Game Center не всегда соединяет два телефона напрямую (NAT/оператор), поэтому подбор и ходы идут через
+    // небольшой сервер (server/relay.py на VPS, nginx + Cloudflare). Game Center остаётся для входа, имени и доски почёта.
+    const RELAY_URL = 'wss://cdn-se.birdhot.ru/chessgm-ws';
+    const relay = native || (function () { try { return new URLSearchParams(location.search).has('relay'); } catch (e) { return false; } })();
+    const Relay = {
+        ws: null, name: '', inMatch: false, searching: false,
+        cid() {
+            try { const q = new URLSearchParams(location.search).get('cid'); if (q) return q.slice(0, 32); } catch (e) { /* проверка двух вкладок в одном браузере */ }
+            let id = '';
+            try { id = localStorage.getItem('chess-cid') || ''; } catch (e) { /* */ }
+            if (!id) {
+                id = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+                try { localStorage.setItem('chess-cid', id); } catch (e) { /* */ }
+            }
+            return id;
+        },
+        open() {
+            return new Promise((resolve, reject) => {
+                if (this.ws && this.ws.readyState === 1) { resolve(this.ws); return; }
+                this.close();
+                let done = false;
+                const ws = new WebSocket(RELAY_URL);
+                this.ws = ws;
+                const timer = setTimeout(() => { if (!done) { done = true; try { ws.close(); } catch (e) { /* */ } reject(new Error('timeout')); } }, 9000);
+                ws.onopen = () => { if (!done) { done = true; clearTimeout(timer); resolve(ws); } };
+                ws.onmessage = (e) => this.onMsg(e.data);
+                ws.onerror = () => { if (!done) { done = true; clearTimeout(timer); reject(new Error('error')); } };
+                ws.onclose = () => {
+                    if (this.ws !== ws) return;
+                    this.ws = null;
+                    if (this.inMatch) { this.inMatch = false; emit({ type: 'left' }); }
+                    else if (this.searching) { this.searching = false; emit({ type: 'error', text: 'Нет связи с сервером игры' }); }
+                };
+            });
+        },
+        close() {
+            const ws = this.ws;
+            this.ws = null;
+            this.inMatch = false;
+            this.searching = false;
+            if (ws) { try { ws.onclose = null; ws.close(); } catch (e) { /* */ } }
+        },
+        onMsg(raw) {
+            let m;
+            try { m = JSON.parse(raw); } catch (e) { return; }
+            if (m.t === 'match') { this.searching = false; this.inMatch = true; emit({ type: 'match', opponent: m.opponent }); }
+            else if (m.t === 'data') emit({ type: 'data', msg: m.msg });
+            else if (m.t === 'left') { this.inMatch = false; emit({ type: 'left' }); }
+            else if (m.t === 'cancelled') { this.searching = false; emit({ type: 'cancelled' }); }
+            else if (m.t === 'room') emit({ type: 'room', code: m.code });
+            else if (m.t === 'error') { this.searching = false; emit({ type: 'error', text: m.text === 'no room' ? 'Комната не найдена' : (m.text || '') }); }
+        },
+        tx(obj) { if (this.ws && this.ws.readyState === 1) this.ws.send(JSON.stringify(obj)); },
+        async find(group) {
+            this.searching = true;
+            try { await this.open(); } catch (e) { this.searching = false; emit({ type: 'error', text: 'Нет связи с сервером игры' }); return; }
+            if (!this.searching) return;      // успели отменить, пока соединялись
+            this.tx({ t: 'find', group, name: this.name, id: this.cid() });
+        },
+        cancel() {
+            if (this.ws && this.ws.readyState === 1) this.tx({ t: 'cancel' });
+            else { this.searching = false; emit({ type: 'cancelled' }); }
+            this.searching = false;
+        },
+        send(msg) { this.tx({ t: 'data', msg }); },
+        leave() { this.tx({ t: 'leave' }); this.close(); }
+    };
+
     function call(cmd, args) {
         if (native) window.webkit.messageHandlers.gc.postMessage(Object.assign({ cmd }, args || {}));
     }
 
     const CMOnline = {
-        available: native || mock,
+        available: native || mock || relay,
         native,
         mock,
+        relay,
         on(fn) { listeners.push(fn); },
         /** Вызов из натива */
         _event(ev) {
+            if (ev && ev.type === 'auth' && ev.ok && ev.name) Relay.name = String(ev.name).slice(0, 24);
             if (ev && ev.type === 'data' && typeof ev.msg === 'string') {
                 try { ev.msg = JSON.parse(ev.msg); } catch (e) { return; }
             }
             emit(ev);
         },
-        auth() { if (native) call('auth'); else if (mock) Mock.init(); },
+        auth() {
+            if (native) call('auth');
+            else if (mock) Mock.init();
+            else if (relay) setTimeout(() => emit({ type: 'auth', ok: true, name: Relay.name || 'Игрок' }), 0);
+        },
         /** group — код контроля времени: подбираются только соперники с тем же лимитом */
-        find(group) { if (native) call('find', { group }); else if (mock) Mock.find(group); },
-        cancel() { if (native) call('cancel'); else if (mock) Mock.cancel(); },
-        send(msg) { if (native) call('send', { data: JSON.stringify(msg) }); else if (mock) Mock.send(msg); },
-        leave() { if (native) call('leave'); else if (mock) Mock.leave(); },
+        find(group) { if (relay) Relay.find(group); else if (mock) Mock.find(group); },
+        cancel() { if (relay) Relay.cancel(); else if (mock) Mock.cancel(); },
+        send(msg) { if (relay) Relay.send(msg); else if (mock) Mock.send(msg); },
+        leave() { if (relay) Relay.leave(); else if (mock) Mock.leave(); },
         leaderboard() { if (native) call('leaderboard'); },
         report(scores) { if (native) call('report', scores); }
     };

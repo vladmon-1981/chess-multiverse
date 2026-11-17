@@ -29,9 +29,9 @@ final class GameCenterBridge: NSObject, WKScriptMessageHandler {
         case "cancel": if let vc = topController() as? GKMatchmakerViewController { vc.dismiss(animated: true) }
         case "send":
             if let s = body["data"] as? String, let data = s.data(using: .utf8), let match {
-                do { try match.sendData(toAllPlayers: data, with: .reliable) }
-                catch { emit(["type": "error", "text": error.localizedDescription]) }
-            }
+                do { try match.sendData(toAllPlayers: data, with: .reliable); dbg("send ok \(data.count)b") }
+                catch { dbg("send FAIL \(error.localizedDescription)"); emit(["type": "error", "text": error.localizedDescription]) }
+            } else if body["data"] != nil { dbg("send dropped: нет match") }
         case "leave": leave()
         case "leaderboard": showLeaderboard()
         case "report": report(rating: body["rating"] as? Int, wins: body["wins"] as? Int)
@@ -48,6 +48,7 @@ final class GameCenterBridge: NSObject, WKScriptMessageHandler {
         authStarted = true
         me.authenticateHandler = { [weak self] vc, error in
             guard let self else { return }
+            self.dbg("auth: vc=\(vc != nil) ok=\(me.isAuthenticated) err=\(error?.localizedDescription ?? "-")")
             if let vc { self.topController()?.present(vc, animated: true); return }
             if me.isAuthenticated {
                 me.register(self)
@@ -71,6 +72,7 @@ final class GameCenterBridge: NSObject, WKScriptMessageHandler {
             return
         }
         leave()
+        dbg("find group=\(group)")
         let req = GKMatchRequest()
         req.minPlayers = 2
         req.maxPlayers = 2
@@ -91,6 +93,7 @@ final class GameCenterBridge: NSObject, WKScriptMessageHandler {
         match = m
         announced = false
         m.delegate = self
+        dbg("didFind: players=\(m.players.map { $0.displayName }) expected=\(m.expectedPlayerCount)")
         AudioKeeper.shared.restore()
         announceIfReady(m)
     }
@@ -98,6 +101,7 @@ final class GameCenterBridge: NSObject, WKScriptMessageHandler {
     private func announceIfReady(_ m: GKMatch) {
         guard !announced, match === m, m.expectedPlayerCount == 0, let opp = m.players.first else { return }
         announced = true
+        dbg("match announced: \(opp.displayName)")
         emit(["type": "match", "opponent": opp.displayName])
     }
 
@@ -146,6 +150,13 @@ final class GameCenterBridge: NSObject, WKScriptMessageHandler {
 
     // MARK: - Служебное
 
+    /// Диагностика: в Debug-сборках события уходят в плашку на экране игры (js dbg), в Release её нет.
+    private func dbg(_ s: String) {
+        #if DEBUG
+        emit(["type": "dbg", "text": s])
+        #endif
+    }
+
     private func emit(_ ev: [String: Any]) {
         guard let data = try? JSONSerialization.data(withJSONObject: ev),
               let json = String(data: data, encoding: .utf8) else { return }
@@ -165,11 +176,13 @@ final class GameCenterBridge: NSObject, WKScriptMessageHandler {
 extension GameCenterBridge: GKMatchmakerViewControllerDelegate {
     func matchmakerViewControllerWasCancelled(_ vc: GKMatchmakerViewController) {
         vc.dismiss(animated: true) { AudioKeeper.shared.restore() }
+        dbg("matchmaker cancelled")
         emit(["type": "cancelled"])
     }
 
     func matchmakerViewController(_ vc: GKMatchmakerViewController, didFailWithError error: Error) {
         vc.dismiss(animated: true)
+        dbg("matchmaker FAIL \(error.localizedDescription)")
         emit(["type": "error", "text": error.localizedDescription])
     }
 
@@ -182,10 +195,12 @@ extension GameCenterBridge: GKMatchmakerViewControllerDelegate {
 extension GameCenterBridge: GKMatchDelegate {
     func match(_ match: GKMatch, didReceive data: Data, fromRemotePlayer player: GKPlayer) {
         guard let s = String(data: data, encoding: .utf8) else { return }
+        dbg("recv \(data.count)b")
         emit(["type": "data", "msg": s])
     }
 
     func match(_ match: GKMatch, player: GKPlayer, didChange state: GKPlayerConnectionState) {
+        dbg("state \(player.displayName): \(state.rawValue) (0=?,1=connected,2=disc) expected=\(match.expectedPlayerCount)")
         switch state {
         case .connected:
             AudioKeeper.shared.restore()
@@ -197,6 +212,7 @@ extension GameCenterBridge: GKMatchDelegate {
     }
 
     func match(_ match: GKMatch, didFailWithError error: Error?) {
+        dbg("match FAIL \(error?.localizedDescription ?? "-")")
         if self.match === match { emit(["type": "left"]) }
     }
 }
@@ -204,7 +220,8 @@ extension GameCenterBridge: GKMatchDelegate {
 /// Приглашение от друга (из уведомления или Сообщений) открывает окно подбора с этим приглашением.
 extension GameCenterBridge: GKLocalPlayerListener {
     func player(_ player: GKPlayer, didAccept invite: GKInvite) {
-        guard let vc = GKMatchmakerViewController(invite: invite) else { return }
+        dbg("invite accepted from \(invite.sender.displayName)")
+        guard let vc = GKMatchmakerViewController(invite: invite) else { dbg("invite: VC nil"); return }
         present(vc)
     }
 }

@@ -1479,7 +1479,7 @@
             if (!this.gcName) { this.toast(tr('Сначала войди в Game Center: Настройки → Game Center')); CMOnline.auth(); return; }
             this.leaveNet();
             this.sound.voice.prime();
-            if (CMOnline.mock) $('#searchBox').hidden = false;
+            if (CMOnline.mock || CMOnline.relay) $('#searchBox').hidden = false;
             $('#findBtn').disabled = true;
             CMOnline.find(this.moveTime);
         }
@@ -1498,12 +1498,31 @@
         netSend(msg) { if (this.net && !this.net.gone) CMOnline.send(msg); }
 
         leaveNet() {
-            if (this.net) { this.net.gone = true; CMOnline.leave(); }
+            if (this.net) { this.net.gone = true; clearInterval(this.net.helloTimer); CMOnline.leave(); }
             this.net = null;
             this.netQueue = [];
         }
 
+        /** Диагностика сети: плашка на экране, включается первым событием dbg от натива (только Debug-сборки). */
+        dbg(text) {
+            if (!this.dbgOn) return;
+            const t = new Date().toTimeString().slice(3, 8) + ' ' + text;
+            (this.dbgLines = this.dbgLines || []).push(t);
+            if (this.dbgLines.length > 14) this.dbgLines.shift();
+            let el = document.getElementById('netDbg');
+            if (!el) {
+                el = document.createElement('pre');
+                el.id = 'netDbg';
+                el.style.cssText = 'position:fixed;left:4px;bottom:4px;z-index:99999;margin:0;padding:4px 6px;max-width:92vw;' +
+                    'font:10px/1.25 monospace;color:#9f9;background:rgba(0,0,0,.72);border-radius:6px;pointer-events:none;white-space:pre-wrap';
+                document.body.appendChild(el);
+            }
+            el.textContent = this.dbgLines.join('\n');
+        }
+
         onNetEvent(ev) {
+            if (ev.type === 'dbg') { this.dbgOn = true; this.dbg('N ' + ev.text); return; }
+            this.dbg('ev ' + ev.type + (ev.opponent ? ' ' + ev.opponent : ''));
             switch (ev.type) {
                 case 'auth':
                     if (ev.ok) {
@@ -1550,7 +1569,15 @@
                 nonce: Math.floor(Math.random() * 2 ** 31),
                 round: 0, hello: null, color: null, gone: false
             };
+            this.dbg('hello → sent (nonce ' + this.net.nonce + ')');
             this.netSend({ t: 'hello', v: 1, nonce: this.net.nonce, tc: this.moveTime, name: this.net.myName, rating: this.stats.rating });
+            // Game Center не буферизует данные до установки delegate у соперника: пока не пришло его приветствие, повторяем своё
+            const net = this.net;
+            let tries = 0;
+            net.helloTimer = setInterval(() => {
+                if (this.net !== net || net.hello || net.gone || ++tries > 20) { clearInterval(net.helloTimer); return; }
+                this.netSend({ t: 'hello', v: 1, re: 1, nonce: net.nonce, tc: this.moveTime, name: net.myName, rating: this.stats.rating });
+            }, 1500);
             const early = this.pendingHello;
             this.pendingHello = null;
             if (early) this.onNetData(early);
@@ -1559,10 +1586,14 @@
         onNetData(m) {
             const n = this.net;
             if (!m || typeof m !== 'object') return;
-            if (!n) { if (m.t === 'hello') this.pendingHello = m; return; }
+            if (!n) { if (m.t === 'hello') { this.pendingHello = m; this.dbg('hello ← early (до match)'); } return; }
             if (m.t === 'hello') {
-                if (n.hello) return;
+                if (n.hello) {   // соперник всё ещё ждёт моё приветствие — ответить
+                    if (m.re) this.netSend({ t: 'hello', v: 1, nonce: n.nonce, tc: this.moveTime, name: n.myName, rating: this.stats.rating });
+                    return;
+                }
                 n.hello = m;
+                this.dbg('hello ← got (nonce ' + m.nonce + (m.re ? ', re' : '') + ')');
                 if (m.name) n.oppName = String(m.name).slice(0, 24);
                 n.oppRating = Math.round(+m.rating) || 1200;
                 if (m.nonce === n.nonce) {   // ничья в жребии — перебросить
@@ -1574,6 +1605,7 @@
                 n.color = n.nonce > m.nonce ? 'w' : 'b';
                 // Лимит времени берётся у белых (при автоподборе он и так одинаковый)
                 n.tc = n.color === 'w' ? this.moveTime : ([30, 60, 120, 300].includes(+m.tc) ? +m.tc : 60);
+                this.dbg('color=' + n.color + ' → startGame');
                 this.toast(tr('Соперник: {name}', { name: n.oppName }), 2200);
                 this.startGame('online');
                 return;
