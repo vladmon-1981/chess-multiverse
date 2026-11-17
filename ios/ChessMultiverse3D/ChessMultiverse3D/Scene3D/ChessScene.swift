@@ -200,9 +200,9 @@ final class ChessScene {
     func setCameraPreset(_ preset: CameraPreset) {
         azimuth = 0
         switch preset {
-        case .normal: distance = 11; elevation = 0.9
-        case .top: distance = 12; elevation = Self.maxElevation
-        case .low: distance = 9.5; elevation = Self.minElevation + 0.05
+        case .normal: distance = 11 * Self.distanceScale; elevation = 0.9
+        case .top: distance = 12 * Self.distanceScale; elevation = Self.maxElevation
+        case .low: distance = 9.5 * Self.distanceScale; elevation = Self.minElevation + 0.05
         }
         applyCameraTransform()
     }
@@ -216,6 +216,48 @@ final class ChessScene {
     private var mateShownOn: Square?
     private var lastCheck: Square?
 
+    /// Значок шахматной фигуры над моделью в нешахматных вселенных (как в веб-версии). Включает tvOS.
+    static var showBadges = false
+    /// Множитель дистанции камеры пресетов (tvOS ближе: доска во весь экран).
+    static var distanceScale: Float = 1
+    private static var badgeCache: [String: UIImage] = [:]
+
+    private static func badgeImage(kind: PieceKind, color: PieceColor) -> UIImage {
+        let key = "\(kind.rawValue)\(color.letter)"
+        if let c = badgeCache[key] { return c }
+        let size: CGFloat = 128
+        let glyphs: [PieceKind: String] = [.king: "♚", .queen: "♛", .rook: "♜", .bishop: "♝", .knight: "♞", .pawn: "♟", .none: ""]
+        let img = UIGraphicsImageRenderer(size: CGSize(width: size, height: size)).image { _ in
+            let rect = CGRect(x: 4, y: 4, width: size - 8, height: size - 8)
+            (color == .white ? UIColor(white: 0.97, alpha: 1) : UIColor(white: 0.12, alpha: 1)).setFill()
+            UIBezierPath(ovalIn: rect).fill()
+            UIColor(white: color == .white ? 0.15 : 0.9, alpha: 1).setStroke()
+            let ring = UIBezierPath(ovalIn: rect.insetBy(dx: 2, dy: 2)); ring.lineWidth = 5; ring.stroke()
+            let font = UIFont.systemFont(ofSize: 82)
+            let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: color == .white ? UIColor(white: 0.1, alpha: 1) : UIColor.white]
+            let str = NSAttributedString(string: (glyphs[kind] ?? "") + "\u{FE0E}", attributes: attrs)
+            let sz = str.size()
+            str.draw(at: CGPoint(x: (size - sz.width) / 2, y: (size - sz.height) / 2))
+        }
+        badgeCache[key] = img
+        return img
+    }
+
+    private func addBadge(to holder: PieceHolder, piece: Piece) {
+        let top = holder.tilt.boundingBox.max.y
+        let plane = SCNPlane(width: 0.42, height: 0.42)
+        let mat = SCNMaterial()
+        mat.diffuse.contents = Self.badgeImage(kind: piece.kind, color: piece.color)
+        mat.lightingModel = .constant
+        mat.isDoubleSided = true
+        plane.materials = [mat]
+        let node = SCNNode(geometry: plane)
+        node.position = SCNVector3(0, max(top, 0.8) + 0.3, 0)
+        let bb = SCNBillboardConstraint(); bb.freeAxes = .all
+        node.constraints = [bb]
+        holder.addChildNode(node)
+    }
+
     /// Полная перестройка фигур по текущей доске модели.
     func setPosition(_ board: [[Piece?]]) {
         piecesNode.childNodes.forEach { $0.removeFromParentNode() }
@@ -227,6 +269,7 @@ final class ChessScene {
                 holder.restYaw = facingYaw(piece: piece)
                 holder.eulerAngles.y = holder.restYaw
                 holder.tilt.addChildNode(PieceFactory.makeNode(piece: piece, theme: currentTheme))
+                if Self.showBadges, currentTheme != .classic { addBadge(to: holder, piece: piece) }
                 holder.position = boardPosition(row: row, col: col, y: 0.06)
                 holder.name = "piece_\(row)_\(col)"
                 piecesNode.addChildNode(holder)
@@ -628,17 +671,29 @@ final class ChessScene {
 
     // ---------- Подсветка ----------
 
-    func setHighlights(selected: Square?, targets: [Square], lastMove: (from: Square, to: Square)?, check: Square?, cursor: Square? = nil) {
+    /// Подсветка клеток. `captures` — клетки, где стоит фигура соперника (ход с взятием): красное кольцо вместо зелёной точки.
+    /// Курсор пульта Apple TV: рамка по краю клетки и пульсирующая стрелка над ней — видны и поверх фигур.
+    func setHighlights(selected: Square?, targets: [Square], lastMove: (from: Square, to: Square)?, check: Square?,
+                       cursor: Square? = nil, captures: Set<Square> = []) {
         highlightNode.childNodes.forEach { $0.removeFromParentNode() }
+        if let lastMove {
+            addMarker(square: lastMove.from, color: UIColor.systemBlue.withAlphaComponent(0.4), height: 0.015)
+            addMarker(square: lastMove.to, color: UIColor.systemBlue.withAlphaComponent(0.4), height: 0.015)
+        }
         if let selected {
-            addMarker(square: selected, color: UIColor.systemYellow.withAlphaComponent(0.55), height: 0.02)
+            let m = addMarker(square: selected, color: UIColor(red: 1, green: 0.84, blue: 0.1, alpha: 0.9), height: 0.02)
+            m.geometry?.firstMaterial?.emission.contents = UIColor(red: 1, green: 0.7, blue: 0, alpha: 0.6)
         }
         for t in targets {
-            addMarker(square: t, color: UIColor.systemGreen.withAlphaComponent(0.55), height: 0.02, isDot: true)
-        }
-        if let lastMove {
-            addMarker(square: lastMove.from, color: UIColor.systemBlue.withAlphaComponent(0.35), height: 0.015)
-            addMarker(square: lastMove.to, color: UIColor.systemBlue.withAlphaComponent(0.35), height: 0.015)
+            if captures.contains(t) {
+                addRing(square: t, color: UIColor(red: 1, green: 0.18, blue: 0.2, alpha: 1))
+                let m = addMarker(square: t, color: UIColor(red: 1, green: 0.15, blue: 0.2, alpha: 0.5), height: 0.02)
+                m.geometry?.firstMaterial?.emission.contents = UIColor(red: 1, green: 0.1, blue: 0.1, alpha: 0.5)
+            } else {
+                let dot = addMarker(square: t, color: UIColor(red: 0.2, green: 1, blue: 0.4, alpha: 0.95), height: 0.05, isDot: true)
+                dot.geometry?.firstMaterial?.emission.contents = UIColor(red: 0.1, green: 0.9, blue: 0.3, alpha: 0.7)
+                dot.scale = SCNVector3(1.5, 0.35, 1.5)
+            }
         }
         if let check {
             let marker = addMarker(square: check, color: UIColor.systemRed.withAlphaComponent(0.6), height: 0.025)
@@ -647,11 +702,62 @@ final class ChessScene {
                 marker.runAction(SCNAction.repeat(.sequence([.scale(to: 1.3, duration: 0.2), .scale(to: 1, duration: 0.2)]), count: 3))
             }
         }
-        // Курсор пульта Apple TV: рамка поверх остальных подсветок
-        if let cursor {
-            addMarker(square: cursor, color: UIColor.white.withAlphaComponent(0.75), height: 0.03)
-        }
+        if let cursor { addCursor(square: cursor, onCapture: captures.contains(cursor) && targets.contains(cursor)) }
         lastCheck = check
+    }
+
+    private func glowMaterial(_ color: UIColor) -> SCNMaterial {
+        let mat = SCNMaterial()
+        mat.diffuse.contents = color
+        mat.emission.contents = color
+        mat.lightingModel = .constant
+        mat.readsFromDepthBuffer = false
+        mat.writesToDepthBuffer = false
+        return mat
+    }
+
+    /// Рамка по краю клетки.
+    private func addFrame(square: Square, color: UIColor, thickness: CGFloat, inset: CGFloat, y: Float) -> SCNNode {
+        let node = SCNNode()
+        let half = tileSize / 2 - inset
+        let len = tileSize - 2 * inset + thickness
+        let mat = glowMaterial(color)
+        for (dx, dz, horizontal) in [(0.0, -1.0, true), (0.0, 1.0, true), (-1.0, 0.0, false), (1.0, 0.0, false)] {
+            let box = SCNBox(width: horizontal ? len : thickness, height: 0.05, length: horizontal ? thickness : len, chamferRadius: 0)
+            box.materials = [mat]
+            let n = SCNNode(geometry: box)
+            n.position = SCNVector3(Float(dx * Double(half)), 0, Float(dz * Double(half)))
+            n.renderingOrder = 100
+            node.addChildNode(n)
+        }
+        node.position = boardPosition(row: square.row, col: square.file, y: y)
+        highlightNode.addChildNode(node)
+        return node
+    }
+
+    private func addRing(square: Square, color: UIColor) {
+        let ring = SCNTorus(ringRadius: 0.36, pipeRadius: 0.055)
+        ring.materials = [glowMaterial(color)]
+        let n = SCNNode(geometry: ring)
+        n.position = boardPosition(row: square.row, col: square.file, y: 0.09)
+        n.renderingOrder = 100
+        n.runAction(.repeatForever(.sequence([.scale(to: 1.18, duration: 0.5), .scale(to: 1.0, duration: 0.5)])))
+        highlightNode.addChildNode(n)
+    }
+
+    private func addCursor(square: Square, onCapture: Bool) {
+        let color = onCapture ? UIColor(red: 1, green: 0.3, blue: 0.3, alpha: 1) : UIColor(red: 0.2, green: 0.95, blue: 1, alpha: 1)
+        let frame = addFrame(square: square, color: color, thickness: 0.1, inset: 0.03, y: 0.1)
+        frame.runAction(.repeatForever(.sequence([.scale(to: 1.05, duration: 0.45), .scale(to: 0.97, duration: 0.45)])))
+        // Стрелка над клеткой, выше любой фигуры
+        let cone = SCNCone(topRadius: 0.17, bottomRadius: 0, height: 0.5)
+        cone.materials = [glowMaterial(color)]
+        let arrow = SCNNode(geometry: cone)
+        arrow.eulerAngles.x = .pi   // остриём вниз, на клетку
+        arrow.position = boardPosition(row: square.row, col: square.file, y: 2.7)
+        arrow.renderingOrder = 200
+        arrow.runAction(.repeatForever(.sequence([.moveBy(x: 0, y: 0.25, z: 0, duration: 0.5), .moveBy(x: 0, y: -0.25, z: 0, duration: 0.5)])))
+        highlightNode.addChildNode(arrow)
     }
 
     @discardableResult
@@ -664,7 +770,7 @@ final class ChessScene {
         }
         let mat = SCNMaterial()
         mat.diffuse.contents = color
-        mat.transparency = 0.85
+        mat.transparency = 0.9
         geometry.materials = [mat]
         let node = SCNNode(geometry: geometry)
         node.position = boardPosition(row: square.row, col: square.file, y: height)

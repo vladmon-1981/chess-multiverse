@@ -9,6 +9,10 @@ struct ChessSceneView: UIViewRepresentable {
     let camera: CameraController
     /// Курсор пульта (tvOS); на iOS не используется.
     var cursor: Square? = nil
+    /// Фон сцены по вселенной (tvOS); nil — однотонный.
+    var backdrop: ((ThemeKey) -> UIImage?)? = nil
+    /// Прозрачный фон (картинку-фон кладёт SwiftUI под сцену).
+    var transparentBackground = false
 
     func makeUIView(context: Context) -> SCNView {
         let scnView = SCNView()
@@ -17,7 +21,8 @@ struct ChessSceneView: UIViewRepresentable {
         scene.onImpact = { [weak viewModel] in viewModel?.sceneImpact() }
         scene.onSlideStop = { [weak viewModel] in viewModel?.announcer.playEffect("stop") }
         scnView.scene = scene.scnScene
-        scnView.backgroundColor = UIColor(white: 0.08, alpha: 1)
+        scnView.backgroundColor = transparentBackground ? .clear : UIColor(white: 0.08, alpha: 1)
+        scnView.isOpaque = !transparentBackground
         scnView.antialiasingMode = .multisampling4X
         scnView.allowsCameraControl = false
         scnView.rendersContinuously = false
@@ -42,6 +47,7 @@ struct ChessSceneView: UIViewRepresentable {
         #endif
 
         scene.setTheme(viewModel.theme)
+        if let img = backdrop?(viewModel.theme) { scene.scnScene.background.contents = img }
         scene.setOrientation(viewModel.orientation)
         scene.setPosition(viewModel.board)
         scene.setCameraPreset(viewModel.settings.cameraPreset)
@@ -59,6 +65,7 @@ struct ChessSceneView: UIViewRepresentable {
         var themeChanged = false
         if coordinator.lastTheme != viewModel.theme {
             scene.setTheme(viewModel.theme)
+            if let img = backdrop?(viewModel.theme) { scene.scnScene.background.contents = img }
             coordinator.lastTheme = viewModel.theme
             themeChanged = true
         }
@@ -104,7 +111,8 @@ struct ChessSceneView: UIViewRepresentable {
                              targets: viewModel.legalTargets,
                              lastMove: viewModel.lastMove,
                              check: viewModel.checkSquare,
-                             cursor: cursor)
+                             cursor: cursor,
+                             captures: Set(viewModel.legalTargets.filter { viewModel.board[$0.row][$0.file] != nil }))
         // Мат: король падает и салютует (announceMate сам не повторяется для той же клетки)
         if viewModel.gameOver?.kind == .checkmate, let king = viewModel.checkSquare {
             scene.announceMate(at: king, winnerIsWhite: viewModel.gameOver?.winner == .white)

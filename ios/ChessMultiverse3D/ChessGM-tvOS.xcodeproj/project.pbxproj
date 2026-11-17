@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		08B1E6DADABC8C6BA115BF54 /* TVOnline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00226B5EB865A86D29EA6A3B /* TVOnline.swift */; };
 		29C22BB8D02974927810A7F4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3D5321445C9FADFAB504D171 /* Assets.xcassets */; };
+		4D5F750822D61CB59C89B8E6 /* themes.json in Resources */ = {isa = PBXBuildFile; fileRef = 7C48B7CC8230D4D7EEB4F8C5 /* themes.json */; };
 		4E1632E8565D1EA50E7EFDA5 /* HockeyModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F89D8B7CC7DB1039572B8A /* HockeyModels.swift */; };
 		580E17F554E99F047A4DABEF /* SoundEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD632D9D337C92318BD11258 /* SoundEngine.swift */; };
 		65965308EEA6EABEF6426EBB /* HospitalModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B6FD96C3DCD739847C87402 /* HospitalModels.swift */; };
@@ -18,20 +19,27 @@
 		A8EDB543CE7F4F64988C4AFB /* CarsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A97BEAAFA48CE1848054D7DA /* CarsModels.swift */; };
 		ADCA939005C1D06440E73B65 /* TVRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD6310FF3A39ADC2A8997075 /* TVRootView.swift */; };
 		B219A1939D96392D87637968 /* PieceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06198CA213DC8F0628E92717 /* PieceType.swift */; };
+		B46002567B7EEAEC999DA583 /* TVNarrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9F604CC33C42D2593EE5CF9 /* TVNarrator.swift */; };
 		B7907BB8381426F643D9FC27 /* ChessSceneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8B3B5A1AD7AAF41A208E0AB /* ChessSceneView.swift */; };
 		C427C50617C51BC6BAD7AE71 /* ChessScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6090C3FAC5E52BF92CB6233C /* ChessScene.swift */; };
+		C4CFD38E098673B60779323D /* ru-m in Resources */ = {isa = PBXBuildFile; fileRef = 10A768A31251A67DFC9CCB3F /* ru-m */; };
 		C5DED5AF9293232326DBDCC9 /* TVGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57B727D428C8B08CB3D71E5 /* TVGameView.swift */; };
 		D3ED154B5FA4C5161CA4AA95 /* ChessGameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B866562174FCABC5967E657 /* ChessGameViewModel.swift */; };
+		D67BACD27B9719578FD8B4F1 /* TVStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D64E54C400BD072EA0F78042 /* TVStyle.swift */; };
+		E7BFEFCB473A80C527765264 /* ru-f in Resources */ = {isa = PBXBuildFile; fileRef = 8D808B9F6563CCA2B1781D75 /* ru-f */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		00226B5EB865A86D29EA6A3B /* TVOnline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVOnline.swift; sourceTree = "<group>"; };
 		06198CA213DC8F0628E92717 /* PieceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceType.swift; sourceTree = "<group>"; };
+		10A768A31251A67DFC9CCB3F /* ru-m */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "ru-m"; path = "../../voice/ru-m"; sourceTree = SOURCE_ROOT; };
 		3D5321445C9FADFAB504D171 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5B6FD96C3DCD739847C87402 /* HospitalModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HospitalModels.swift; sourceTree = "<group>"; };
 		5B866562174FCABC5967E657 /* ChessGameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessGameViewModel.swift; sourceTree = "<group>"; };
 		6090C3FAC5E52BF92CB6233C /* ChessScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessScene.swift; sourceTree = "<group>"; };
 		63F89D8B7CC7DB1039572B8A /* HockeyModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HockeyModels.swift; sourceTree = "<group>"; };
+		7C48B7CC8230D4D7EEB4F8C5 /* themes.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = themes.json; sourceTree = "<group>"; };
+		8D808B9F6563CCA2B1781D75 /* ru-f */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "ru-f"; path = "../../voice/ru-f"; sourceTree = SOURCE_ROOT; };
 		A57B727D428C8B08CB3D71E5 /* TVGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVGameView.swift; sourceTree = "<group>"; };
 		A6F5E01B9CC14F96652AAB56 /* TVApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVApp.swift; sourceTree = "<group>"; };
 		A97BEAAFA48CE1848054D7DA /* CarsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarsModels.swift; sourceTree = "<group>"; };
@@ -39,8 +47,10 @@
 		BD6310FF3A39ADC2A8997075 /* TVRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVRootView.swift; sourceTree = "<group>"; };
 		BD632D9D337C92318BD11258 /* SoundEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundEngine.swift; sourceTree = "<group>"; };
 		C8B69B9FFE02E3398BD68002 /* ChessEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessEngine.swift; sourceTree = "<group>"; };
+		D64E54C400BD072EA0F78042 /* TVStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVStyle.swift; sourceTree = "<group>"; };
 		EDDC4419C05206357F5C059D /* ThemeData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeData.swift; sourceTree = "<group>"; };
 		F8B3B5A1AD7AAF41A208E0AB /* ChessSceneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessSceneView.swift; sourceTree = "<group>"; };
+		F9F604CC33C42D2593EE5CF9 /* TVNarrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVNarrator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -68,8 +78,11 @@
 				3D5321445C9FADFAB504D171 /* Assets.xcassets */,
 				A6F5E01B9CC14F96652AAB56 /* TVApp.swift */,
 				A57B727D428C8B08CB3D71E5 /* TVGameView.swift */,
+				F9F604CC33C42D2593EE5CF9 /* TVNarrator.swift */,
 				00226B5EB865A86D29EA6A3B /* TVOnline.swift */,
 				BD6310FF3A39ADC2A8997075 /* TVRootView.swift */,
+				D64E54C400BD072EA0F78042 /* TVStyle.swift */,
+				FF22EA87B835F4A77D8E063D /* Resources */,
 			);
 			path = tvOS;
 			sourceTree = "<group>";
@@ -99,6 +112,8 @@
 		B18BF7494F86F442F0F5CC11 = {
 			isa = PBXGroup;
 			children = (
+				8D808B9F6563CCA2B1781D75 /* ru-f */,
+				10A768A31251A67DFC9CCB3F /* ru-m */,
 				11733735DEE905F6531F11C7 /* Models */,
 				6C27E689572B8177A989B31D /* Scene3D */,
 				893FCDFB5B0CBCC09A9FC7C3 /* Sound */,
@@ -125,6 +140,14 @@
 			);
 			name = ViewModels;
 			path = ChessMultiverse3D/ViewModels;
+			sourceTree = "<group>";
+		};
+		FF22EA87B835F4A77D8E063D /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				7C48B7CC8230D4D7EEB4F8C5 /* themes.json */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -188,6 +211,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				29C22BB8D02974927810A7F4 /* Assets.xcassets in Resources */,
+				E7BFEFCB473A80C527765264 /* ru-f in Resources */,
+				C4CFD38E098673B60779323D /* ru-m in Resources */,
+				4D5F750822D61CB59C89B8E6 /* themes.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -209,8 +235,10 @@
 				580E17F554E99F047A4DABEF /* SoundEngine.swift in Sources */,
 				710FF5BCE31C8051CEA63054 /* TVApp.swift in Sources */,
 				C5DED5AF9293232326DBDCC9 /* TVGameView.swift in Sources */,
+				B46002567B7EEAEC999DA583 /* TVNarrator.swift in Sources */,
 				08B1E6DADABC8C6BA115BF54 /* TVOnline.swift in Sources */,
 				ADCA939005C1D06440E73B65 /* TVRootView.swift in Sources */,
+				D67BACD27B9719578FD8B4F1 /* TVStyle.swift in Sources */,
 				7833CB66F4E22815E018F48F /* ThemeData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -343,7 +371,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 20261117;
+				CURRENT_PROJECT_VERSION = 20261118;
 				DEVELOPMENT_TEAM = 646ZQ353UC;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = ChessGM;
@@ -370,7 +398,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 20261117;
+				CURRENT_PROJECT_VERSION = 20261118;
 				DEVELOPMENT_TEAM = 646ZQ353UC;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = ChessGM;

@@ -5,7 +5,7 @@ import AVFoundation
 /// (осцилляторы, огибающие, фильтры, шум, ревербератор) и проигрывается через пул
 /// AVAudioPlayerNode. У каждой вселенной свой набор (как в вебе), общие звуки — из COMMON.
 /// Голосовые реплики — через AVSpeechSynthesizer (ru-RU), во время речи звук приглушается.
-final class SoundEngine: NSObject, SoundAnnouncing, AVSpeechSynthesizerDelegate {
+final class SoundEngine: NSObject, SoundAnnouncing, AVSpeechSynthesizerDelegate, AVAudioPlayerDelegate {
 
     var soundEnabled: Bool = true
     var voiceEnabled: Bool = true
@@ -68,8 +68,52 @@ final class SoundEngine: NSObject, SoundAnnouncing, AVSpeechSynthesizerDelegate 
         }
     }
 
+    // ---------- Записанный нейроголос (Piper), как Voice в js/sounds.js ----------
+
+    /// Тембр записанного диктора: male — Руслан, female — Ирина.
+    var voiceKind: String = UserDefaults.standard.string(forKey: "chess-voice-kind") ?? "male" {
+        didSet { UserDefaults.standard.set(voiceKind, forKey: "chess-voice-kind") }
+    }
+    private var clipPlayer: AVAudioPlayer?
+
+    /// Только то, что надо произнести — как Voice.clean в вебе.
+    static func clean(_ text: String) -> String {
+        let bad = CharacterSet(charactersIn: "\\/«»\"“”„*_#<>|~^")
+        let replaced = text.unicodeScalars.map { bad.contains($0) ? " " : Character($0) }
+        return String(replaced).split(whereSeparator: { $0.isWhitespace }).joined(separator: " ")
+    }
+
+    /// Ключ записи фразы: 32-битный хеш (тот же считает Voice.key в вебе), в системе счисления 36.
+    static func clipKey(_ cleaned: String) -> String {
+        var h: UInt32 = 5381
+        for u in cleaned.utf16 { h = (h &* 33) ^ UInt32(u) }
+        return String(h, radix: 36)
+    }
+
+    func clipURL(for text: String) -> URL? {
+        let key = Self.clipKey(Self.clean(text))
+        return Bundle.main.url(forResource: key, withExtension: "m4a", subdirectory: voiceKind == "female" ? "ru-f" : "ru-m")
+    }
+
+    func hasClip(_ text: String) -> Bool { clipURL(for: text) != nil }
+
+    private func playClip(_ url: URL) {
+        clipPlayer?.stop()
+        speech.stopSpeaking(at: .immediate)
+        guard let p = try? AVAudioPlayer(contentsOf: url) else { return }
+        p.delegate = self
+        clipPlayer = p
+        engine.mainMixerNode.outputVolume = 0.5
+        p.play()
+    }
+
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        engine.mainMixerNode.outputVolume = 1.0
+    }
+
     func say(_ text: String, rate: Double, pitch: Double) {
         guard voiceEnabled, !text.isEmpty else { return }
+        if let url = clipURL(for: text) { playClip(url); return }
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(language: "ru-RU")
         utterance.rate = Float(max(0.3, min(0.6, rate)))

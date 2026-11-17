@@ -295,17 +295,22 @@ final class TVOnline: ObservableObject {
 
 struct TVOnlineView: View {
     @ObservedObject var online: TVOnline
+    @ObservedObject var vm: ChessGameViewModel
 
     var body: some View {
         VStack(spacing: 36) {
-            Text("По сети").font(.system(size: 52, weight: .bold))
+            Text("По сети").font(.system(size: 64, weight: .heavy))
             if let e = online.error {
                 Text(e).font(.title3).foregroundStyle(.red)
             }
             content
         }
-        .font(.title2)
+        .font(.system(size: 32, weight: .bold))
+        .buttonStyle(TVChipStyle(palette: TVStyle.palette(nil)))
         .padding(80)
+        .onExitCommand {
+            if online.phase == .idle { online.lobbyVisible = false } else { online.cancel() }
+        }
     }
 
     @ViewBuilder private var content: some View {

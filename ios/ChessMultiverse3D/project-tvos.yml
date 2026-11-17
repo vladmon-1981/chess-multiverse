@@ -17,6 +17,14 @@ targets:
       - path: ChessMultiverse3D/Theme
       - path: ChessMultiverse3D/Sound
       - path: ChessMultiverse3D/ViewModels
+      - path: tvOS/Resources
+        buildPhase: resources
+      - path: ../../voice/ru-m
+        type: folder
+        buildPhase: resources
+      - path: ../../voice/ru-f
+        type: folder
+        buildPhase: resources
       - path: ChessMultiverse3D/Scene3D
         excludes:
           - ModelSnapshot.swift
@@ -33,6 +41,6 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: ChessGM
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         MARKETING_VERSION: "1.2.0"
-        CURRENT_PROJECT_VERSION: 20261117
+        CURRENT_PROJECT_VERSION: 20261118
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.board-games

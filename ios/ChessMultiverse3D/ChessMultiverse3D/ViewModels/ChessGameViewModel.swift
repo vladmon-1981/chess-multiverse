@@ -26,6 +26,12 @@ struct GameOverInfo {
     var reasonText: String
 }
 
+/// События, которые озвучивает диктор (реплики вселенной из js/themes.js, комментарии к ходам).
+enum NarrationEvent {
+    case start, check, win, lose, draw, resignWin, resignLose, pvpWin(String)
+    case move(ChessEngine.AppliedMove, isCheck: Bool)
+}
+
 /// Протокол озвучки/звука — заглушка на будущую фазу (AVFoundation / AVSpeechSynthesizer).
 protocol SoundAnnouncing {
     func setTheme(_ key: ThemeKey)
@@ -117,6 +123,8 @@ final class ChessGameViewModel: ObservableObject {
     @Published var settings = GameSettings()
 
     var announcer: SoundAnnouncing = SoundEngine()
+    /// Диктор вселенной (tvOS): возвращает true, если фраза произнесена и старую реплику не нужно озвучивать.
+    var narrate: ((NarrationEvent, ThemeKey) -> Bool)?
 
     // ---------- Сетевая партия (используется Apple TV; iOS играет онлайн через веб-слой) ----------
     /// Отправка сообщения сопернику (подставляет сетевой слой).
@@ -182,7 +190,7 @@ final class ChessGameViewModel: ObservableObject {
         refreshBoard()
         updateStatus()
         announcer.playEffect("start")
-        announcer.say(spec.voice.start, rate: spec.voice.rate, pitch: spec.voice.pitch)
+        if narrate?(.start, theme) != true { announcer.say(spec.voice.start, rate: spec.voice.rate, pitch: spec.voice.pitch) }
 
         if isAITurn() { scheduleAIMove(after: 1.2) }
     }
@@ -212,7 +220,7 @@ final class ChessGameViewModel: ObservableObject {
         lastMove = (applied.from, applied.to)
         recordSAN(applied)
         playMoveAudio(from: applied.from, to: applied.to, applied: applied)
-        afterMove()
+        afterMove(applied)
         return true
     }
 
@@ -335,7 +343,7 @@ final class ChessGameViewModel: ObservableObject {
                       "promotion": applied.promotion.map { $0.letter } ?? NSNull()])
         }
         playMoveAudio(from: from, to: to, applied: applied)
-        afterMove()
+        afterMove(applied)
     }
 
     /// Звук хода: старт движения (ход, рокировка, превращение), кинорежим — «whoosh»,
@@ -386,7 +394,7 @@ final class ChessGameViewModel: ObservableObject {
         }
     }
 
-    private func afterMove() {
+    private func afterMove(_ applied: ChessEngine.AppliedMove? = nil) {
         refreshBoard()
         turn = game.turn
         if settings.autoFlip, mode == .pvp { orientation = turn }
@@ -397,9 +405,13 @@ final class ChessGameViewModel: ObservableObject {
         if game.isInCheck() {
             checkSquare = game.findKingSquare(turn)
             announcer.playEffect("check")
-            announcer.say(spec.voice.check, rate: spec.voice.rate, pitch: spec.voice.pitch)
+            let commented = applied.map { narrate?(.move($0, isCheck: true), theme) == true } ?? false
+            if !commented, narrate?(.check, theme) != true {
+                announcer.say(spec.voice.check, rate: spec.voice.rate, pitch: spec.voice.pitch)
+            }
         } else {
             checkSquare = nil
+            if let applied { _ = narrate?(.move(applied, isCheck: false), theme) }
         }
         updateStatus()
         if mode == .online { startClock() }
@@ -433,7 +445,7 @@ final class ChessGameViewModel: ObservableObject {
                 self.lastMove = (applied.from, applied.to)
                 self.recordSAN(applied)
                 self.playMoveAudio(from: applied.from, to: applied.to, applied: applied)
-                self.afterMove()
+                self.afterMove(applied)
             }
         }
     }
@@ -564,6 +576,13 @@ final class ChessGameViewModel: ObservableObject {
         else { outcome = "win" }
         announcer.playEffect(outcome)
         let winnerName = result.winner.map { nameFor($0) } ?? ""
+        let won = outcome == "win"
+        let ended = result.kind == .resign || result.kind == .timeout || result.kind == .left
+        let event: NarrationEvent = outcome == "draw" ? .draw
+            : mode == .pvp ? .pvpWin(winnerName)
+            : ended ? (won ? .resignWin : .resignLose)
+            : (won ? .win : .lose)
+        if narrate?(event, theme) == true { return }
         let line: String
         if outcome == "draw" { line = spec.voice.draw }
         else if mode == .pvp { line = spec.voice.pvpWin(winnerName) }

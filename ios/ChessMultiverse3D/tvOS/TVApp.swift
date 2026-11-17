@@ -6,6 +6,8 @@ import SwiftUI
 struct ChessGMTVApp: App {
     @StateObject private var vm = ChessGameViewModel()
 
+    init() { ChessScene.showBadges = true; ChessScene.distanceScale = 0.93 }
+
     var body: some Scene {
         WindowGroup {
             TVRootView(vm: vm)
