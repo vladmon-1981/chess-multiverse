@@ -1,5 +1,10 @@
 # Журнал
 
+## 17.11.2026 (ночь) — Apple TV: всё готово к проверке на устройстве
+- Иконка (параллакс, 2 слоя) и Top Shelf (1920×720 и 2320×720) — `tvOS/Assets.xcassets`; кадры App Store (меню и 4 вселенные) — `AppStore/screenshots-tvos/`.
+- Релизная подпись: профиль TVOS_APP_STORE «ChessGM tvOS AppStore» через ASC API (`scripts/asc_tv_profile.py`); `scripts/tv_archive.sh` собрал архив 1.2.0 (20261117) и экспорт IPA — успешно, в App Store Connect НЕ выгружал.
+- `scripts/tv_install.sh` — установка на Apple TV. Телевизор в `devicectl` не виден (не спарен) — по пульту и живому устройству проверка впереди.
+
 ## 17.11.2026 (вечер) — сетевая игра на Apple TV
 - `tvOS/TVOnline.swift`: нативный клиент ретранслятора + экран лобби («По сети»: быстрая игра, комната, вход по коду), реванш. `ChessGameViewModel`: `GameMode.online`, часы на ход (свои 0 — проигрыш, у соперника +5 с — флаг), `GameOverKind.timeout/.left`.
 - Проверено в симуляторе Apple TV против бота через боевой `wss://cdn-se.birdhot.ru/chessgm-ws`: подбор, hello, цвет по жребию (телевизор чёрные), ход соперника на доске, часы, сдача, выход. Пультом и на живом Apple TV не пробовал. iOS-сборка после правок общей модели собирается.

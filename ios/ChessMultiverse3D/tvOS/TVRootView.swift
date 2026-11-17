@@ -26,6 +26,22 @@ struct TVRootView: View {
                 online.lobbyVisible = true
                 if args[i + 1] == "room" { online.createRoom() } else { online.quickFind() }
             }
+            // Кадры для App Store: -autoGame classic|cars|hospital|hockey [-autoMoves "e2e4 e7e5 ..."]
+            if let i = args.firstIndex(of: "-autoGame"), i + 1 < args.count {
+                if let key = ThemeKey(rawValue: args[i + 1]) { vm.theme = key }
+                vm.startGame(mode: .pvp)
+                if let j = args.firstIndex(of: "-autoMoves"), j + 1 < args.count {
+                    let moves = args[j + 1].split(separator: " ").map(String.init)
+                    Task { @MainActor in
+                        for m in moves where m.count >= 4 {
+                            try? await Task.sleep(nanoseconds: 2_500_000_000)
+                            if let f = Square(name: String(m.prefix(2))), let t = Square(name: String(m.dropFirst(2).prefix(2))) {
+                                vm.attemptMove(from: f, to: t)
+                            }
+                        }
+                    }
+                }
+            }
             #endif
         }
     }

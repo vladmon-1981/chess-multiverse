@@ -60,8 +60,14 @@
 - Сеть tvOS: `tvOS/TVOnline.swift` — клиент ретранслятора (`URLSessionWebSocketTask`, тот же протокол, что `js/online.js`: hello/nonce → цвет, move/resign/timeout/flag/rematch),
   значит Apple TV играет с iPhone/iPad. В `ChessGameViewModel` режим `.online` (`startOnlineGame`, `receiveMove`, `endOnline`, часы на ход, `netSend`).
   Проверка без пульта: Debug-аргумент запуска `-autoOnline find|room`, бот `scratchpad/tvbot.py` (подбор, hello, ход, сдача — всё сошлось).
-- Нет: Pro/StoreKit (онлайн на tvOS пока без лимита), иконка и Top Shelf (brandassets), скриншоты, голос и локализации веба,
-  карточка tvOS в App Store Connect (тот же bundle id `com.chessmultiverse.app`), проверка на живом Apple TV и пультом (свайпы).
+- Иконка с параллаксом и Top Shelf: `tvOS/Assets.xcassets` (генератор `scripts/make_tv_brand_assets.py` из иконки iOS, нужен Pillow; скрипты держать вне `tvOS/`,
+  иначе xcodegen кладёт их в бандл приложения). Кадры для App Store 1920×1080: `AppStore/screenshots-tvos/` (Debug-аргументы запуска
+  `-autoGame classic|cars|hospital|hockey -autoMoves "e2e4 e7e5 …"`).
+- Установка на Apple TV: `scripts/tv_install.sh` (телевизор сначала спарить в Xcode → Devices; VPN на Маке выключить). Архив для App Store: `scripts/tv_archive.sh`
+  (профиль `ChessGM tvOS AppStore` создаёт `scripts/asc_tv_profile.py`, действует до 2027-10-31); архив и IPA лежат в `~/Projects/ios-release-tmp/`. НЕ выгружено в App Store Connect — ждёт проверки владельцем на живом Apple TV.
+- Нет: Pro/StoreKit (онлайн на tvOS пока без лимита), голос и локализации веба, карточка tvOS в App Store Connect (тот же bundle id `com.chessmultiverse.app`;
+  нужна версия платформы tvOS и тексты/кадры), проверка на живом Apple TV и пультом (свайпы).
+- Подсказка внизу игрового экрана налезает на край доски — поправить после проверки пультом.
 
 ## ChessGM Pro (с 12.11.2026)
 - Решение владельца (12.11.2026): «Pro-версия, цена 199 рублей, ограничение для бесплатной версии одно

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		08B1E6DADABC8C6BA115BF54 /* TVOnline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00226B5EB865A86D29EA6A3B /* TVOnline.swift */; };
+		29C22BB8D02974927810A7F4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3D5321445C9FADFAB504D171 /* Assets.xcassets */; };
 		4E1632E8565D1EA50E7EFDA5 /* HockeyModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F89D8B7CC7DB1039572B8A /* HockeyModels.swift */; };
 		580E17F554E99F047A4DABEF /* SoundEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD632D9D337C92318BD11258 /* SoundEngine.swift */; };
 		65965308EEA6EABEF6426EBB /* HospitalModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B6FD96C3DCD739847C87402 /* HospitalModels.swift */; };
@@ -26,6 +27,7 @@
 /* Begin PBXFileReference section */
 		00226B5EB865A86D29EA6A3B /* TVOnline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVOnline.swift; sourceTree = "<group>"; };
 		06198CA213DC8F0628E92717 /* PieceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceType.swift; sourceTree = "<group>"; };
+		3D5321445C9FADFAB504D171 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5B6FD96C3DCD739847C87402 /* HospitalModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HospitalModels.swift; sourceTree = "<group>"; };
 		5B866562174FCABC5967E657 /* ChessGameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessGameViewModel.swift; sourceTree = "<group>"; };
 		6090C3FAC5E52BF92CB6233C /* ChessScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessScene.swift; sourceTree = "<group>"; };
@@ -63,6 +65,7 @@
 		37A3B1C24F5565A7FA9B0B0C /* tvOS */ = {
 			isa = PBXGroup;
 			children = (
+				3D5321445C9FADFAB504D171 /* Assets.xcassets */,
 				A6F5E01B9CC14F96652AAB56 /* TVApp.swift */,
 				A57B727D428C8B08CB3D71E5 /* TVGameView.swift */,
 				00226B5EB865A86D29EA6A3B /* TVOnline.swift */,
@@ -132,6 +135,7 @@
 			buildConfigurationList = D64022E8D5578FCC9409A7C8 /* Build configuration list for PBXNativeTarget "ChessGM-tvOS" */;
 			buildPhases = (
 				1D802C09E7462A5AE8E3C698 /* Sources */,
+				E6E1030536835DAE4CA7546D /* Resources */,
 			);
 			buildRules = (
 			);
@@ -177,6 +181,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E6E1030536835DAE4CA7546D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				29C22BB8D02974927810A7F4 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1D802C09E7462A5AE8E3C698 /* Sources */ = {
