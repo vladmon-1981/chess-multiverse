@@ -943,6 +943,19 @@ body.is-gloom .board-stage { filter: saturate(0.45) brightness(0.8); transition:
 .search-box { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 18px; color: var(--text-dim); }
 .search-box .spinner { position: static; }
 
+.room-block { margin: 18px auto 0; max-width: 520px; }
+.room-block[hidden], .room-show[hidden] { display: none; }
+.room-row { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.room-input { width: 92px; padding: 10px; border-radius: 14px; border: 1px solid rgba(255,255,255,.25); background: rgba(20,17,40,.7); color: #fff; font: 900 20px var(--font-logo); text-align: center; text-transform: uppercase; letter-spacing: 3px; }
+.room-show { margin-top: 10px; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.room-show b { font: 900 40px var(--font-logo); letter-spacing: 8px; color: #fcd34d; }
+.lobby-block { margin: 18px auto 0; max-width: 520px; }
+.lobby-block[hidden], .lobby-invite[hidden] { display: none; }
+.lobby-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.lobby-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 16px; background: rgba(20, 17, 40, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); font-weight: 800; }
+.lobby-list li.is-wait { opacity: .7; }
+.lobby-invite { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 8px; padding: 10px 14px; border-radius: 16px; background: rgba(252, 211, 77, .14); border: 1px solid rgba(252, 211, 77, .5); font-weight: 800; }
+
 /* Время на ход — в карточке того, кто ходит */
 .pc-clock { display: none; font-family: var(--font-logo); font-weight: 900; font-size: 14px; min-width: 38px; text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
 body.is-online .player-card.is-turn .pc-clock { display: block; }

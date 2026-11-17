@@ -32,7 +32,7 @@ struct TVRootView: View {
             let args = ProcessInfo.processInfo.arguments
             if let i = args.firstIndex(of: "-autoOnline"), i + 1 < args.count {
                 online.lobbyVisible = true
-                if args[i + 1] == "room" { online.createRoom() } else { online.quickFind() }
+                switch args[i + 1] { case "room": online.createRoom(); case "lobby": break; default: online.quickFind() }
             }
             // Кадры для App Store: -autoGame classic|cars|hospital|hockey [-autoMoves "e2e4 e7e5 ..."]
             if let i = args.firstIndex(of: "-autoGame"), i + 1 < args.count {

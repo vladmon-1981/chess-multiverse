@@ -9,11 +9,16 @@
   {"t":"find","group":60,"name":"Имя","id":"<случайный id устройства>"}   подбор по времени на ход
   {"t":"room","name":"Имя","id":...}                                      создать комнату для друга
   {"t":"join","code":"ABCD","name":"Имя","id":...}                        войти по коду
-  {"t":"cancel"}                                                          отменить поиск/комнату
+  {"t":"lobby","name":"Имя","id":...}                                     встать в список «игроки в сети» (виден другим)
+  {"t":"invite","to":<p>,"tc":60}                                         пригласить игрока из списка
+  {"t":"accept","to":<p>} / {"t":"decline","to":<p>}                      ответ на приглашение
+  {"t":"cancel"}                                                          отменить поиск/комнату/лобби
   {"t":"data","msg":{...}}                                                сообщение сопернику
   {"t":"leave"}                                                           выйти из партии
 Сервер → клиент:
   {"t":"room","code":"ABCD"}   {"t":"match","opponent":"Имя"}   {"t":"data","msg":{...}}
+  {"t":"players","list":[{"p":1,"name":"Имя"}]}   {"t":"invite","from":<p>,"name":"Имя","tc":60}
+  {"t":"declined","name":"Имя"}
   {"t":"left"}   {"t":"cancelled"}   {"t":"error","text":"..."}
 
 Запуск: relay.py [порт] (слушает 127.0.0.1, TLS даёт nginx).
@@ -40,7 +45,7 @@ log = logging.getLogger("relay")
 
 
 class Client:
-    __slots__ = ("ws", "ip", "name", "cid", "peer", "queued", "room", "stamp", "tokens", "tstamp")
+    __slots__ = ("ws", "ip", "name", "cid", "peer", "queued", "room", "lobby", "pid", "stamp", "tokens", "tstamp")
 
     def __init__(self, ws, ip):
         self.ws, self.ip = ws, ip
@@ -48,6 +53,8 @@ class Client:
         self.peer = None
         self.queued = None        # группа, в очереди которой стоит клиент
         self.room = None          # код созданной комнаты
+        self.lobby = False        # виден в списке игроков
+        self.pid = 0
         self.stamp = time.monotonic()
         self.tokens, self.tstamp = RATE_LIMIT, time.monotonic()
 
@@ -60,6 +67,8 @@ class Client:
 
 queues = {g: [] for g in GROUPS}     # группа -> клиенты в ожидании
 rooms = {}                           # код -> клиент-хозяин
+lobby = {}                           # pid -> клиент в списке игроков
+pid_seq = 0
 per_ip = {}                          # ip -> число соединений
 
 
@@ -78,6 +87,16 @@ def unqueue(c):
         if rooms.get(c.room) is c:
             del rooms[c.room]
         c.room = None
+    if c.lobby:
+        c.lobby = False
+        lobby.pop(c.pid, None)
+        asyncio.get_event_loop().create_task(broadcast_players())
+
+
+async def broadcast_players():
+    people = [{"p": x.pid, "name": x.name} for x in lobby.values() if not x.ws.closed]
+    for x in list(lobby.values()):
+        await x.send({"t": "players", "list": [i for i in people if i["p"] != x.pid]})
 
 
 async def pair(a, b):
@@ -100,7 +119,7 @@ async def drop_peer(c, notify=True):
 
 async def handle(c, m):
     t = m.get("t")
-    if t in ("find", "room", "join"):
+    if t in ("find", "room", "join", "lobby"):
         await drop_peer(c)
         unqueue(c)
         c.name = clean_name(m.get("name"))
@@ -120,6 +139,25 @@ async def handle(c, m):
             c.stamp = now
             c.queued = g
             q.append(c)
+    elif t == "lobby":
+        global pid_seq
+        pid_seq += 1
+        c.pid, c.lobby, c.stamp = pid_seq, True, time.monotonic()
+        lobby[c.pid] = c
+        await broadcast_players()
+    elif t in ("invite", "accept", "decline"):
+        other = lobby.get(m.get("to"))
+        if not c.lobby or other is None or other.ws.closed or other is c:
+            await c.send({"t": "error", "text": "gone"})
+            return
+        if t == "invite":
+            tc = m.get("tc") if m.get("tc") in GROUPS else 60
+            await other.send({"t": "invite", "from": c.pid, "name": c.name, "tc": tc})
+        elif t == "accept":
+            await pair(other, c)
+            await broadcast_players()
+        else:
+            await other.send({"t": "declined", "name": c.name})
     elif t == "room":
         for _ in range(20):
             code = "".join(random.choice(CODE_ALPHABET) for _ in range(4))

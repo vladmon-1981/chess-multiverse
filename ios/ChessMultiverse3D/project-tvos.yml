@@ -41,6 +41,6 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: ChessGM
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         MARKETING_VERSION: "1.2.0"
-        CURRENT_PROJECT_VERSION: 20261118
+        CURRENT_PROJECT_VERSION: 20261119
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.board-games

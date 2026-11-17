@@ -166,10 +166,30 @@
                     <button type="button" data-sec="120" role="radio" aria-checked="false"><span>2 мин</span></button>
                     <button type="button" data-sec="300" role="radio" aria-checked="false"><span>5 мин</span></button>
                 </div>
-                <div class="setup-note">Не успел походить — партия проиграна. Соперник подбирается с тем же временем.</div>
+                <div class="setup-note">Не успел походить — партия проиграна. Выбери игрока в списке и пригласи его.</div>
+            </div>
+            <div class="lobby-block" id="lobbyBlock" hidden>
+                <div class="setup-label">Игроки в сети</div>
+                <div class="lobby-invite" id="lobbyInvite" hidden>
+                    <span id="lobbyInviteText"></span>
+                    <button class="btn btn-primary btn-small" id="inviteAccept" type="button">Принять</button>
+                    <button class="btn btn-ghost btn-small" id="inviteDecline" type="button">Отклонить</button>
+                </div>
+                <ul class="lobby-list" id="lobbyList"></ul>
+                <div class="setup-note" id="lobbyEmpty">Пока никого. Попроси друга открыть «Играть онлайн» — он появится здесь.</div>
+            </div>
+            <div class="room-block" id="roomBlock" hidden>
+                <div class="setup-label">Игра с другом по коду</div>
+                <div class="room-row">
+                    <button class="btn btn-secondary btn-small" id="roomCreate" type="button">Создать комнату</button>
+                    <input class="room-input" id="roomCode" type="text" maxlength="4" inputmode="text" autocapitalize="characters" autocomplete="off" placeholder="КОД" aria-label="Код комнаты">
+                    <button class="btn btn-secondary btn-small" id="roomJoin" type="button">Войти</button>
+                </div>
+                <div class="room-show" id="roomShow" hidden>Код комнаты: <b id="roomShowCode"></b><span class="setup-note">Скажи его другу — пусть введёт в «Войти».</span>
+                    <button class="btn btn-ghost btn-small" id="roomCancel" type="button">Отмена</button></div>
             </div>
             <div class="mode-buttons">
-                <button class="btn btn-primary" id="findBtn" type="button"><span class="btn-icon">⚔️</span>Найти соперника</button>
+                <button class="btn btn-secondary" id="findBtn" type="button"><span class="btn-icon">🎲</span>Случайный соперник</button>
                 <button class="btn btn-secondary" id="leaderBtn" type="button"><span class="btn-icon">🏆</span>Доска почёта</button>
             </div>
             <div class="search-box" id="searchBox" hidden>
@@ -388,7 +408,7 @@
     <script src="voice/manifest.js?v=2"></script>
     <script src="js/sounds.js?v=2.12.0"></script>
     <script src="js/effects.js?v=2.8.0"></script>
-    <script src="js/online.js?v=2.9.1"></script>
+    <script src="js/online.js?v=2.9.4"></script>
     <script src="js/pro.js?v=2.10.0"></script>
     <script src="js/chess-app.js?v=2.14.0"></script>
 </body>

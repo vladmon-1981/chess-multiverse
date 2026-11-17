@@ -144,12 +144,17 @@
                 this.updateToggles();
             }));
             $('#findBtn').addEventListener('click', () => this.findOpponent());
-            $('#searchCancel').addEventListener('click', () => CMOnline.cancel());
+            $('#searchCancel').addEventListener('click', () => { CMOnline.cancel(); this.startLobby(); });
+            $('#roomCreate').addEventListener('click', () => this.createRoom());
+            $('#roomJoin').addEventListener('click', () => this.joinRoom());
+            $('#roomCancel').addEventListener('click', () => { CMOnline.cancel(); $('#roomShow').hidden = true; this.startLobby(); });
+            $('#inviteAccept').addEventListener('click', () => this.answerInvite(true));
+            $('#inviteDecline').addEventListener('click', () => this.answerInvite(false));
             $('#leaderBtn').addEventListener('click', () => this.showLeaderboard());
             $('#playerName').addEventListener('change', () => this.saveName());
             $('#playerName').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#pveBtn').click(); });
             $$('[data-back]').forEach((b) => b.addEventListener('click', () => {
-                if (document.body.dataset.screen === 'online') this.stopSearch();
+                if (document.body.dataset.screen === 'online') { this.stopSearch(); this.stopLobby(); }
                 this.showScreen('menu');
             }));
 
@@ -1466,6 +1471,85 @@
             this.renderStats(this.lastDelta || 0);
             this.lastDelta = 0;
             this.showScreen('online');
+            this.startLobby();
+        }
+
+        // ---------- Список игроков в сети: выбор соперника приглашением ----------
+        startLobby() {
+            if (!CMOnline.relay || !this.gcName) return;
+            this.lobbyPlayers = [];
+            this.pendingInvite = null;
+            $('#lobbyBlock').hidden = false;
+            $('#roomBlock').hidden = false;
+            this.renderLobby();
+            CMOnline.lobby();
+        }
+
+        createRoom() {
+            if (!CMPro.canStart()) { this.showPro(true); return; }
+            this.leaveNet(); this.sound.voice.prime();
+            CMOnline.createRoom();
+        }
+
+        joinRoom() {
+            const code = $('#roomCode').value.trim().toUpperCase();
+            if (code.length !== 4) { this.toast(tr('Код — 4 символа'), 2200); return; }
+            if (!CMPro.canStart()) { this.showPro(true); return; }
+            this.leaveNet(); this.sound.voice.prime();
+            CMOnline.joinRoom(code);
+        }
+
+        stopLobby() {
+            if (!CMOnline.relay) return;
+            CMOnline.leaveLobby();
+            $('#lobbyBlock').hidden = true;
+            $('#roomBlock').hidden = true;
+            $('#roomShow').hidden = true;
+            this.pendingInvite = null;
+        }
+
+        renderLobby() {
+            const ul = $('#lobbyList');
+            ul.replaceChildren(...(this.lobbyPlayers || []).map((pl) => {
+                const li = document.createElement('li');
+                const nm = document.createElement('span');
+                nm.textContent = pl.name;
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'btn btn-primary btn-small';
+                b.textContent = this.invited === pl.p ? tr('Ждём ответа…') : tr('Играть');
+                b.disabled = this.invited === pl.p;
+                b.addEventListener('click', () => this.invitePlayer(pl));
+                li.append(nm, b);
+                return li;
+            }));
+            $('#lobbyEmpty').hidden = (this.lobbyPlayers || []).length > 0;
+            const inv = this.pendingInvite;
+            $('#lobbyInvite').hidden = !inv;
+            if (inv) $('#lobbyInviteText').textContent = tr('{name} зовёт играть ({sec} сек на ход)', { name: inv.name, sec: inv.tc });
+        }
+
+        invitePlayer(pl) {
+            if (!CMPro.canStart()) { this.showPro(true); return; }
+            this.sound.voice.prime();
+            this.invited = pl.p;
+            CMOnline.invite(pl.p, this.moveTime);
+            this.renderLobby();
+            clearTimeout(this.inviteTimer);
+            this.inviteTimer = setTimeout(() => { this.invited = null; this.renderLobby(); }, 30000);
+        }
+
+        answerInvite(ok) {
+            const inv = this.pendingInvite;
+            if (!inv) return;
+            this.pendingInvite = null;
+            this.renderLobby();
+            if (ok) {
+                if (!CMPro.canStart()) { this.showPro(true); CMOnline.decline(inv.from); return; }
+                this.sound.voice.prime();
+                if ([30, 60, 120, 300].includes(+inv.tc)) { this.moveTime = +inv.tc; this.updateToggles(); }
+                CMOnline.accept(inv.from);
+            } else CMOnline.decline(inv.from);
         }
 
         setGcStatus(text, bad = false) {
@@ -1478,6 +1562,7 @@
             if (!CMPro.canStart()) { this.showPro(true); return; }
             if (!this.gcName) { this.toast(tr('Сначала войди в Game Center: Настройки → Game Center')); CMOnline.auth(); return; }
             this.leaveNet();
+            this.stopLobby();
             this.sound.voice.prime();
             if (CMOnline.mock || CMOnline.relay) $('#searchBox').hidden = false;
             $('#findBtn').disabled = true;
@@ -1521,7 +1606,7 @@
         }
 
         onNetEvent(ev) {
-            if (ev.type === 'dbg') { this.dbgOn = true; this.dbg('N ' + ev.text); return; }
+            if (ev.type === 'dbg') return; // отладочная плашка отключена (17.11.2026)
             this.dbg('ev ' + ev.type + (ev.opponent ? ' ' + ev.opponent : ''));
             switch (ev.type) {
                 case 'auth':
@@ -1548,6 +1633,12 @@
                 case 'audio': this.sound.ensure(); break;
                 case 'data': this.onNetData(ev.msg); break;
                 case 'left': this.onNetLeft(); break;
+                case 'players': this.lobbyPlayers = ev.list || []; if (this.invited && !this.lobbyPlayers.some((x) => x.p === this.invited)) this.invited = null; this.renderLobby(); break;
+                case 'invite':
+                    if (document.body.dataset.screen === 'online') { this.pendingInvite = { from: ev.from, name: ev.name, tc: ev.tc }; this.renderLobby(); }
+                    break;
+                case 'room': $('#roomShowCode').textContent = ev.code; $('#roomShow').hidden = false; break;
+                case 'declined': this.invited = null; this.renderLobby(); this.toast(tr('{name} отказался', { name: ev.name }), 2600); break;
                 case 'cancelled':
                     $('#searchBox').hidden = true;
                     $('#findBtn').disabled = false;
@@ -1563,6 +1654,7 @@
         /** Соперник найден: обмениваемся приветствием, цвет решает жребий (у кого число больше — белые). */
         onNetMatch(ev) {
             $('#searchBox').hidden = true;
+            $('#roomShow').hidden = true;
             this.net = {
                 oppName: ev.opponent || tr('Соперник'),
                 myName: this.gcName || this.playerName(),

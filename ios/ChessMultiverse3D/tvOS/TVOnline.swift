@@ -7,7 +7,8 @@ import SwiftUI
 @MainActor
 final class TVOnline: ObservableObject {
     enum Phase: Equatable {
-        case idle                 // лобби: выбор способа
+        case idle                 // лобби закрыто
+        case lobby                // в списке «игроки в сети»
         case connecting
         case searching            // быстрый подбор
         case room(String)         // ждём друга по коду
@@ -23,6 +24,9 @@ final class TVOnline: ObservableObject {
     @Published var rematchHint: String?
     @Published var moveTime = 60
     @Published var codeInput = ""
+    @Published var players: [(id: Int, name: String)] = []
+    @Published var incoming: (from: Int, name: String, tc: Int)?
+    @Published var invited: Int?
 
     private weak var vm: ChessGameViewModel?
     private var task: URLSessionWebSocketTask?
@@ -63,6 +67,49 @@ final class TVOnline: ObservableObject {
     }
 
     // MARK: Действия лобби
+
+    /// Встать в список игроков: пока экран открыт, соединение держится и переподключается само.
+    func enterLobby() {
+        guard phase == .idle || phase == .lobby else { return }
+        players = []; incoming = nil; invited = nil
+        connect(first: ["t": "lobby", "name": myName, "id": Self.cid], phase: .lobby)
+    }
+
+    private func retryLobby2() {
+        // close() уже увеличил generation — ждём и заходим заново, если лобби всё ещё нужно
+        Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            guard let self, self.phase == .lobby, self.lobbyVisible else { return }
+            self.enterLobby()
+        }
+    }
+
+    private func retryLobby() {
+        let gen = generation
+        Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            guard let self, self.generation == gen, self.phase == .lobby else { return }
+            self.enterLobby()
+        }
+    }
+
+    func invite(_ p: Int) {
+        invited = p
+        send(["t": "invite", "to": p, "tc": moveTime])
+        Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 30_000_000_000)
+            if self?.invited == p { self?.invited = nil }
+        }
+    }
+
+    func answer(_ ok: Bool) {
+        guard let inc = incoming else { return }
+        incoming = nil
+        if ok {
+            if [30, 60, 120, 300].contains(inc.tc) { moveTime = inc.tc }
+            send(["t": "accept", "to": inc.from])
+        } else { send(["t": "decline", "to": inc.from]) }
+    }
 
     func quickFind() {
         connect(first: ["t": "find", "group": moveTime, "name": myName, "id": Self.cid], phase: .searching)
@@ -108,6 +155,7 @@ final class TVOnline: ObservableObject {
         close()
         error = nil
         phase = newPhase == .searching || newPhase == .joining ? .connecting : newPhase
+        if newPhase == .lobby { phase = .lobby }
         let wanted = newPhase
         generation += 1
         let gen = generation
@@ -151,6 +199,13 @@ final class TVOnline: ObservableObject {
         close()
         phase = .idle
         error = text
+        if lobbyVisible {
+            Task { [weak self] in
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                guard let self, self.lobbyVisible, self.phase == .idle else { return }
+                self.enterLobby()
+            }
+        }
         if let vm, vm.screen == .game, vm.mode == .online, vm.gameOver == nil {
             gone = true
             vm.endOnline(winner: vm.humanColor, kind: .left, text: "Связь потеряна")
@@ -169,7 +224,8 @@ final class TVOnline: ObservableObject {
                 guard let self, self.generation == gen else { return }
                 switch result {
                 case .failure:
-                    if self.phase != .idle { self.fail("Соединение прервано") }
+                    if self.phase == .lobby { self.players = []; self.close(); self.retryLobby2() }
+                    else if self.phase != .idle { self.fail("Соединение прервано") }
                 case .success(let msg):
                     if case .string(let s) = msg,
                        let d = s.data(using: .utf8),
@@ -188,6 +244,19 @@ final class TVOnline: ObservableObject {
         switch m["t"] as? String {
         case "room":
             if let code = m["code"] as? String { phase = .room(code) }
+        case "players":
+            players = ((m["list"] as? [[String: Any]]) ?? []).compactMap {
+                guard let p = ($0["p"] as? NSNumber)?.intValue, let n = $0["name"] as? String else { return nil }
+                return (p, n)
+            }
+            if let i = invited, !players.contains(where: { $0.id == i }) { invited = nil }
+        case "invite":
+            if phase == .lobby, let f = (m["from"] as? NSNumber)?.intValue {
+                incoming = (f, (m["name"] as? String) ?? "Игрок", (m["tc"] as? NSNumber)?.intValue ?? 60)
+            }
+        case "declined":
+            invited = nil
+            error = "\((m["name"] as? String) ?? "Игрок") отказался"
         case "match":
             onMatch(opponent: m["opponent"] as? String)
         case "data":
@@ -198,7 +267,7 @@ final class TVOnline: ObservableObject {
             phase = .idle
         case "error":
             let text = (m["text"] as? String) ?? ""
-            fail(text == "no room" ? "Такой комнаты нет" : (text.isEmpty ? "Ошибка сервера" : text))
+            fail(text == "gone" ? "Игрок уже вышел" : text == "no room" ? "Такой комнаты нет" : (text.isEmpty ? "Ошибка сервера" : text))
         default: break
         }
     }
@@ -308,22 +377,42 @@ struct TVOnlineView: View {
         .font(.system(size: 32, weight: .bold))
         .buttonStyle(TVChipStyle(palette: TVStyle.palette(nil)))
         .padding(80)
+        .onAppear { if online.phase == .idle { online.enterLobby() } }
         .onExitCommand {
-            if online.phase == .idle { online.lobbyVisible = false } else { online.cancel() }
+            if online.phase == .lobby || online.phase == .idle { online.cancel(); online.lobbyVisible = false }
+            else { online.cancel(); online.enterLobby() }
         }
     }
 
     @ViewBuilder private var content: some View {
         switch online.phase {
-        case .idle:
+        case .idle, .lobby:
             Text("Время на ход").font(.title3).foregroundStyle(.secondary)
             HStack(spacing: 24) {
                 ForEach([30, 60, 120, 300], id: \.self) { s in
                     Button((online.moveTime == s ? "✓ " : "") + (s < 60 ? "\(s) с" : "\(s / 60) мин")) { online.moveTime = s }
                 }
             }
+            if let inc = online.incoming {
+                HStack(spacing: 24) {
+                    Text("\(inc.name) зовёт играть (\(inc.tc) с)").foregroundStyle(.yellow)
+                    Button("Принять") { online.answer(true) }
+                    Button("Отклонить") { online.answer(false) }
+                }
+            }
+            Text("Игроки в сети").font(.title3).foregroundStyle(.secondary)
+            if online.players.isEmpty {
+                Text("Пока никого — попроси друга открыть «По сети» на телефоне или Apple TV").font(.callout).foregroundStyle(.secondary)
+            } else {
+                HStack(spacing: 24) {
+                    ForEach(online.players, id: \.id) { pl in
+                        Button(online.invited == pl.id ? "\(pl.name) — ждём…" : "⚔ \(pl.name)") { online.invite(pl.id) }
+                            .disabled(online.invited == pl.id)
+                    }
+                }
+            }
             HStack(spacing: 24) {
-                Button("Быстрая игра") { online.quickFind() }
+                Button("Случайный соперник") { online.quickFind() }
                 Button("Создать комнату") { online.createRoom() }
             }
             HStack(spacing: 24) {
@@ -332,21 +421,21 @@ struct TVOnlineView: View {
                     .textInputAutocapitalization(.characters)
                 Button("Войти по коду") { online.joinRoom() }
             }
-            Button("Назад") { online.lobbyVisible = false }
+            Button("Назад") { online.cancel(); online.lobbyVisible = false }
         case .connecting:
             ProgressView("Подключаемся…")
-            Button("Отмена") { online.cancel() }
+            Button("Отмена") { online.cancel(); online.enterLobby() }
         case .searching:
             ProgressView("Ищем соперника (\(online.moveTime < 60 ? "\(online.moveTime) с" : "\(online.moveTime / 60) мин") на ход)…")
-            Button("Отмена") { online.cancel() }
+            Button("Отмена") { online.cancel(); online.enterLobby() }
         case .room(let code):
             Text("Код комнаты").font(.title3).foregroundStyle(.secondary)
             Text(code).font(.system(size: 120, weight: .heavy, design: .monospaced))
             Text("Назови код другу — пусть войдёт с телефона или другого Apple TV").foregroundStyle(.secondary)
-            Button("Отмена") { online.cancel() }
+            Button("Отмена") { online.cancel(); online.enterLobby() }
         case .joining:
             ProgressView("Входим в комнату…")
-            Button("Отмена") { online.cancel() }
+            Button("Отмена") { online.cancel(); online.enterLobby() }
         case .playing:
             ProgressView("Соперник найден, начинаем…")
         }
