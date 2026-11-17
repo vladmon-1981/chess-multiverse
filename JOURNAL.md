@@ -1,5 +1,8 @@
 # Журнал
 
+## 17.11.2026 (вечер) — tvOS в App Store Connect и TestFlight
+- По просьбе владельца: `xcodebuild -exportArchive` (destination upload, ключ ASC) выгрузил `ChessGM-tvOS.xcarchive`; сборка 20261117 обработана (VALID). Создана внутренняя группа «Владелец» (все сборки), тестер добавлен; создан черновик версии tvOS 1.2.0. Apple TV в Xcode не спарился (Shadowrocket) — установка через TestFlight на телевизоре.
+
 ## 17.11.2026 (ночь) — Apple TV: всё готово к проверке на устройстве
 - Иконка (параллакс, 2 слоя) и Top Shelf (1920×720 и 2320×720) — `tvOS/Assets.xcassets`; кадры App Store (меню и 4 вселенные) — `AppStore/screenshots-tvos/`.
 - Релизная подпись: профиль TVOS_APP_STORE «ChessGM tvOS AppStore» через ASC API (`scripts/asc_tv_profile.py`); `scripts/tv_archive.sh` собрал архив 1.2.0 (20261117) и экспорт IPA — успешно, в App Store Connect НЕ выгружал.

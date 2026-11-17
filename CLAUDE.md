@@ -64,7 +64,7 @@
   иначе xcodegen кладёт их в бандл приложения). Кадры для App Store 1920×1080: `AppStore/screenshots-tvos/` (Debug-аргументы запуска
   `-autoGame classic|cars|hospital|hockey -autoMoves "e2e4 e7e5 …"`).
 - Установка на Apple TV: `scripts/tv_install.sh` (телевизор сначала спарить в Xcode → Devices; VPN на Маке выключить). Архив для App Store: `scripts/tv_archive.sh`
-  (профиль `ChessGM tvOS AppStore` создаёт `scripts/asc_tv_profile.py`, действует до 2027-10-31); архив и IPA лежат в `~/Projects/ios-release-tmp/`. НЕ выгружено в App Store Connect — ждёт проверки владельцем на живом Apple TV.
+  (профиль `ChessGM tvOS AppStore` создаёт `scripts/asc_tv_profile.py`, действует до 2027-10-31); архив и IPA лежат в `~/Projects/ios-release-tmp/`. Выгружено в App Store Connect 17.11.2026 (сборка tvOS 1.2.0 (20261117), VALID), внутренняя группа TestFlight «Владелец» (vladmon1981kz@gmail.com), платформа tvOS добавлена (черновик версии 1.2.0, PREPARE_FOR_SUBMISSION, на проверку не отправлялся).
 - Нет: Pro/StoreKit (онлайн на tvOS пока без лимита), голос и локализации веба, карточка tvOS в App Store Connect (тот же bundle id `com.chessmultiverse.app`;
   нужна версия платформы tvOS и тексты/кадры), проверка на живом Apple TV и пультом (свайпы).
 - Подсказка внизу игрового экрана налезает на край доски — поправить после проверки пультом.
