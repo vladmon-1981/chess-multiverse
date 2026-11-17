@@ -55,10 +55,13 @@
   Спецификация `ios/ChessMultiverse3D/project-tvos.yml` (генерация `xcodegen generate --spec project-tvos.yml` → `ChessGM-tvOS.xcodeproj`;
   iOS-проект правится руками и xcodegen'ом не пересоздаётся). Исходники интерфейса — `ios/ChessMultiverse3D/tvOS/`,
   общий с iOS код — `Models`, `Theme`, `Sound`, `ViewModels`, `Scene3D` (в `ChessSceneView.swift` жесты под `#if os(iOS)`, курсор пульта — `cursor`).
-- Состояние на 17.11.2026: собирается (`xcodebuild -destination generic/platform=tvOS CODE_SIGNING_ALLOWED=NO`), НЕ запускалось:
-  нет симулятора tvOS (runtime не скачан, ~4–5 ГБ при 4,5 ГБ свободных) и Apple TV в сети. Меню, игра с компьютером, вдвоём на одном пульте.
-- Нет: онлайн (нужен нативный клиент ретранслятора, протокол как в `js/online.js`), Pro/StoreKit, иконка и Top Shelf (brandassets), скриншоты,
-  голос и локализации веба, карточка tvOS в App Store Connect (тот же bundle id `com.chessmultiverse.app` — универсальная покупка).
+- Состояние на 17.11.2026: собирается и запускается в симуляторе (`xcrun simctl`, устройство «CM TV»; runtime tvOS 27.2 стоит).
+  Меню, игра с компьютером, вдвоём на одном пульте, **по сети** (быстрая игра по времени на ход 30/60/120/300 с, комната с кодом, вход по коду, реванш).
+- Сеть tvOS: `tvOS/TVOnline.swift` — клиент ретранслятора (`URLSessionWebSocketTask`, тот же протокол, что `js/online.js`: hello/nonce → цвет, move/resign/timeout/flag/rematch),
+  значит Apple TV играет с iPhone/iPad. В `ChessGameViewModel` режим `.online` (`startOnlineGame`, `receiveMove`, `endOnline`, часы на ход, `netSend`).
+  Проверка без пульта: Debug-аргумент запуска `-autoOnline find|room`, бот `scratchpad/tvbot.py` (подбор, hello, ход, сдача — всё сошлось).
+- Нет: Pro/StoreKit (онлайн на tvOS пока без лимита), иконка и Top Shelf (brandassets), скриншоты, голос и локализации веба,
+  карточка tvOS в App Store Connect (тот же bundle id `com.chessmultiverse.app`), проверка на живом Apple TV и пультом (свайпы).
 
 ## ChessGM Pro (с 12.11.2026)
 - Решение владельца (12.11.2026): «Pro-версия, цена 199 рублей, ограничение для бесплатной версии одно

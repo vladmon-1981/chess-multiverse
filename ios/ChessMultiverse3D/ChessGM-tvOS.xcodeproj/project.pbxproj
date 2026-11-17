@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		08B1E6DADABC8C6BA115BF54 /* TVOnline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00226B5EB865A86D29EA6A3B /* TVOnline.swift */; };
 		4E1632E8565D1EA50E7EFDA5 /* HockeyModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F89D8B7CC7DB1039572B8A /* HockeyModels.swift */; };
 		580E17F554E99F047A4DABEF /* SoundEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD632D9D337C92318BD11258 /* SoundEngine.swift */; };
 		65965308EEA6EABEF6426EBB /* HospitalModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B6FD96C3DCD739847C87402 /* HospitalModels.swift */; };
@@ -23,6 +24,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		00226B5EB865A86D29EA6A3B /* TVOnline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVOnline.swift; sourceTree = "<group>"; };
 		06198CA213DC8F0628E92717 /* PieceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceType.swift; sourceTree = "<group>"; };
 		5B6FD96C3DCD739847C87402 /* HospitalModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HospitalModels.swift; sourceTree = "<group>"; };
 		5B866562174FCABC5967E657 /* ChessGameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessGameViewModel.swift; sourceTree = "<group>"; };
@@ -63,6 +65,7 @@
 			children = (
 				A6F5E01B9CC14F96652AAB56 /* TVApp.swift */,
 				A57B727D428C8B08CB3D71E5 /* TVGameView.swift */,
+				00226B5EB865A86D29EA6A3B /* TVOnline.swift */,
 				BD6310FF3A39ADC2A8997075 /* TVRootView.swift */,
 			);
 			path = tvOS;
@@ -191,6 +194,7 @@
 				580E17F554E99F047A4DABEF /* SoundEngine.swift in Sources */,
 				710FF5BCE31C8051CEA63054 /* TVApp.swift in Sources */,
 				C5DED5AF9293232326DBDCC9 /* TVGameView.swift in Sources */,
+				08B1E6DADABC8C6BA115BF54 /* TVOnline.swift in Sources */,
 				ADCA939005C1D06440E73B65 /* TVRootView.swift in Sources */,
 				7833CB66F4E22815E018F48F /* ThemeData.swift in Sources */,
 			);

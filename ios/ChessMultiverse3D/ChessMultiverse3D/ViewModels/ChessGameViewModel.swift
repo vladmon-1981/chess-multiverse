@@ -1,7 +1,7 @@
 import Foundation
 import Combine
 
-enum GameMode { case pve, pvp }
+enum GameMode { case pve, pvp, online }
 enum ColorChoice: String { case white, black, random }
 enum Difficulty: String, CaseIterable, Identifiable {
     case easy, medium, hard
@@ -18,7 +18,7 @@ enum Difficulty: String, CaseIterable, Identifiable {
 
 enum AppScreen { case menu, pveSetup, pvpSetup, game }
 
-enum GameOverKind { case checkmate, stalemate, insufficientMaterial, threefold, fiftyMove, resign }
+enum GameOverKind { case checkmate, stalemate, insufficientMaterial, threefold, fiftyMove, resign, timeout, left }
 
 struct GameOverInfo {
     var kind: GameOverKind
@@ -118,6 +118,17 @@ final class ChessGameViewModel: ObservableObject {
 
     var announcer: SoundAnnouncing = SoundEngine()
 
+    // ---------- Сетевая партия (используется Apple TV; iOS играет онлайн через веб-слой) ----------
+    /// Отправка сообщения сопернику (подставляет сетевой слой).
+    var netSend: (([String: Any]) -> Void)?
+    /// Раунд партии (растёт при реванше) — сообщения чужого раунда отбрасываются.
+    var netRound = 0
+    /// Секунд на ход; 0 — часов нет.
+    var moveTimeLimit = 0
+    /// Оставшиеся секунды на ход у того, чей сейчас ход (nil — часы не идут).
+    @Published var clockSeconds: Int? = nil
+    private var clockTask: Task<Void, Never>? = nil
+
     private var game = ChessEngine()
     private var aiEngine = ChessEngine()
     private var startedAt: Date = Date()
@@ -160,6 +171,8 @@ final class ChessGameViewModel: ObservableObject {
                 blackName = playerName.isEmpty ? "Игрок" : playerName
                 whiteName = "Компьютер · \(difficultyTitleForNames())"
             }
+        } else if mode == .online {
+            // humanColor/orientation/имена уже выставил startOnlineGame
         } else {
             humanColor = .white
             orientation = .white
@@ -175,6 +188,71 @@ final class ChessGameViewModel: ObservableObject {
     }
 
     private func difficultyTitleForNames() -> String { difficulty.title }
+
+    /// Старт сетевой партии: цвет и лимит времени уже согласованы по `hello`.
+    func startOnlineGame(myColor: PieceColor, myName: String, oppName: String, moveTime: Int, round: Int) {
+        humanColor = myColor
+        orientation = myColor
+        whiteName = myColor == .white ? myName : oppName
+        blackName = myColor == .white ? oppName : myName
+        netRound = round
+        moveTimeLimit = moveTime
+        startGame(mode: .online)
+        startClock()
+    }
+
+    /// Ход соперника по сети. Возвращает false, если ход не подошёл (не очередь соперника / не тот номер).
+    @discardableResult
+    func receiveMove(from: String, to: String, promotion: String?, ply: Int) -> Bool {
+        guard mode == .online, gameOver == nil, turn != humanColor, ply == sanUciHistory.count + 1,
+              let f = Square(name: from), let t = Square(name: to) else { return false }
+        guard let applied = game.applyMove(from: f, to: t, promotion: promotion.flatMap { PieceKind.fromLetter($0) }) else { return false }
+        selected = nil
+        legalTargets = []
+        lastMove = (applied.from, applied.to)
+        recordSAN(applied)
+        playMoveAudio(from: applied.from, to: applied.to, applied: applied)
+        afterMove()
+        return true
+    }
+
+    /// Конец сетевой партии по решению сети (сдача, время, выход соперника).
+    func endOnline(winner: PieceColor?, kind: GameOverKind, text: String) {
+        guard mode == .online, gameOver == nil else { return }
+        finishGame(forced: GameOverInfo(kind: kind, winner: winner, reasonText: text))
+    }
+
+    // ---------- Часы на ход ----------
+
+    private func startClock() {
+        clockTask?.cancel()
+        clockSeconds = nil
+        guard mode == .online, moveTimeLimit > 0, gameOver == nil else { return }
+        let deadline = Date().addingTimeInterval(Double(moveTimeLimit))
+        let clockColor = turn
+        let round = netRound
+        clockTask = Task { [weak self] in
+            while !Task.isCancelled {
+                guard let self, self.gameOver == nil else { return }
+                let left = deadline.timeIntervalSinceNow
+                self.clockSeconds = max(0, Int(ceil(left)))
+                if left <= 0 {
+                    if clockColor == self.humanColor {
+                        // своё время вышло — признаём сразу
+                        self.netSend?(["t": "timeout", "r": round])
+                        self.endOnline(winner: self.humanColor.other, kind: .timeout, text: "Время вышло")
+                        return
+                    } else if left < -5 {
+                        // у соперника вышло время и 5 с запаса на задержку сети тоже
+                        self.netSend?(["t": "flag", "r": round])
+                        self.endOnline(winner: self.humanColor, kind: .timeout, text: "У соперника вышло время")
+                        return
+                    }
+                }
+                try? await Task.sleep(nanoseconds: 200_000_000)
+            }
+        }
+    }
 
     // ---------- Выбор темы ----------
 
@@ -192,7 +270,7 @@ final class ChessGameViewModel: ObservableObject {
 
     // ---------- Запрос состояния ----------
 
-    func isHumanTurn() -> Bool { mode == .pvp || turn == humanColor }
+    func isHumanTurn() -> Bool { mode == .pvp || turn == humanColor }   // online: только свой цвет
     func isAITurn() -> Bool { mode == .pve && gameOver == nil && turn != humanColor }
     func canInteract() -> Bool { gameOver == nil && !thinking && !busy && pendingPromotion == nil && isHumanTurn() }
 
@@ -252,6 +330,10 @@ final class ChessGameViewModel: ObservableObject {
         legalTargets = []
         lastMove = (from, to)
         recordSAN(applied)
+        if mode == .online {
+            netSend?(["t": "move", "r": netRound, "ply": sanUciHistory.count, "from": from.name, "to": to.name,
+                      "promotion": applied.promotion.map { $0.letter } ?? NSNull()])
+        }
         playMoveAudio(from: from, to: to, applied: applied)
         afterMove()
     }
@@ -320,6 +402,7 @@ final class ChessGameViewModel: ObservableObject {
             checkSquare = nil
         }
         updateStatus()
+        if mode == .online { startClock() }
         if isAITurn() { scheduleAIMove(after: 0.3) }
     }
 
@@ -391,7 +474,7 @@ final class ChessGameViewModel: ObservableObject {
     // ---------- Отмена хода ----------
 
     func undo() {
-        guard canUndo() else { return }
+        guard canUndo(), mode != .online else { return }
         aiTask?.cancel()
         thinking = false
         var n = 1
@@ -440,7 +523,8 @@ final class ChessGameViewModel: ObservableObject {
     func resign() {
         guard gameOver == nil else { return }
         aiTask?.cancel()
-        let who = mode == .pve ? humanColor : turn
+        if mode == .online { netSend?(["t": "resign"]) }
+        let who = mode == .pve || mode == .online ? humanColor : turn
         finishGame(forced: GameOverInfo(kind: .resign, winner: who.other, reasonText: "Сдача"))
     }
 
@@ -461,6 +545,8 @@ final class ChessGameViewModel: ObservableObject {
         }
         gameOver = result
         thinking = false
+        clockTask?.cancel()
+        clockSeconds = nil
         deselect()
         if result.kind == .checkmate, let winner = result.winner {
             checkSquare = game.findKingSquare(winner.other)
@@ -474,7 +560,7 @@ final class ChessGameViewModel: ObservableObject {
 
         let outcome: String
         if result.winner == nil { outcome = "draw" }
-        else if mode == .pve { outcome = result.winner == humanColor ? "win" : "lose" }
+        else if mode == .pve || mode == .online { outcome = result.winner == humanColor ? "win" : "lose" }
         else { outcome = "win" }
         announcer.playEffect(outcome)
         let winnerName = result.winner.map { nameFor($0) } ?? ""
@@ -492,6 +578,8 @@ final class ChessGameViewModel: ObservableObject {
 
     func backToMenu() {
         aiTask?.cancel()
+        clockTask?.cancel()
+        clockSeconds = nil
         screen = .menu
     }
 
@@ -501,6 +589,8 @@ final class ChessGameViewModel: ObservableObject {
         if let over = gameOver {
             switch over.kind {
             case .resign: statusText = "\(nameFor(over.winner?.other ?? .white)) сдаётся"
+            case .timeout: statusText = "\(over.reasonText). Победа: \(nameFor(over.winner ?? .white))"
+            case .left: statusText = "Соперник вышел. Победа: \(nameFor(over.winner ?? .white))"
             case .checkmate: statusText = "\(spec.texts.mateBanner) Победа: \(nameFor(over.winner ?? .white))"
             default: statusText = "\(spec.texts.drawTitle): \(over.reasonText.lowercased())"
             }
@@ -510,7 +600,9 @@ final class ChessGameViewModel: ObservableObject {
             statusText = spec.texts.thinking + "…"
             return
         }
-        if mode == .pve {
+        if mode == .online {
+            statusText = turn == humanColor ? (game.isInCheck() ? spec.texts.check : spec.texts.yourMove) : "Ход соперника…"
+        } else if mode == .pve {
             statusText = turn == humanColor ? (game.isInCheck() ? spec.texts.check : spec.texts.yourMove) : spec.texts.thinking + "…"
         } else {
             let nm = nameFor(turn)

@@ -3,16 +3,30 @@ import SwiftUI
 /// Корневой экран: переключает меню / настройку партии / игру по `vm.screen`.
 struct TVRootView: View {
     @ObservedObject var vm: ChessGameViewModel
+    @StateObject private var online = TVOnline()
 
     var body: some View {
         ZStack {
             Color(red: 0.07, green: 0.06, blue: 0.14).ignoresSafeArea()
             switch vm.screen {
-            case .menu: TVMenuView(vm: vm)
+            case .menu:
+                if online.lobbyVisible { TVOnlineView(online: online) }
+                else { TVMenuView(vm: vm, online: online) }
             case .pveSetup: TVPveSetupView(vm: vm)
             case .pvpSetup: TVPvpSetupView(vm: vm)
-            case .game: TVGameView(vm: vm)
+            case .game: TVGameView(vm: vm, online: online)
             }
+        }
+        .onAppear {
+            online.attach(vm)
+            #if DEBUG
+            // Проверка без пульта: -autoOnline find|room
+            let args = ProcessInfo.processInfo.arguments
+            if let i = args.firstIndex(of: "-autoOnline"), i + 1 < args.count {
+                online.lobbyVisible = true
+                if args[i + 1] == "room" { online.createRoom() } else { online.quickFind() }
+            }
+            #endif
         }
     }
 }
@@ -20,6 +34,7 @@ struct TVRootView: View {
 /// Главное меню: вселенная и режим. Фокус двигается пультом, нажатие — выбор.
 struct TVMenuView: View {
     @ObservedObject var vm: ChessGameViewModel
+    @ObservedObject var online: TVOnline
 
     var body: some View {
         VStack(spacing: 48) {
@@ -44,6 +59,7 @@ struct TVMenuView: View {
             HStack(spacing: 40) {
                 Button("Против компьютера") { vm.screen = .pveSetup }
                 Button("Вдвоём") { vm.screen = .pvpSetup }
+                Button("По сети") { online.error = nil; online.lobbyVisible = true }
             }
             .font(.title2)
         }

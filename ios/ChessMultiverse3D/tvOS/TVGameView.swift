@@ -6,6 +6,7 @@ import SwiftUI
 ///  • Play/Pause или Menu — открыть меню партии.
 struct TVGameView: View {
     @ObservedObject var vm: ChessGameViewModel
+    @ObservedObject var online: TVOnline
     @State private var camera = CameraController()
     @State private var cursor = Square(index0x88: 6 * 16 + 4)   // e2
     @State private var showMenu = false
@@ -24,6 +25,12 @@ struct TVGameView: View {
                         .font(.title3.weight(.semibold))
                         .padding(.horizontal, 24).padding(.vertical, 12)
                         .background(.ultraThinMaterial, in: Capsule())
+                    if let c = vm.clockSeconds {
+                        Text("\(c / 60):\(String(format: "%02d", c % 60))")
+                            .font(.title.monospacedDigit().weight(.bold))
+                            .foregroundStyle(c <= 10 ? .red : .primary)
+                            .padding(.leading, 24)
+                    }
                     Spacer()
                     Text("Курсор: \(cursor.name)").font(.callout).foregroundStyle(.secondary)
                 }
@@ -80,20 +87,30 @@ struct TVGameView: View {
     private var pauseOverlay: some View {
         TVOverlay(title: "Партия") {
             Button("Продолжить") { showMenu = false }
-            Button("Новая партия") { showMenu = false; vm.newGame() }
+            if vm.mode != .online { Button("Новая партия") { showMenu = false; vm.newGame() } }
             if vm.canUndo() { Button("Отменить ход") { showMenu = false; vm.undo() } }
             Button("Развернуть доску") { showMenu = false; vm.flipBoard() }
             Button("Сдаться") { showMenu = false; vm.resign() }
-            Button("В меню") { showMenu = false; vm.backToMenu() }
+            Button("В меню") { showMenu = false; toMenu() }
         }
         .onExitCommand { showMenu = false }
     }
 
     private func resultOverlay(_ info: GameOverInfo) -> some View {
         TVOverlay(title: vm.statusText) {
-            Button("Ещё партию") { vm.newGame() }
-            Button("В меню") { vm.backToMenu() }
+            if vm.mode == .online {
+                if online.canRematch { Button("Реванш") { online.requestRematch() } }
+                if let h = online.rematchHint { Text(h).font(.callout).foregroundStyle(.secondary) }
+            } else {
+                Button("Ещё партию") { vm.newGame() }
+            }
+            Button("В меню") { toMenu() }
         }
+    }
+
+    private func toMenu() {
+        if vm.mode == .online { online.leave() }
+        vm.backToMenu()
     }
 
     private var promotionOverlay: some View {
