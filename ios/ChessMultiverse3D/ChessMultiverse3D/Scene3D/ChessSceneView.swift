@@ -7,6 +7,8 @@ struct ChessSceneView: UIViewRepresentable {
     @ObservedObject var viewModel: ChessGameViewModel
     /// Мост к кнопкам камеры в GameView.
     let camera: CameraController
+    /// Курсор пульта (tvOS); на iOS не используется.
+    var cursor: Square? = nil
 
     func makeUIView(context: Context) -> SCNView {
         let scnView = SCNView()
@@ -20,6 +22,7 @@ struct ChessSceneView: UIViewRepresentable {
         scnView.allowsCameraControl = false
         scnView.rendersContinuously = false
 
+        #if os(iOS)
         // Один палец — вращение/наклон; два — пинч-зум (pan не реагирует на два пальца).
         let pan = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePan(_:)))
         pan.minimumNumberOfTouches = 1
@@ -35,6 +38,8 @@ struct ChessSceneView: UIViewRepresentable {
         let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
         tap.require(toFail: doubleTap)
         scnView.addGestureRecognizer(tap)
+
+        #endif
 
         scene.setTheme(viewModel.theme)
         scene.setOrientation(viewModel.orientation)
@@ -98,7 +103,8 @@ struct ChessSceneView: UIViewRepresentable {
         scene.setHighlights(selected: viewModel.selected,
                              targets: viewModel.legalTargets,
                              lastMove: viewModel.lastMove,
-                             check: viewModel.checkSquare)
+                             check: viewModel.checkSquare,
+                             cursor: cursor)
         // Мат: король падает и салютует (announceMate сам не повторяется для той же клетки)
         if viewModel.gameOver?.kind == .checkmate, let king = viewModel.checkSquare {
             scene.announceMate(at: king, winnerIsWhite: viewModel.gameOver?.winner == .white)
@@ -149,6 +155,7 @@ struct ChessSceneView: UIViewRepresentable {
             self.viewModel = viewModel
         }
 
+        #if os(iOS)
         @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
             guard let scene else { return }
             let translation = gesture.translation(in: gesture.view)
@@ -184,6 +191,7 @@ struct ChessSceneView: UIViewRepresentable {
                 }
             }
         }
+        #endif
     }
 }
 

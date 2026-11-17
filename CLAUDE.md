@@ -50,6 +50,16 @@
   закрытия окон Game Center и шлёт игре событие `audio`; `SoundManager.play` будит контекст и не играет
   звук, если тот не проснулся за 350 мс.
 
+## Apple TV (tvOS, с 17.11.2026)
+- В tvOS SDK нет WebKit: веб-оболочка iOS не работает, поэтому цель tvOS — нативная (SceneKit + SwiftUI).
+  Спецификация `ios/ChessMultiverse3D/project-tvos.yml` (генерация `xcodegen generate --spec project-tvos.yml` → `ChessGM-tvOS.xcodeproj`;
+  iOS-проект правится руками и xcodegen'ом не пересоздаётся). Исходники интерфейса — `ios/ChessMultiverse3D/tvOS/`,
+  общий с iOS код — `Models`, `Theme`, `Sound`, `ViewModels`, `Scene3D` (в `ChessSceneView.swift` жесты под `#if os(iOS)`, курсор пульта — `cursor`).
+- Состояние на 17.11.2026: собирается (`xcodebuild -destination generic/platform=tvOS CODE_SIGNING_ALLOWED=NO`), НЕ запускалось:
+  нет симулятора tvOS (runtime не скачан, ~4–5 ГБ при 4,5 ГБ свободных) и Apple TV в сети. Меню, игра с компьютером, вдвоём на одном пульте.
+- Нет: онлайн (нужен нативный клиент ретранслятора, протокол как в `js/online.js`), Pro/StoreKit, иконка и Top Shelf (brandassets), скриншоты,
+  голос и локализации веба, карточка tvOS в App Store Connect (тот же bundle id `com.chessmultiverse.app` — универсальная покупка).
+
 ## ChessGM Pro (с 12.11.2026)
 - Решение владельца (12.11.2026): «Pro-версия, цена 199 рублей, ограничение для бесплатной версии одно
   единственное – 5 партий в день». Разовая покупка без подписки, `com.chessmultiverse.app.pro`

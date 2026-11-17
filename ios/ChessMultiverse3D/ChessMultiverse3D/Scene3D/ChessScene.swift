@@ -628,7 +628,7 @@ final class ChessScene {
 
     // ---------- Подсветка ----------
 
-    func setHighlights(selected: Square?, targets: [Square], lastMove: (from: Square, to: Square)?, check: Square?) {
+    func setHighlights(selected: Square?, targets: [Square], lastMove: (from: Square, to: Square)?, check: Square?, cursor: Square? = nil) {
         highlightNode.childNodes.forEach { $0.removeFromParentNode() }
         if let selected {
             addMarker(square: selected, color: UIColor.systemYellow.withAlphaComponent(0.55), height: 0.02)
@@ -646,6 +646,10 @@ final class ChessScene {
             if check != lastCheck {
                 marker.runAction(SCNAction.repeat(.sequence([.scale(to: 1.3, duration: 0.2), .scale(to: 1, duration: 0.2)]), count: 3))
             }
+        }
+        // Курсор пульта Apple TV: рамка поверх остальных подсветок
+        if let cursor {
+            addMarker(square: cursor, color: UIColor.white.withAlphaComponent(0.75), height: 0.03)
         }
         lastCheck = check
     }

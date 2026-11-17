@@ -1,0 +1,37 @@
+# Apple TV (tvOS): нативная цель на SceneKit. Генерация: `xcodegen generate --spec project-tvos.yml`
+# Создаёт ChessGM-tvOS.xcodeproj рядом; iOS-проект (ChessMultiverse3D.xcodeproj, правится руками) не затрагивается.
+name: ChessGM-tvOS
+options:
+  developmentLanguage: en
+  bundleIdPrefix: com.chessmultiverse
+  deploymentTarget:
+    tvOS: "17.0"
+targets:
+  ChessGM-tvOS:
+    type: application
+    platform: tvOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: tvOS
+      - path: ChessMultiverse3D/Models
+      - path: ChessMultiverse3D/Theme
+      - path: ChessMultiverse3D/Sound
+      - path: ChessMultiverse3D/ViewModels
+      - path: ChessMultiverse3D/Scene3D
+        excludes:
+          - ModelSnapshot.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.chessmultiverse.app
+        PRODUCT_NAME: ChessGM
+        DEVELOPMENT_TEAM: 646ZQ353UC
+        CODE_SIGN_STYLE: Automatic
+        SWIFT_VERSION: 5.0
+        TARGETED_DEVICE_FAMILY: "3"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: ChessGM
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        MARKETING_VERSION: "1.2.0"
+        CURRENT_PROJECT_VERSION: 20261117
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.board-games

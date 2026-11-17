@@ -1,0 +1,399 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		4E1632E8565D1EA50E7EFDA5 /* HockeyModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F89D8B7CC7DB1039572B8A /* HockeyModels.swift */; };
+		580E17F554E99F047A4DABEF /* SoundEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD632D9D337C92318BD11258 /* SoundEngine.swift */; };
+		65965308EEA6EABEF6426EBB /* HospitalModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B6FD96C3DCD739847C87402 /* HospitalModels.swift */; };
+		710FF5BCE31C8051CEA63054 /* TVApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F5E01B9CC14F96652AAB56 /* TVApp.swift */; };
+		73BF18EA199D308F6E067670 /* ChessEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8B69B9FFE02E3398BD68002 /* ChessEngine.swift */; };
+		7833CB66F4E22815E018F48F /* ThemeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDC4419C05206357F5C059D /* ThemeData.swift */; };
+		A8EDB543CE7F4F64988C4AFB /* CarsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A97BEAAFA48CE1848054D7DA /* CarsModels.swift */; };
+		ADCA939005C1D06440E73B65 /* TVRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD6310FF3A39ADC2A8997075 /* TVRootView.swift */; };
+		B219A1939D96392D87637968 /* PieceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06198CA213DC8F0628E92717 /* PieceType.swift */; };
+		B7907BB8381426F643D9FC27 /* ChessSceneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8B3B5A1AD7AAF41A208E0AB /* ChessSceneView.swift */; };
+		C427C50617C51BC6BAD7AE71 /* ChessScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6090C3FAC5E52BF92CB6233C /* ChessScene.swift */; };
+		C5DED5AF9293232326DBDCC9 /* TVGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57B727D428C8B08CB3D71E5 /* TVGameView.swift */; };
+		D3ED154B5FA4C5161CA4AA95 /* ChessGameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B866562174FCABC5967E657 /* ChessGameViewModel.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		06198CA213DC8F0628E92717 /* PieceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceType.swift; sourceTree = "<group>"; };
+		5B6FD96C3DCD739847C87402 /* HospitalModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HospitalModels.swift; sourceTree = "<group>"; };
+		5B866562174FCABC5967E657 /* ChessGameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessGameViewModel.swift; sourceTree = "<group>"; };
+		6090C3FAC5E52BF92CB6233C /* ChessScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessScene.swift; sourceTree = "<group>"; };
+		63F89D8B7CC7DB1039572B8A /* HockeyModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HockeyModels.swift; sourceTree = "<group>"; };
+		A57B727D428C8B08CB3D71E5 /* TVGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVGameView.swift; sourceTree = "<group>"; };
+		A6F5E01B9CC14F96652AAB56 /* TVApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVApp.swift; sourceTree = "<group>"; };
+		A97BEAAFA48CE1848054D7DA /* CarsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarsModels.swift; sourceTree = "<group>"; };
+		AFC5B1F0C616AC22BE83EA45 /* ChessGM-tvOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "ChessGM-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD6310FF3A39ADC2A8997075 /* TVRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVRootView.swift; sourceTree = "<group>"; };
+		BD632D9D337C92318BD11258 /* SoundEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundEngine.swift; sourceTree = "<group>"; };
+		C8B69B9FFE02E3398BD68002 /* ChessEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessEngine.swift; sourceTree = "<group>"; };
+		EDDC4419C05206357F5C059D /* ThemeData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeData.swift; sourceTree = "<group>"; };
+		F8B3B5A1AD7AAF41A208E0AB /* ChessSceneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessSceneView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		11733735DEE905F6531F11C7 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				C8B69B9FFE02E3398BD68002 /* ChessEngine.swift */,
+				06198CA213DC8F0628E92717 /* PieceType.swift */,
+			);
+			name = Models;
+			path = ChessMultiverse3D/Models;
+			sourceTree = "<group>";
+		};
+		25779B1888A179ACFEB7A190 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AFC5B1F0C616AC22BE83EA45 /* ChessGM-tvOS.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		37A3B1C24F5565A7FA9B0B0C /* tvOS */ = {
+			isa = PBXGroup;
+			children = (
+				A6F5E01B9CC14F96652AAB56 /* TVApp.swift */,
+				A57B727D428C8B08CB3D71E5 /* TVGameView.swift */,
+				BD6310FF3A39ADC2A8997075 /* TVRootView.swift */,
+			);
+			path = tvOS;
+			sourceTree = "<group>";
+		};
+		6C27E689572B8177A989B31D /* Scene3D */ = {
+			isa = PBXGroup;
+			children = (
+				A97BEAAFA48CE1848054D7DA /* CarsModels.swift */,
+				6090C3FAC5E52BF92CB6233C /* ChessScene.swift */,
+				F8B3B5A1AD7AAF41A208E0AB /* ChessSceneView.swift */,
+				63F89D8B7CC7DB1039572B8A /* HockeyModels.swift */,
+				5B6FD96C3DCD739847C87402 /* HospitalModels.swift */,
+			);
+			name = Scene3D;
+			path = ChessMultiverse3D/Scene3D;
+			sourceTree = "<group>";
+		};
+		893FCDFB5B0CBCC09A9FC7C3 /* Sound */ = {
+			isa = PBXGroup;
+			children = (
+				BD632D9D337C92318BD11258 /* SoundEngine.swift */,
+			);
+			name = Sound;
+			path = ChessMultiverse3D/Sound;
+			sourceTree = "<group>";
+		};
+		B18BF7494F86F442F0F5CC11 = {
+			isa = PBXGroup;
+			children = (
+				11733735DEE905F6531F11C7 /* Models */,
+				6C27E689572B8177A989B31D /* Scene3D */,
+				893FCDFB5B0CBCC09A9FC7C3 /* Sound */,
+				BA5F8F313B1CCD5476D7AC29 /* Theme */,
+				37A3B1C24F5565A7FA9B0B0C /* tvOS */,
+				BDDA09D55A250A1C4B516406 /* ViewModels */,
+				25779B1888A179ACFEB7A190 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		BA5F8F313B1CCD5476D7AC29 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				EDDC4419C05206357F5C059D /* ThemeData.swift */,
+			);
+			name = Theme;
+			path = ChessMultiverse3D/Theme;
+			sourceTree = "<group>";
+		};
+		BDDA09D55A250A1C4B516406 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				5B866562174FCABC5967E657 /* ChessGameViewModel.swift */,
+			);
+			name = ViewModels;
+			path = ChessMultiverse3D/ViewModels;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A47729FC123BDAF601CFC98A /* ChessGM-tvOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D64022E8D5578FCC9409A7C8 /* Build configuration list for PBXNativeTarget "ChessGM-tvOS" */;
+			buildPhases = (
+				1D802C09E7462A5AE8E3C698 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "ChessGM-tvOS";
+			packageProductDependencies = (
+			);
+			productName = "ChessGM-tvOS";
+			productReference = AFC5B1F0C616AC22BE83EA45 /* ChessGM-tvOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		6FCC19386FED3B30A4F75277 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					A47729FC123BDAF601CFC98A = {
+						DevelopmentTeam = 646ZQ353UC;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = EC30D8151A4200BB8B1C80AE /* Build configuration list for PBXProject "ChessGM-tvOS" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = B18BF7494F86F442F0F5CC11;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 25779B1888A179ACFEB7A190 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A47729FC123BDAF601CFC98A /* ChessGM-tvOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1D802C09E7462A5AE8E3C698 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A8EDB543CE7F4F64988C4AFB /* CarsModels.swift in Sources */,
+				73BF18EA199D308F6E067670 /* ChessEngine.swift in Sources */,
+				D3ED154B5FA4C5161CA4AA95 /* ChessGameViewModel.swift in Sources */,
+				C427C50617C51BC6BAD7AE71 /* ChessScene.swift in Sources */,
+				B7907BB8381426F643D9FC27 /* ChessSceneView.swift in Sources */,
+				4E1632E8565D1EA50E7EFDA5 /* HockeyModels.swift in Sources */,
+				65965308EEA6EABEF6426EBB /* HospitalModels.swift in Sources */,
+				B219A1939D96392D87637968 /* PieceType.swift in Sources */,
+				580E17F554E99F047A4DABEF /* SoundEngine.swift in Sources */,
+				710FF5BCE31C8051CEA63054 /* TVApp.swift in Sources */,
+				C5DED5AF9293232326DBDCC9 /* TVGameView.swift in Sources */,
+				ADCA939005C1D06440E73B65 /* TVRootView.swift in Sources */,
+				7833CB66F4E22815E018F48F /* ThemeData.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		6A0084E77EFD77AE23A43FED /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TVOS_DEPLOYMENT_TARGET = 17.0;
+			};
+			name = Release;
+		};
+		892A370183B4A66749AFC7F5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TVOS_DEPLOYMENT_TARGET = 17.0;
+			};
+			name = Debug;
+		};
+		C1F4BA003047EAD42DA6A599 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 20261117;
+				DEVELOPMENT_TEAM = 646ZQ353UC;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = ChessGM;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.board-games";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chessmultiverse.app;
+				PRODUCT_NAME = ChessGM;
+				SDKROOT = appletvos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 17.0;
+			};
+			name = Debug;
+		};
+		CDB46D0ED89960F940C06513 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 20261117;
+				DEVELOPMENT_TEAM = 646ZQ353UC;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = ChessGM;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.board-games";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chessmultiverse.app;
+				PRODUCT_NAME = ChessGM;
+				SDKROOT = appletvos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 17.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D64022E8D5578FCC9409A7C8 /* Build configuration list for PBXNativeTarget "ChessGM-tvOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C1F4BA003047EAD42DA6A599 /* Debug */,
+				CDB46D0ED89960F940C06513 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EC30D8151A4200BB8B1C80AE /* Build configuration list for PBXProject "ChessGM-tvOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				892A370183B4A66749AFC7F5 /* Debug */,
+				6A0084E77EFD77AE23A43FED /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 6FCC19386FED3B30A4F75277 /* Project object */;
+}
